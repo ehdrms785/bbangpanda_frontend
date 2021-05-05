@@ -1,11 +1,14 @@
+import 'package:bbangnarae_frontend/auth/localState.dart';
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/model/filterListModel.dart';
 import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBread/findBreadScreen.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
+import 'package:bbangnarae_frontend/screens/Login/loginScreen.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
 import 'package:bbangnarae_frontend/screens/NearBakery/nearBakeryScreen.dart';
+import 'package:bbangnarae_frontend/shared/publicValues.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -16,18 +19,23 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:get/get.dart';
 // import 'package:dotenv/dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // load();
   await Hive.initFlutter();
   await Hive.openBox('auth');
+
+  // print("메인에서 테스트 ");
+  // print(token);
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
+  // LocalStorage localStorage = new LocalStorage('newUser');
+  // This widget is the root of your application.
   // final isLoggedin =
   // final isLoggedin = loggedInCheck();
   final isLoggedin = false;
@@ -35,7 +43,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // print(token);
-    print("현재 저장된 토큰 ${GraphQLConfiguration.token}");
+    print("현재 저장된 토큰 ${GraphQLConfiguration.httpLink.defaultHeaders}");
+    final Future<FirebaseApp> _initialization = Firebase.initializeApp();
 
     // Hive Store에 토큰 확인
     // 있다면, 로그인한걸로
@@ -44,62 +53,50 @@ class MyApp extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark));
-    return GraphQLProvider(
-      client: GraphQLConfiguration.graphqlInit(),
-      child: ResponsiveSizer(builder: (context, orientation, screenType) {
-        return MultiProvider(
-          providers: [
-            ChangeNotifierProvider<FilteredList>(
-              create: (context) => FilteredList(),
-            ),
-          ],
-          child: GetMaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: '빵나래 프로젝트',
-            themeMode: ThemeMode.light, // Change it as you want
-            theme: ThemeData(
-                primaryColor: Colors.white,
-                primaryColorBrightness: Brightness.light,
-                brightness: Brightness.light,
-                primaryColorDark: Colors.black,
-                canvasColor: Colors.white,
-                //     // next line is important!
-                appBarTheme: AppBarTheme(brightness: Brightness.light)),
-            darkTheme: ThemeData(
-              primaryColor: Colors.black,
-              primaryColorBrightness: Brightness.dark,
-              primaryColorLight: Colors.black,
-              brightness: Brightness.dark,
-              primaryColorDark: Colors.black,
-              indicatorColor: Colors.white,
-              canvasColor: Colors.black,
-              // next line is important!
-              appBarTheme: AppBarTheme(brightness: Brightness.dark),
-            ),
-            // home: isLoggedin ? MainPage() : LoginScreen(),
-            home: App(),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class App extends StatelessWidget {
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
-  @override
-  Widget build(BuildContext context) {
     return FutureBuilder(
       future: _initialization,
-      builder: (context, snapshot) {
+      builder: (BuildContext context, snapshot) {
         if (snapshot.hasError) {
-          print(snapshot.error);
-          return Container(
-            child: Text("Error!"),
-          );
+          return Container(child: Text("Error!"));
         }
         if (snapshot.connectionState == ConnectionState.done) {
-          return MainPage();
+          return GraphQLProvider(
+            client: GraphQLConfiguration().getClient,
+            child: ResponsiveSizer(builder: (context, orientation, screenType) {
+              return MultiProvider(
+                providers: [
+                  ChangeNotifierProvider<FilteredList>(
+                    create: (context) => FilteredList(),
+                  ),
+                ],
+                child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: '빵나래 프로젝트',
+                  themeMode: ThemeMode.light, // Change it as you want
+                  theme: ThemeData(
+                      primaryColor: Colors.white,
+                      primaryColorBrightness: Brightness.light,
+                      brightness: Brightness.light,
+                      primaryColorDark: Colors.black,
+                      canvasColor: Colors.white,
+                      //     // next line is important!
+                      appBarTheme: AppBarTheme(brightness: Brightness.light)),
+                  darkTheme: ThemeData(
+                    primaryColor: Colors.black,
+                    primaryColorBrightness: Brightness.dark,
+                    primaryColorLight: Colors.black,
+                    brightness: Brightness.dark,
+                    primaryColorDark: Colors.black,
+                    indicatorColor: Colors.white,
+                    canvasColor: Colors.black,
+                    // next line is important!
+                    appBarTheme: AppBarTheme(brightness: Brightness.dark),
+                  ),
+                  home: isLoggedin ? MainPage() : LoginScreen(),
+                ),
+              );
+            }),
+          );
         }
         return CupertinoActivityIndicator();
       },

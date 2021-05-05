@@ -1,5 +1,6 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
@@ -16,8 +17,6 @@ final String ReissueTokenMutation = """
   mutation reissueToken(\$refreshToken: String!) {
     reissueToken(refreshToken: \$refreshToken) {
           ok
-          token
-          expiredTime
           refreshToken
           error
      }
@@ -41,8 +40,8 @@ class _NearBakeryState extends State<NearBakery> {
   @override
   Widget build(BuildContext context) {
     // LocalStorage('newUser').setItem('token', 'Cool token');
-    // print(LocalStorage('newUser').getItem('token'));
-    // GraphQLConfiguration.setToken(LocalStorage('newUser').getItem('token'));
+    // print(GraphQLConfiguration.httpLink.defaultHeaders);
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(MediaQuery.of(context).size.height / 20),
@@ -90,7 +89,11 @@ class _NearBakeryState extends State<NearBakery> {
           return Container(
               child: FloatingActionButton(
             onPressed: () async {
-              await tokenCheck();
+              final ok = await tokenCheck();
+              if (!ok) {
+                print("리턴");
+                return;
+              }
               runMutation({'address': '오송임돵ㅋㅋss'});
             },
             child: Icon(Icons.star),
@@ -100,61 +103,64 @@ class _NearBakeryState extends State<NearBakery> {
     );
   }
 
-  Future tokenCheck() {
+  Future<bool> tokenCheck() {
     return Future(() async {
       // print('expiredTime:${Hive.box('auth').get('expiredTime')}');
-      var nowTime = ((DateTime.now().millisecondsSinceEpoch) / 1000).floor();
-      // print('nowTime:$nowTime');
-      // print(
-      //     'expire Time - nowTime = ${Hive.box('auth').get('expiredTime') - nowTime}');
-      if (Hive.box('auth').get('expiredTime') - 1800 < nowTime) {
+      // Node 서버가 Flutter 클라이언트 서버 200초 느리다. 이유는 모르겠지만
+      // 그래서 200초 마이너스
+      var nowTime =
+          ((DateTime.now().millisecondsSinceEpoch) / 1000).floor() - 200;
+
+      // Refresh Token Expired 체크 (604800 1주일)
+      if (nowTime + 600 > Hive.box('auth').get('customTokenExpired')) {
         var result = await client.mutate(
           MutationOptions(document: gql(ReissueTokenMutation), variables: {
             'refreshToken': Hive.box('auth').get('refreshToken')
           }),
         );
-        //         var ok = resultData['login']['ok'];
-        // print(ok);
-        // if (ok) {
-        //   String token = resultData['login']['token'];
-        //   int expiredTime = resultData['login']['expiredTime'];
-        //   String refreshToken = resultData['login']['refreshToken'];
-
+        print(result);
         if (result.data != null) {
           var reissueTokenResult = result.data?['reissueToken'];
-          var ok = reissueTokenResult['ok'];
           // print(ok);
-          if (ok) {
-            // print(result);
-            await Hive.box('auth').put('token', reissueTokenResult['token']);
-            await Hive.box('auth')
-                .put('expiredTime', reissueTokenResult['expiredTime']);
-            String refToken = reissueTokenResult['refreshToken'];
-            if (refToken.isNotEmpty) {
-              // print("RefToken 커몬");
-              await Hive.box('auth').put('RefreshToken', refToken);
+          try {
+            if (reissueTokenResult['ok']) {
+              // print(result);
+              // await Hive.box('auth').put('token', reissueTokenResult['token']);
+              // await Hive.box('auth')
+              //     .put('expiredTime', reissueTokenResult['expiredTime']);
+              print("현재");
+
+              final newCustomToken =
+                  await FirebaseAuth.instance.currentUser?.getIdToken(true);
+              await Hive.box('auth').putAll({
+                'token': newCustomToken,
+                'customTokenExpired':
+                    (DateTime.now().millisecondsSinceEpoch / 1000).floor(),
+              });
+              GraphQLConfiguration.setToken(Hive.box('auth').get('token'));
+              String? refToken = reissueTokenResult['refreshToken'];
+              if (refToken != null) {
+                print("RefToken 커몬");
+                await Hive.box('auth').putAll(
+                  {
+                    'refreshToken': refToken,
+                    'refreshTokenExpired':
+                        reissueTokenResult['refreshTokenExpired']
+                  },
+                );
+              }
+              return true;
+            } else {
+              return false;
+              // 로그아웃 시키고 재 인증 받도록 !
             }
-            // print(((DateTime.now().millisecondsSinceEpoch) / 1000).floor());
-            // print(Hive.box('auth').get('expiredTime'));
-            // print(((DateTime.now().millisecondsSinceEpoch) / 1000).floor() -
-            //     Hive.box('auth').get('expiredTime'));
+          } catch (err) {
+            print(err);
+            return false;
           }
         }
       }
+      return true;
     });
-    // client.mutate(
-    //   MutationOptions(document: gql(Reis))
-    // )
-    // JWT.verify(token,);
-
-    // var result = await GraphQLConfiguration().clientToQuery().mutate(
-    //       MutationOptions(document: gql(ReissueTokenMutation), variables: {
-    //         'token': Hive.box('auth').get('token'),
-    //         'refreshToken': Hive.box('auth').get('refreshToken')
-    //       }),
-    //     );
-
-    // print(result);
-    // return queryFunc;
   }
 }

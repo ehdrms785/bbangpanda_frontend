@@ -24,7 +24,6 @@ final String loginMutation = """
      }
   }
 """;
-final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class _HomeState extends State<Home> {
   @override

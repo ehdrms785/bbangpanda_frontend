@@ -3,57 +3,39 @@ import "package:graphql_flutter/graphql_flutter.dart";
 import 'package:hive/hive.dart';
 
 class GraphQLConfiguration {
-  static Link? link;
-  static HttpLink httpLink = HttpLink('https://4b81eda99e47.ngrok.io/graphql',
-      defaultHeaders: {'Authorization': ""});
+  static String token = Hive.box("auth").get('token');
 
-  static void setToken(String token) {
-    // AuthLink alink = AuthLink(getToken: () async => 'Bearer ' + token);
-    // GraphQLConfiguration.link = alink.concat(GraphQLConfiguration.httpLink);
-    httpLink.defaultHeaders.update('Authorization', (_) => 'Bearer $token');
-  }
+  static HttpLink httpLink = HttpLink('https://bb729fcaaadc.ngrok.io/graphql');
+  // static Link? link;
 
-  Map<String, String> getToken() {
-    var token = Hive.box('auth').get('token');
-    return {'Authorization': token};
-  }
+  static ValueNotifier<GraphQLClient> graphqlInit() {
+    final AuthLink authLink = AuthLink(
+      getToken: () async => 'Bearer $token',
+    );
+    final Link link = authLink.concat(httpLink);
 
-  static void removeToken() {
-    GraphQLConfiguration.link = null;
-  }
-
-  static Link getLink() {
-    if (link == null) {
-      return GraphQLConfiguration.httpLink;
-    }
-    return GraphQLConfiguration.link!;
-  }
-
-  // Future<ValueNotifier<GraphQLClient>> getClient() async {
-  //   final store = await HiveStore.open(path: 'my/cache/path');
-  //   return ValueNotifier(
-  //     GraphQLClient(
-  //       link: getLink(),
-  //       cache: GraphQLCache(store: store),
-  //     ),
-  //   );
-  // }
-
-  ValueNotifier<GraphQLClient> getClient = ValueNotifier(
-    GraphQLClient(
-      link: getLink(),
-      cache: GraphQLCache(
-        store: InMemoryStore(),
+    ValueNotifier<GraphQLClient> client = ValueNotifier(
+      GraphQLClient(
+        link: link,
+        cache: GraphQLCache(store: HiveStore()),
       ),
-    ),
-  );
+    );
+    return client;
+  }
+
+  static void setToken(String newToken) {
+    token = newToken;
+  }
 
   static GraphQLClient clientToQuery() {
+    AuthLink authLink = AuthLink(getToken: () async => 'Bearer $token');
+    final Link link = authLink.concat(httpLink);
+
     return GraphQLClient(
       cache: GraphQLCache(
-        store: InMemoryStore(),
+        store: HiveStore(),
       ),
-      link: getLink(),
+      link: link,
     );
   }
 }
