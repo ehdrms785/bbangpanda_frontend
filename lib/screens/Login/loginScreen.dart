@@ -37,13 +37,16 @@ class _LoginScreenState extends State<LoginScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextField(
-          decoration: InputDecoration(labelText: 'PhoneNumber'),
+          decoration: InputDecoration(
+              labelText: 'PhoneNumber',
+              isDense: true,
+              contentPadding: EdgeInsets.all(20.0)),
           onChanged: (val) {
             phoneNumber = val;
           },
         ),
         TextField(
-          decoration: InputDecoration(labelText: 'Password'),
+          decoration: InputDecoration(labelText: 'Password', isDense: true),
           onChanged: (val) {
             password = val;
           },

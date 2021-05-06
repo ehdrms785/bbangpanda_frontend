@@ -1,5 +1,5 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
-import 'package:bbangnarae_frontend/screens/Home/homeScreen%20copy%202.dart';
+import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';

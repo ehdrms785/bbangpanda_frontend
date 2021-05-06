@@ -1,11 +1,14 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/model/filterListModel.dart';
 import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
+import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBread/findBreadScreen.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
 import 'package:bbangnarae_frontend/screens/NearBakery/nearBakeryScreen.dart';
+import 'package:bbangnarae_frontend/theme/mainTheme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -17,11 +20,11 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get/get.dart';
-// import 'package:dotenv/dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
+  await initHiveForFlutter();
+  // await Hive.initFlutter();
   await Hive.openBox('auth');
   runApp(MyApp());
 }
@@ -34,16 +37,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // print(token);
     print("현재 저장된 토큰 ${GraphQLConfiguration.token}");
 
-    // Hive Store에 토큰 확인
-    // 있다면, 로그인한걸로
-    // 로그아웃 할때 Hive Store에서 token 제거
     // 스테이터스바 색 조정
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark));
+    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    //     statusBarColor: Colors.white,
+    //     statusBarIconBrightness: Brightness.dark));
+
     return GraphQLProvider(
       client: GraphQLConfiguration.graphqlInit(),
       child: ResponsiveSizer(builder: (context, orientation, screenType) {
@@ -57,26 +57,8 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: '빵나래 프로젝트',
             themeMode: ThemeMode.light, // Change it as you want
-            theme: ThemeData(
-                primaryColor: Colors.white,
-                primaryColorBrightness: Brightness.light,
-                brightness: Brightness.light,
-                primaryColorDark: Colors.black,
-                canvasColor: Colors.white,
-                //     // next line is important!
-                appBarTheme: AppBarTheme(brightness: Brightness.light)),
-            darkTheme: ThemeData(
-              primaryColor: Colors.black,
-              primaryColorBrightness: Brightness.dark,
-              primaryColorLight: Colors.black,
-              brightness: Brightness.dark,
-              primaryColorDark: Colors.black,
-              indicatorColor: Colors.white,
-              canvasColor: Colors.black,
-              // next line is important!
-              appBarTheme: AppBarTheme(brightness: Brightness.dark),
-            ),
-            // home: isLoggedin ? MainPage() : LoginScreen(),
+            theme: getMainTheme(),
+            darkTheme: getMainDarkTheme(),
             home: App(),
           ),
         );
@@ -86,28 +68,23 @@ class MyApp extends StatelessWidget {
 }
 
 class App extends StatelessWidget {
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _initialization,
+      future: Firebase.initializeApp(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           print(snapshot.error);
-          return Container(
-            child: Text("Error!"),
-          );
+          return ErrorScreen();
         }
         if (snapshot.connectionState == ConnectionState.done) {
           return MainPage();
         }
-        return CupertinoActivityIndicator();
+        return Loader();
       },
     );
   }
 }
-
-// final appBarTitleValueNotifier = ValueNotifier<String>('빵나래 홈');
 
 class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);
@@ -123,7 +100,7 @@ class _MainPageState extends State<MainPage> {
     Cart(),
     NearBakery(),
   ];
-  final List<String> _appBarNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "내주변빵집"];
+  final List<String> _pageNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "내주변빵집"];
   late PageController pageController;
   int _selectedIndex = 0;
 
@@ -151,7 +128,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void onPageChanged(int index) {
-    p_appBarTitleValueNotifier.value = _appBarNames[index];
+    p_appBarTitleValueNotifier.value = _pageNames[index];
     print("페이지 체인지");
     if (_selectedIndex != index)
       setState(() {
@@ -184,23 +161,23 @@ class _MainPageState extends State<MainPage> {
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: "빵나래",
+              label: _pageNames[0],
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.storefront),
-              label: "빵상점",
+              label: _pageNames[1],
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: "주변빵집",
+              label: _pageNames[2],
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_cart),
-              label: "찜빵",
+              label: _pageNames[3],
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.location_searching),
-              label: "나의공간",
+              label: _pageNames[4],
             ),
           ],
         ),
