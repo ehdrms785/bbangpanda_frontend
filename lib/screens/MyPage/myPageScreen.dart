@@ -1,9 +1,16 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
+import 'package:bbangnarae_frontend/screens/Login/loginScreen.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/query.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:bbangnarae_frontend/shared/query.dart';
+import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
+import 'package:get/get.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 final String EditProfileMutation = """
   mutation editProfile(\$username: String, \$phonenumber: String, \$address: String) {
@@ -31,74 +38,63 @@ late final QueryOptions options = QueryOptions(
   // pollInterval: Duration(seconds: 5),
 );
 
-class NearBakery extends StatefulWidget {
+class MyPage extends StatefulWidget {
   @override
-  _NearBakeryState createState() => _NearBakeryState();
+  _MyPageState createState() => _MyPageState();
 }
 
-class _NearBakeryState extends State<NearBakery> {
+class _MyPageState extends State<MyPage> {
   @override
   Widget build(BuildContext context) {
-    // LocalStorage('newUser').setItem('token', 'Cool token');
-    // print(GraphQLConfiguration.httpLink.defaultHeaders);
-
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(MediaQuery.of(context).size.height / 20),
-        child: AppBar(
-          actions: [IconButton(icon: Icon(Icons.ac_unit), onPressed: () {})],
-          //AppBar Shadow를 사라져보이게 하기 !
-          shadowColor: Colors.transparent,
-          centerTitle: true,
-          // backgroundColor: Colors.red,
-          title: ValueListenableBuilder(
-            valueListenable: p_appBarTitleValueNotifier,
-            builder: (context, String title, _) {
-              return Center(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w400,
+      appBar: PrefferedAppBar(context),
+      body: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, AsyncSnapshot<User?> snapshot) {
+          if (!snapshot.hasData) {
+            // 로그인 하지 않은 기본 화면 제공
+            // return
+            // Queries.loginQuery
+          }
+          return SingleChildScrollView(
+            child: Container(
+              height: 90.0.h,
+              color: Colors.red.shade100,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(child: Text("${snapshot.data?.phoneNumber}님 안녕하세요")),
+                  TextButton(
+                    onPressed: () async {
+                      showModalBottomSheet(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(25.0))),
+                        context: context,
+                        isDismissible: false,
+                        isScrollControlled: true,
+                        useRootNavigator: true,
+                        builder: (context) {
+                          // return ModalSheet();
+                          return LoginModal();
+                        },
+                      );
+                      // Navigator.of(context).pushNamed(routename);
+                    },
+                    child: Text("로그인"),
                   ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-      body: Mutation(
-        options: MutationOptions(
-          document: gql(EditProfileMutation),
-          onCompleted: (dynamic resultData) async {
-            print("on Complete");
-            print(resultData);
-            if (resultData == null) {
-              return;
-            }
-          },
-        ),
-        builder: (runMutation, result) {
-          if (result == null) {
-            return Text("Hi");
-          }
-          if (result.isLoading) {
-            return Text("Loading");
-          }
-          return Container(
-              child: FloatingActionButton(
-            onPressed: () async {
-              final ok = await tokenCheck();
-              if (!ok) {
-                print("리턴");
-                return;
-              }
-              runMutation({'address': '오송임돵ㅋㅋss'});
-            },
-            child: Icon(Icons.star),
-          ));
+                  TextButton(
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut();
+                      },
+                      child: Text("로그아웃"))
+                ],
+              ),
+            ),
+          );
         },
+        // },
       ),
     );
   }
@@ -124,12 +120,6 @@ class _NearBakeryState extends State<NearBakery> {
           // print(ok);
           try {
             if (reissueTokenResult['ok']) {
-              // print(result);
-              // await Hive.box('auth').put('token', reissueTokenResult['token']);
-              // await Hive.box('auth')
-              //     .put('expiredTime', reissueTokenResult['expiredTime']);
-              print("현재");
-
               final newCustomToken =
                   await FirebaseAuth.instance.currentUser?.getIdToken(true);
               await Hive.box('auth').putAll({
@@ -162,5 +152,28 @@ class _NearBakeryState extends State<NearBakery> {
       }
       return true;
     });
+  }
+}
+
+class ModalSheet extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      child: new FlatButton(
+        onPressed: () => Navigator.of(context).pushNamed('/test'),
+        child: const Text('test'),
+      ),
+    );
+  }
+}
+
+class TestModal extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      child: new Center(
+        child: const Text('modal routing test'),
+      ),
+    );
   }
 }

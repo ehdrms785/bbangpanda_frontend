@@ -5,26 +5,26 @@ import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBread/findBreadScreen.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
 import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
-import 'package:bbangnarae_frontend/screens/NearBakery/nearBakeryScreen.dart';
 import 'package:bbangnarae_frontend/theme/mainTheme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get/get.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:page_transition/page_transition.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initHiveForFlutter();
-  // await Hive.initFlutter();
+
   await Hive.openBox('auth');
   runApp(MyApp());
 }
@@ -54,13 +54,36 @@ class MyApp extends StatelessWidget {
             ),
           ],
           child: GetMaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: '빵나래 프로젝트',
-            themeMode: ThemeMode.light, // Change it as you want
-            theme: getMainTheme(),
-            darkTheme: getMainDarkTheme(),
-            home: App(),
-          ),
+              debugShowCheckedModeBanner: false,
+              title: '빵나래 프로젝트',
+              themeMode: ThemeMode.light, // Change it as you want
+              theme: getMainTheme(),
+              darkTheme: getMainDarkTheme(),
+              home: AnimatedSplashScreen(
+                animationDuration: Duration(seconds: 2),
+                splash: 'lib/images/splash.png',
+                splashIconSize: 30.0.h,
+                centered: true,
+                backgroundColor: Color.fromRGBO(27, 115, 64, 0.8),
+                nextScreen: App(),
+                splashTransition: SplashTransition.fadeTransition,
+                pageTransitionType: PageTransitionType.scale,
+              ),
+              routes: <String, WidgetBuilder>{
+                // '/': (BuildContext context) => App(),
+                '/test': (BuildContext context) => new TestModal(),
+              }
+              // getPages: [
+              //   GetPage(
+              //     name: '/signUp',
+              //     page: (BuildContext context) => SignUpScreen(),
+              //   ),
+              //   GetPage(
+              //     name: '/test',
+              //     page: () => TestModal(),
+              //   ),
+              // ],
+              ),
         );
       }),
     );
@@ -98,7 +121,7 @@ class _MainPageState extends State<MainPage> {
     FindBakery(),
     FindBread(),
     Cart(),
-    NearBakery(),
+    MyPage(),
   ];
   final List<String> _pageNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "내주변빵집"];
   late PageController pageController;

@@ -1,91 +1,329 @@
-import 'package:bbangnarae_frontend/SignUp/signUpScreen.dart';
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
-import 'package:flutter/material.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/query.dart';
+import 'package:bbangnarae_frontend/screens/SignUp/signUpScreen.dart';
+import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
-import 'package:uuid/uuid.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
-final String login = """
-  mutation login(\$email: String, \$phonenumber: String, \$password: String!) {
-    login(email: \$email, phonenumber: \$phonenumber, password: \$password) {
-      ok
-      error
-      customToken
-      customTokenExpired
-      refreshToken
-      refreshTokenExpired
-     }
-  }
-""";
-
-class LoginScreen extends StatefulWidget {
+class LoginModal extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _LoginModalState createState() => _LoginModalState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  var phoneNumber, password, token;
+class _LoginModalState extends State<LoginModal> {
+  final formKey = GlobalKey<FormState>();
+  final emailTextController = TextEditingController();
+  final passwordTextController = TextEditingController();
+
   @override
-  Widget build(BuildContext? context) {
-    return Scaffold(
-        body: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'PhoneNumber',
-              isDense: true,
-              contentPadding: EdgeInsets.all(20.0)),
-          onChanged: (val) {
-            phoneNumber = val;
-          },
+  void dispose() {
+    print("디스포스~~");
+    emailTextController.dispose();
+    passwordTextController.dispose();
+
+    super.dispose();
+  }
+
+  bool _isInAsyncCall = false;
+  final PageController controller = PageController(initialPage: 0);
+
+  @override
+  Widget build(BuildContext context) {
+    print("빌드 테스트");
+    return Container(
+      height: 90.0.h - MediaQuery.of(context).viewInsets.bottom,
+      child: PageView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: controller,
+        children: [
+          ModalProgressScreen(
+            isAsyncCall: _isInAsyncCall,
+            child: Container(
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    title: Text(
+                      "빵판다 로그인",
+                      style: TextStyle(
+                        fontSize: 16.0.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    centerTitle: true,
+                    automaticallyImplyLeading: false,
+                    forceElevated: true,
+                    pinned: true,
+                    elevation: 1.0,
+                    shadowColor: Colors.black,
+                    leading: SizedBox(
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back_ios_sharp),
+                        iconSize: 16.0.sp,
+                        color: Colors.grey.shade600,
+                        onPressed: () {
+                          Get.back();
+                        },
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        Container(
+                          child: Column(
+                            children: [
+                              Divider(
+                                indent: 0.0,
+                                thickness: 2.0,
+                                height: 0.0,
+                              ),
+                              SizedBox(height: 4.0.h),
+                              Padding(
+                                padding:
+                                    EdgeInsets.symmetric(horizontal: 4.0.w),
+                                child: Form(
+                                  key: this
+                                      .formKey, // 나중에 한꺼번에 폼필드 데이터 Save할때 사용
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      RenderTextFormField(
+                                        label: '이메일 혹은 휴대폰번호 입력',
+                                        controller: emailTextController,
+                                        validator: (val) {
+                                          return emailValidator(val);
+                                        },
+                                        autoFocus: true,
+                                        useIcon: true,
+                                      ),
+                                      RenderTextFormField(
+                                        label: '비밀번호',
+                                        controller: passwordTextController,
+                                        isSecure: true,
+                                        useIcon: true,
+                                        validator: (val) {
+                                          return passwordValidator(val);
+                                        },
+                                      ),
+                                      renderButton(),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              print("아이디 찾기 탭");
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.all(10.0.sp),
+                                              child: Text(
+                                                "아이디찾기",
+                                                style: TextStyle(
+                                                  color: Colors.grey.shade500,
+                                                  fontSize: 12.0.sp,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              print("비밀번호 찾기 탭");
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.all(10.0.sp),
+                                              child: Text(
+                                                "비밀번호찾기",
+                                                style: TextStyle(
+                                                  color: Colors.grey.shade500,
+                                                  fontSize: 12.0.sp,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Divider(
+                                        indent: 0.0,
+                                        thickness: 1.0,
+                                        height: 0.0,
+                                      ),
+                                      SizedBox(
+                                        height: 2.0.h,
+                                      ),
+                                      signUpButton()
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+
+          // /테스트 고고
+          SignUpScreen(controller),
+        ],
+      ),
+    );
+  }
+
+  void _submit() async {
+    if (this.formKey.currentState!.validate()) {
+      setState(() {
+        _isInAsyncCall = true;
+      });
+      late final ErrorCode? error;
+      await Future.delayed(Duration(milliseconds: 50), () async {
+        error = await signInWithServer(
+            emailTextController.text, passwordTextController.text);
+        setState(() {
+          _isInAsyncCall = false;
+        });
+      });
+
+      if (error != null) {
+        Get.snackbar(
+          '',
+          '',
+          backgroundColor: Colors.white,
+          titleText: Container(
+            child: Center(
+              child: Text(error!.errorCode),
+            ),
+          ),
+          messageText: Container(
+            child: Center(
+              child: Text(error!.errorMessage),
+            ),
+          ),
+        );
+        return;
+      }
+      Get.to(MyPage());
+      Get.snackbar(
+        '로그인 성공',
+        '야호',
+        backgroundColor: Colors.white,
+      );
+    } else {
+      String snackBarMesasge = emailValidator(emailTextController.text) ?? '';
+      if (snackBarMesasge == "") {
+        snackBarMesasge = passwordValidator(passwordTextController.text) ?? '';
+      }
+      Get.snackbar(
+        "",
+        "",
+        backgroundColor: Colors.white,
+        titleText: Container(
+          child: Center(
+            child: Text("로그인 실패"),
+          ),
         ),
-        TextField(
-          decoration: InputDecoration(labelText: 'Password', isDense: true),
-          onChanged: (val) {
-            password = val;
-          },
+        messageText: Container(
+          child: Center(
+            child: Text(snackBarMesasge),
+          ),
         ),
-        SizedBox(
-          height: 10.0,
+      );
+    }
+  }
+
+  renderButton() {
+    return SizedBox(
+      width: 80.0.w,
+      child: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
         ),
-        ElevatedButton(
-          onPressed: () => {signInWithServer(phoneNumber, password)},
-          child: Text("Authenticated"),
+        onPressed: _submit,
+        child: Text(
+          '로그인',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14.0.sp,
+          ),
         ),
-        ElevatedButton(
-          onPressed: () {
-            Get.to(SignUpScreen());
-          },
-          child: Text("SignUp"),
+      ),
+    );
+  }
+
+  signUpButton() {
+    return GestureDetector(
+      onTap: () {
+        controller.animateToPage(1,
+            duration: Duration(milliseconds: 600), curve: Curves.easeIn);
+        print('클릭');
+      },
+      child: Container(
+        width: 80.0.w,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: Colors.grey.shade300,
+          ),
         ),
-      ],
-    ));
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 1.3.h),
+          child: Center(
+            child: Text(
+              '회원가입',
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 12.0.sp,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
-Future<UserCredential?> signInWithServer(
-    String phoneNumber, String password) async {
+class ErrorCode {
+  ErrorCode({this.errorCode = 'X0000', required this.errorMessage});
+  final String errorCode;
+  final String errorMessage;
+
+  // String? get errorCode => _errorCode;
+}
+
+Future<ErrorCode?> signInWithServer(String id, String password) async {
+  String email = '';
+  String phoneNumber = '';
+  print('id들어옴 :$id');
   try {
-    final result =
-        await client.mutate(MutationOptions(document: gql(login), variables: {
-      // 'email':
-      'phonenumber': phoneNumber,
-      'password': password
-    }));
+    if (id.startsWith('010')) {
+      print("체크");
+      phoneNumber = id;
+    } else {
+      email = id;
+    }
+    final result = await client.mutate(MutationOptions(
+        document: gql(MyPageQuery.loginMutation),
+        variables: email.isNotEmpty
+            ? {'email': email, 'password': password}
+            : {'phonenumber': phoneNumber, 'password': password}));
     if (result.hasException) {
-      print("에러발생");
-      return null;
+      return ErrorCode(
+          errorCode: "", errorMessage: "로그인 접속 오류 잠시 후 다시 시도 해 주세요");
     }
     if (result.data != null) {
       final loginResult = result.data?['login'];
       if (loginResult['ok']) {
         try {
+          print("로그인 완료");
           await FirebaseAuth.instance
               .signInWithCustomToken(loginResult['customToken']);
           final token = await FirebaseAuth.instance.currentUser?.getIdToken();
@@ -102,7 +340,7 @@ Future<UserCredential?> signInWithServer(
           return null;
         }
       } else {
-        print(loginResult['error']);
+        return loginResult['error'].split('\n');
       }
     }
     // FirebaseAuth.instance.signInWithCustomToken();
@@ -110,4 +348,150 @@ Future<UserCredential?> signInWithServer(
     print(e);
   }
   return null;
+}
+
+class RenderTextFormField extends StatelessWidget {
+  RenderTextFormField(
+      {Key? key,
+      required this.controller,
+      required this.label,
+      required this.validator,
+      this.isSecure = false,
+      this.autoFocus = false,
+      this.labelSize,
+      this.additional,
+      this.useIcon = false})
+      : super(key: key);
+  final bool? isSecure;
+  final bool autoFocus;
+  final TextEditingController controller;
+  final String label;
+  double? labelSize;
+  final FormFieldValidator validator;
+  final Widget? additional;
+  final bool useIcon;
+
+  late final ValueNotifier<bool?> isSecureNotifier = ValueNotifier(isSecure);
+  @override
+  Widget build(BuildContext context) {
+    if (labelSize == null) {
+      labelSize = 14.0.sp;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          // height: 6.0.h,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                child: Container(
+                    // width: additional == null ? 85.0.w : 72.0.w,
+                    child: ValueListenableBuilder(
+                  valueListenable: isSecureNotifier,
+                  builder: (context, _isSecure, _) => TextFormField(
+                    autofocus: autoFocus,
+                    style: TextStyle(fontSize: labelSize),
+                    controller: controller,
+                    validator: validator,
+                    obscureText: _isSecure as bool,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: new InputDecoration(
+                      hintText: label,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 10.0),
+                      enabledBorder: new UnderlineInputBorder(
+                        borderSide: new BorderSide(
+                            color: Colors.grey.shade300, width: 0),
+                      ),
+                      focusedBorder: new UnderlineInputBorder(
+                        borderSide: new BorderSide(color: Colors.blue),
+                      ),
+                      errorBorder: new UnderlineInputBorder(
+                        borderSide: new BorderSide(color: Colors.red),
+                      ),
+                    ),
+                  ),
+                )),
+              ),
+              if (useIcon)
+                isSecure!
+                    ? secureIcon(isSecureNotifier)
+                    : removeIcon(controller),
+              if (additional != null)
+                Container(
+                    margin: EdgeInsets.only(left: 3.0.w),
+                    width: 20.0.w,
+                    height: 5.0.h,
+                    color: Colors.grey.shade300,
+                    child: Center(child: additional))
+            ],
+          ),
+        ),
+        SizedBox(height: 3.0.h),
+      ],
+    );
+  }
+}
+
+String? emailValidator(String val) {
+  if (val.length < 1) {
+    return '이메일 혹은 휴대폰번호 입력 해 주세요';
+  }
+  if (RegExp(r'^010((?!@).)*$').hasMatch(val)) {
+    if (!RegExp(r'^010\d{4}\d{4}').hasMatch(val)) {
+      return '휴대폰번호 전체 자리를 입력 해 주세요';
+    }
+  } else if (!RegExp(
+          r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
+      .hasMatch(val)) {
+    return '잘못된 이메일 형식입니다.';
+  }
+  return null;
+}
+
+String? passwordValidator(String val) {
+  if (val.length < 1) {
+    return '비밀번호는 필수사항입니다.';
+  } else if (val.length < 8) {
+    return '비밀번호는 8자 이상 입력해주세요!';
+  }
+  return null;
+}
+
+removeIcon(TextEditingController controller) {
+  return Container(
+    width: 5.0.w,
+    child: GestureDetector(
+      onTap: () {
+        controller.clear();
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Icon(Icons.clear),
+      ),
+    ),
+  );
+}
+
+secureIcon(ValueNotifier<bool?> isSecureNotifier) {
+  return Container(
+    width: 5.0.w,
+    child: GestureDetector(
+      onTap: () {
+        isSecureNotifier.value = !isSecureNotifier.value!;
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: ValueListenableBuilder(
+          valueListenable: isSecureNotifier,
+          builder: (context, value, child) => isSecureNotifier.value!
+              ? Icon(Icons.lock_rounded)
+              : Icon(Icons.lock_open_rounded),
+        ),
+      ),
+    ),
+  );
 }

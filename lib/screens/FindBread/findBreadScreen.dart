@@ -1,5 +1,6 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
@@ -84,32 +85,7 @@ class _FindBreadState extends State<FindBread> {
 
     print("hello world");
     return Scaffold(
-        appBar: PreferredSize(
-          preferredSize:
-              Size.fromHeight(MediaQuery.of(context).size.height / 20),
-          child: AppBar(
-            actions: [IconButton(icon: Icon(Icons.ac_unit), onPressed: () {})],
-            //AppBar Shadow를 사라져보이게 하기 !
-            shadowColor: Colors.transparent,
-            centerTitle: true,
-            // backgroundColor: Colors.red,
-            title: ValueListenableBuilder(
-              valueListenable: p_appBarTitleValueNotifier,
-              builder: (context, String title, _) {
-                return Center(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
+        appBar: PrefferedAppBar(context),
         body: Container(
           child: Column(
             children: [
