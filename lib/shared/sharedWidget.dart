@@ -99,22 +99,113 @@ Widget backArrowButtton({double? size}) {
   );
 }
 
-Widget modalHeader({required String title}) {
-  return Container(
-    height: 5.0.h,
-    child: Row(
-      children: [
-        backArrowButtton(),
-        Container(
-          width: 75.0.w,
-          child: Center(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 16.0.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-        )
-      ],
-    ),
+class MySliverAppBar extends StatelessWidget {
+  const MySliverAppBar({
+    Key? key,
+    required this.title,
+    this.centerTitle = true,
+    this.automaticallyImplyLeading = false,
+    this.floating = false,
+    this.pinned = true,
+    this.snap = false,
+    this.stretch = false,
+    this.elevation = 1.0,
+    this.shadowColor = Colors.black,
+    this.leading,
+    this.actions,
+    this.forceElevated = true,
+    this.backgroundColor,
+    this.iconTheme,
+    this.actionsIconTheme,
+    this.textTheme,
+    this.shape,
+    this.titleTextStyle,
+  }) : super(key: key);
+
+  final Widget? leading;
+  final bool automaticallyImplyLeading;
+  final String title;
+  final List<Widget>? actions;
+  final double? elevation;
+  final Color? shadowColor;
+  final bool forceElevated;
+  final Color? backgroundColor;
+  final IconThemeData? iconTheme;
+  final IconThemeData? actionsIconTheme;
+  final TextTheme? textTheme;
+  final bool? centerTitle;
+  final bool floating;
+  final bool pinned;
+  final ShapeBorder? shape;
+  final bool snap;
+  final bool stretch;
+  final TextStyle? titleTextStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.0.sp,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: centerTitle,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      floating: floating,
+      pinned: pinned,
+      snap: snap,
+      stretch: stretch,
+      elevation: elevation,
+      shadowColor: shadowColor,
+      leading: leading ?? defaultLeading(),
+      actions: actions,
+      forceElevated: forceElevated,
+      backgroundColor: backgroundColor,
+      iconTheme: iconTheme,
+      actionsIconTheme: actionsIconTheme,
+      textTheme: textTheme,
+      shape: shape,
+      titleTextStyle: titleTextStyle,
+    );
+  }
+
+  Widget defaultLeading() => SizedBox(
+        child: IconButton(
+          icon: Icon(Icons.arrow_back_ios_sharp),
+          iconSize: 16.0.sp,
+          color: Colors.grey.shade600,
+          onPressed: () {
+            Get.back();
+          },
+        ),
+      );
+}
+
+Widget FormContainer({required Widget child}) {
+  return Column(
+    children: [
+      SizedBox(
+        height: 4.0.h,
+      ),
+      Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.0.w),
+        child: child,
+      )
+    ],
   );
 }
+
+Widget MakeGap() => Column(
+      children: [
+        Divider(
+          indent: 0.0,
+          thickness: 1.0,
+          height: 0.0,
+        ),
+        SizedBox(
+          height: 2.0.h,
+        )
+      ],
+    );

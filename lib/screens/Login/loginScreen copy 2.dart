@@ -1,13 +1,15 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/query.dart';
-import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+import 'package:bbangnarae_frontend/screens/SignUp/signUpScreen.dart';
+import 'package:bbangnarae_frontend/shared/publicValues.dart';
 import 'package:bbangnarae_frontend/shared/sharedClass.dart';
 import 'package:bbangnarae_frontend/shared/sharedValidator.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:get/get.dart';
@@ -23,14 +25,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final formKey = GlobalKey<FormState>();
   final idTextController = TextEditingController();
   final passwordTextController = TextEditingController();
-  // final _focusNode = FocusScopeNode();
-  final _pwFocusNode = FocusNode();
+  final _focusNode = FocusScopeNode();
+  final _addBtnNode = FocusNode();
   @override
   void dispose() {
     print("디스포스~~");
-    // _focusNode.dispose();
-    // _addBtnNode.dispose();
-    _pwFocusNode.dispose();
+    _focusNode.dispose();
+    _addBtnNode.dispose();
     idTextController.dispose();
     passwordTextController.dispose();
     super.dispose();
@@ -42,7 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     print("로그인 페이지 빌드");
-
     return Scaffold(
       body: ModalProgressScreen(
         isAsyncCall: _isInAsyncCall,
@@ -58,11 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     MyForm(),
                     Find_Id_PW(),
                     signUpButton(),
-                    TextButton(
-                        onPressed: () {
-                          _pwFocusNode.requestFocus();
-                        },
-                        child: Text("다음 포커스")),
                   ],
                 ),
               ),
@@ -75,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
 //=====================
 ////////// functions
-  ///1620785988524 1620786179649
+  ///
   void _submit() async {
     if (this.formKey.currentState!.validate()) {
       setState(() {
@@ -148,13 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget signUpButton() {
     return GestureDetector(
       onTap: () async {
-        print("버튼누름");
-        var result = await Get.toNamed('/signUp');
-        print("기다리는지 체크");
-        if (result != null) {
-          idTextController.text = result;
-          _pwFocusNode.requestFocus();
-        }
+        idTextController.text = await Get.toNamed('/signUp');
       },
       child: Container(
         width: 80.0.w,
@@ -226,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
             label: '이메일 혹은 휴대폰번호 입력',
             controller: idTextController,
             validator: (val) {
-              return idValidator(val);
+              return emailValidator(val);
             },
             autoFocus: true,
             useIcon: true,
@@ -234,7 +223,6 @@ class _LoginScreenState extends State<LoginScreen> {
           RenderTextFormField(
             label: '비밀번호',
             controller: passwordTextController,
-            focusNode: _pwFocusNode,
             isSecure: true,
             useIcon: true,
             validator: (val) {
@@ -274,7 +262,6 @@ Future<ErrorCode?> signInWithServer(String id, String password) async {
               .signInWithCustomToken(loginResult['customToken']);
           final token = await FirebaseAuth.instance.currentUser?.getIdToken();
           Hive.box('auth').putAll({
-            'isLoggedIn': true,
             'token': token,
             'tokenExpired': loginResult['customTokenExpired'],
             'refreshToken': loginResult['refreshToken'],
@@ -287,8 +274,7 @@ Future<ErrorCode?> signInWithServer(String id, String password) async {
           return null;
         }
       } else {
-        var _errorBox = loginResult['error'].split('\n');
-        return ErrorCode(errorCode: _errorBox[0], errorMessage: _errorBox[1]);
+        return loginResult['error'].split('\n');
       }
     }
     // FirebaseAuth.instance.signInWithCustomToken();
@@ -306,7 +292,6 @@ class RenderTextFormField extends StatelessWidget {
       required this.validator,
       this.isSecure = false,
       this.autoFocus = false,
-      this.focusNode,
       this.labelSize,
       this.additional,
       this.useIcon = false,
@@ -320,7 +305,6 @@ class RenderTextFormField extends StatelessWidget {
   final Widget? additional;
   final bool useIcon;
   final int? maxLength;
-  final FocusNode? focusNode;
   double? labelSize = 14.0.sp;
 
   late final ValueNotifier<bool?> isSecureNotifier = ValueNotifier(isSecure);
@@ -341,7 +325,6 @@ class RenderTextFormField extends StatelessWidget {
                   valueListenable: isSecureNotifier,
                   builder: (context, _isSecure, _) => TextFormField(
                     autofocus: autoFocus,
-                    focusNode: focusNode,
                     style: TextStyle(fontSize: labelSize),
                     controller: controller,
                     validator: validator,
@@ -371,7 +354,13 @@ class RenderTextFormField extends StatelessWidget {
                 isSecure!
                     ? secureIcon(isSecureNotifier)
                     : removeIcon(controller),
-              if (additional != null) additional!
+              if (additional != null)
+                Container(
+                    margin: EdgeInsets.only(left: 3.0.w),
+                    width: 20.0.w,
+                    height: 5.0.h,
+                    color: Colors.grey.shade300,
+                    child: Center(child: additional))
             ],
           ),
         ),

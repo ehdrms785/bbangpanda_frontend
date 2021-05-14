@@ -1,11 +1,9 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
-import 'package:bbangnarae_frontend/shared/auth/authController.dart';
-import 'package:bbangnarae_frontend/shared/dialog/policy_dialog.dart';
-import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedValidator.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -45,7 +43,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final signCodeTextController = TextEditingController();
   final ValueNotifier<bool> _isSignCodeClicked = ValueNotifier<bool>(false);
   late int resendPossibleTime;
-  var _loading = false.obs;
+
   @override
   Widget build(BuildContext context) {
     print("회원가입 페이지 빌드");
@@ -95,11 +93,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       timeout: const Duration(seconds: 10),
       verificationCompleted: (PhoneAuthCredential credential) async {
         // ANDROID ONLY?
-        
         print("Recapcha 없이 인증 (안드로이드 Only)");
       },
       verificationFailed: (FirebaseAuthException err) {
-        print(err.code);
         if (err.code == 'invalid-phone-number') {
           print('잘못된 휴대폰 번호 입니다.');
         }
@@ -107,13 +103,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       },
       codeSent: (String verificationId, int? resendToken) async {
         // SMS Code 받아서
-        print("헬로");
         _verificationId = verificationId;
         Get.snackbar("알림", "휴대폰으로 인증코드가 전송되었습니다.");
       },
       codeAutoRetrievalTimeout: (verificationId) {
         // Auto-resolution timed out...
-         _verificationId = verificationId;
         print("4번");
       },
     );
@@ -121,60 +115,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _signUpWithServer() async {
     return Future(() async {
-      if (this.formKey.currentState!.validate()) {
-        setState(() {
-          _isInAsyncCall = true;
-        });
+      if (_auth.currentUser != null) {
+        Get.snackbar("알림", '이미 로그인 되어 있습니다.');
+        return;
+      }
+
+      final PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: _verificationId,
+        smsCode: signCodeTextController.text,
+      );
+
+      try {
+        await _auth.signInWithCredential(credential);
 
         if (_auth.currentUser != null) {
-          Get.snackbar("알림", '이미 로그인 되어 있습니다.');
-          return;
-        }
-
-        try {
-          final PhoneAuthCredential credential = PhoneAuthProvider.credential(
-            verificationId: _verificationId,
-            smsCode: signCodeTextController.text,
-          );
-          await _auth.signInWithCredential(credential);
-
-          if (_auth.currentUser != null) {
-            print("유저 있음");
-            bool ok = await signUpWithServer(uid: _auth.currentUser!.uid);
-            print("정상 작동했나? $ok");
-            await _auth.signOut();
-            if (ok) {
-              Get.back(result: emailTextController.text);
-              return;
-            }
-          }
-        } on FirebaseAuthException catch (e) {
-          print("\n\n에러발생 (아마 코드오류??)");
-          print(e.code);
-            if(!Get.find<AuthController>().isInternetOn) {
-           showError(title: "XE00000", message: "인터넷 연결을 확인 해 주세요.");
-           return;
-        }
-        if(e.code == "invalid-verification-id") {
-                      Get.snackbar("알림", "인증번호를 재 전송 해 주세요.");
-            return;
-        }
-          if (e.code == "invalid-verification-code") {
-            Get.snackbar("알림", "올바르지 않은 인증번호 입니다.");
+          print("유저 있음");
+          bool ok = await signUpWithServer(uid: _auth.currentUser!.uid);
+          print("정상 작동했나? $ok");
+          await _auth.signOut();
+          if (ok) {
+            Get.back(result: emailTextController.text);
+          } else {
             return;
           }
+        }
+      } on FirebaseAuthException catch (e) {
+        print("\n\n에러발생 (아마 코드오류??)");
+        print(e.code);
+        if (e.code == "invalid-verification-code") {
+          Get.snackbar("알림", "올바르지 않은 인증번호 입니다.");
           return;
-        } finally {
-          setState(() {
-            _isInAsyncCall = false;
-          });
         }
-      } else {
-        String? snackBarMessage = signUpTotalValidator(email: emailTextController.text, password: passwordTextController.text name: nameTextController.text, phonenumber: phoneNumberTextController.text, signCode: signCodeTextController.text);
-        if(snackBarMessage != null) {
-         showSnackBar(title: "회원가입 실패", message: snackBarMessage);
-        }
-
+        return;
       }
     });
   }
@@ -197,11 +169,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       print('result');
       if (result.hasException) {
         print(result.exception);
-        var internet = await internetCheck();
-        print('interNet 상태 $internet');
-        if(!await internetCheck()) {
-          showError(title: "XE00000", message: "인터넷 연결을 확인 해 주세요.");
-        }
         showError(
             title: "XE00001", message: '회원가입 알 수 없는 오류\n관리자에게 문의를 보내주세요.');
         return false;
@@ -270,130 +237,76 @@ class _SignUpScreenState extends State<SignUpScreen> {
         key: this.formKey, // 나중에 한꺼번에 폼필드 데이터 Save할때 사용
         child: TextFieldList(),
       );
-  List<bool> isChecked = List.generate(2, (index) => false).obs;
-  List<String> termsList = ['이용약관에 동의합니다.', '개인정보 수집 및 이용에 동의합니다.'];
+  Map<String, bool> termsList = {
+    'foo': true,
+    'bar': false,
+  };
+
   Widget TermsList() => Container(
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade400),
         ),
         child: Column(
           children: [
-            Obx(() => Padding(
-                padding: const EdgeInsets.all(0),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      onChanged: (val) {
-                        for (int i = 0; i < isChecked.length; i++) {
-                          isChecked[i] = val!;
-                        }
-                      },
-                      value: !isChecked.contains(false),
-                    ),
-                    Text("약관 전체동의"),
-                  ],
-                ))),
-            // Obx(
-            //   () => CheckboxListTile(
-            //     title: Text("약관 전체동의"),
-            //     value: !isChecked.contains(false),
-            //     contentPadding: EdgeInsets.zero,
-            //     controlAffinity: ListTileControlAffinity.leading,
-            //     onChanged: (val) {
-            //       for (int i = 0; i < isChecked.length; i++) {
-            //         isChecked[i] = val!;
-            //       }
-            //     },
-            //   ),
-            // ),
+            Row(
+              children: [
+                Checkbox(
+                  value: false,
+                  onChanged: (value) {},
+                ),
+                Text("약관 전체동의")
+              ],
+            ),
             Divider(
               indent: 0.0,
               thickness: 1.0,
               height: 0.0,
             ),
-            Obx(() => Padding(
-                padding: const EdgeInsets.all(0),
-                child: Column(
+            Row(
+              children: [
+                Checkbox(
+                  value: false,
+                  onChanged: (value) {},
+                ),
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                            onChanged: (val) {
-                              isChecked[0] = val!;
-                            },
-                            value: isChecked[0]),
-                        Text(termsList[0]),
-                        TextButton(
-                          onPressed: () {
-                            showModalBottomSheet(
-                              isDismissible: true,
-                              isScrollControlled: true,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              context: context,
-                              builder: (context) => PolicyDialog(
-                                mdFileName: "서비스 이용약관.md",
-                              ),
-                            );
-                          },
-                          child: Text("본문보기"),
-                        )
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                            onChanged: (val) {
-                              isChecked[1] = val!;
-                            },
-                            value: isChecked[1]),
-                        Text(termsList[1]),
-                        TextButton(
-                          onPressed: () {
-                            showModalBottomSheet(
-                              isDismissible: true,
-                              isScrollControlled: true,
-                              context: context,
-                              builder: (context) => PolicyDialog(
-                                mdFileName: "개인정보 처리방침.md",
-                              ),
-                            );
-                          },
-                          child: Text("본문보기"),
-                        )
-                      ],
-                    ),
+                    Text("이용약관에 동의합니다"),
+                    GestureDetector(
+                      child: Text(
+                        "본문보기",
+                        style: TextStyle(
+                            color: Colors.blueAccent,
+                            decoration: TextDecoration.underline),
+                      ),
+                    )
                   ],
-                )))
-            // Obx(
-            //   () => ListView.builder(
-            //     shrinkWrap: true,
-            //     padding: const EdgeInsets.all(0),
-            //     itemCount: isChecked.length,
-            //     itemBuilder: (context, index) => Container(
-            //         height: 5.0.h,
-            //         child: Row(
-            //           children: [
-            //             Checkbox(
-            //               value: isChecked[index],
-            //               onChanged: (value) => isChecked[index] = value!,
-            //             ),
-            //             Text(termsList[index]),
-            //           ],
-            //         )),
-            //     // children: [
-            //     //   Container(
-            //     //     height: 5.0.h,
-            //     //     child: Row(children: [],)
-            //     //   )
-            //     // ]
-            //   ),
-            // ),
+                )
+              ],
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: false,
+                  onChanged: (value) {},
+                ),
+                Row(
+                  children: [
+                    Text("개인정보 수집 및 이용에 동의합니다."),
+                    GestureDetector(
+                      child: Text(
+                        "본문보기",
+                        style: TextStyle(
+                            color: Colors.blueAccent,
+                            decoration: TextDecoration.underline),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
           ],
         ),
       );
-
   Widget TextFieldList() => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -436,21 +349,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 margin: EdgeInsets.only(left: 3.0.w),
                 child: ElevatedButton(
                   onPressed: () async {
-                    _loading.value = true;
                     await sendSignCode(isCliked);
-                    _loading.value = false;
-                    // });
                   },
-                  style: ButtonStyle(padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero)),
-                  child:  Obx( () { return _loading.value == true ?Center(child: CupertinoActivityIndicator()) :Center(
-                      child: Text(isCliked? "재전송" : "인증번호", style: TextStyle(fontSize: 12.0.sp)),
-                    ); }
-                 
-                  
-                
-                  
+                  child: Center(
+                    child: Text("재전송", style: TextStyle(fontSize: 12.0.sp)),
                   ),
-                
                 ),
               ),
             ),

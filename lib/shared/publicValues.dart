@@ -13,3 +13,5 @@ ValueNotifier<String> get p_appBarTitleValueNotifier =>
 // list와 set이 완전히 같은지 체크하는 용도로 쓰이는 함수
 Function listEq = const ListEquality().equals;
 Function setEq = const SetEquality().equals;
+
+Color mainColor = Color.fromRGBO(27, 115, 64, 0.8);

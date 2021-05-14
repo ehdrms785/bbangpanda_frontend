@@ -1,6 +1,7 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/screens/Login/loginScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/query.dart';
+import 'package:bbangnarae_frontend/screens/SignUp/signUpScreen.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
 import 'package:bbangnarae_frontend/shared/query.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
@@ -44,12 +45,32 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
+  // final _auth = FirebaseAuth.instance;
+
+  // @override
+  // void initState() {
+  //   _auth.userChanges().listen((User? user) {
+  //     print("유저변경 체크중");
+  //     print(user);
+  //   });
+  //   super.initState();
+  // }
+
   @override
   Widget build(BuildContext context) {
+//     FirebaseAuth.instance.onAuthStateChanged(function(user) {
+//   if (user) {
+//     // User is signed in.
+//   } else {
+//     // No user is signed in.
+//   }
+// });
+
     return Scaffold(
       appBar: PrefferedAppBar(context),
       body: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
+
         builder: (context, AsyncSnapshot<User?> snapshot) {
           if (!snapshot.hasData) {
             // 로그인 하지 않은 기본 화면 제공
@@ -66,21 +87,8 @@ class _MyPageState extends State<MyPage> {
                 children: [
                   Center(child: Text("${snapshot.data?.phoneNumber}님 안녕하세요")),
                   TextButton(
-                    onPressed: () async {
-                      showModalBottomSheet(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(25.0))),
-                        context: context,
-                        isDismissible: false,
-                        isScrollControlled: true,
-                        useRootNavigator: true,
-                        builder: (context) {
-                          // return ModalSheet();
-                          return LoginModal();
-                        },
-                      );
-                      // Navigator.of(context).pushNamed(routename);
+                    onPressed: () {
+                      Get.toNamed('/login');
                     },
                     child: Text("로그인"),
                   ),

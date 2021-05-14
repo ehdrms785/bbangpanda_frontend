@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/model/filterListModel.dart';
 import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
@@ -5,7 +7,11 @@ import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBread/findBreadScreen.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
+import 'package:bbangnarae_frontend/screens/Login/loginScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
+import 'package:bbangnarae_frontend/screens/SignUp/signUpScreen.dart';
+import 'package:bbangnarae_frontend/shared/auth/authBinding.dart';
+import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/publicValues.dart';
 import 'package:bbangnarae_frontend/theme/mainTheme.dart';
@@ -13,6 +19,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -20,6 +27,7 @@ import 'package:hive/hive.dart';
 import 'package:get/get.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:connectivity/connectivity.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,9 +48,9 @@ class MyApp extends StatelessWidget {
     print("현재 저장된 토큰 ${GraphQLConfiguration.token}");
 
     // 스테이터스바 색 조정
-    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    //     statusBarColor: Colors.white,
-    //     statusBarIconBrightness: Brightness.dark));
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark));
 
     return GraphQLProvider(
       client: GraphQLConfiguration.graphqlInit(),
@@ -54,36 +62,47 @@ class MyApp extends StatelessWidget {
             ),
           ],
           child: GetMaterialApp(
-              debugShowCheckedModeBanner: false,
-              title: '빵나래 프로젝트',
-              themeMode: ThemeMode.light, // Change it as you want
-              theme: getMainTheme(),
-              darkTheme: getMainDarkTheme(),
-              home: AnimatedSplashScreen(
-                animationDuration: Duration(seconds: 2),
-                splash: 'lib/images/splash.png',
-                splashIconSize: 30.0.h,
-                centered: true,
-                backgroundColor: Color.fromRGBO(27, 115, 64, 0.8),
-                nextScreen: App(),
-                splashTransition: SplashTransition.fadeTransition,
-                pageTransitionType: PageTransitionType.scale,
+            debugShowCheckedModeBanner: false,
+            title: '빵나래 프로젝트',
+            themeMode: ThemeMode.light, // Change it as you want
+            theme: getMainTheme(),
+            darkTheme: getMainDarkTheme(),
+            initialRoute: '/init',
+            initialBinding: AuthBinding(),
+            getPages: [
+              GetPage(
+                name: '/init',
+                page: () => AnimatedSplashScreen(
+                  animationDuration: Duration(milliseconds: 1000),
+                  splash: 'lib/images/splash.png',
+                  splashIconSize: 30.0.h,
+                  centered: true,
+                  backgroundColor: mainColor,
+                  nextScreen: App(),
+                  splashTransition: SplashTransition.fadeTransition,
+                  pageTransitionType: PageTransitionType.scale,
+                ),
               ),
-              routes: <String, WidgetBuilder>{
-                // '/': (BuildContext context) => App(),
-                '/test': (BuildContext context) => new TestModal(),
-              }
-              // getPages: [
-              //   GetPage(
-              //     name: '/signUp',
-              //     page: (BuildContext context) => SignUpScreen(),
-              //   ),
-              //   GetPage(
-              //     name: '/test',
-              //     page: () => TestModal(),
-              //   ),
-              // ],
+              GetPage(
+                name: '/',
+                page: () => App(),
               ),
+              GetPage(
+                  name: '/myPage',
+                  page: () => MyPage(),
+                  settings: RouteSettings(name: "myPage")),
+              GetPage(
+                name: '/login',
+                page: () => LoginScreen(),
+                transition: Transition.downToUp,
+              ),
+              GetPage(
+                name: '/signUp',
+                page: () => SignUpScreen(),
+                transition: Transition.rightToLeft,
+              ),
+            ],
+          ),
         );
       }),
     );
@@ -130,7 +149,6 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-
     pageController = PageController();
   }
 

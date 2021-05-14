@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import '../Login/loginScreen copy.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -38,7 +39,21 @@ class _HomeState extends State<Home> {
       // resizeToAvoidBottomInset: false,
       appBar: PrefferedAppBar(context),
       body: Container(
-        child: Center(child: Text("홈 화면")),
+        child: Column(
+          children: [
+            Center(
+              child: Text("홈 화면"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Get.to(
+                  PhoneSignInSection(),
+                );
+              },
+              child: Text("테스트 클릭"),
+            ),
+          ],
+        ),
       ),
     );
   }
