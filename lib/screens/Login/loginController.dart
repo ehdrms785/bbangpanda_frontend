@@ -2,17 +2,11 @@ import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SignUpController extends GetxController {
-  late final TextEditingController emailTextController;
+class LoginController extends GetxController {
+  late final TextEditingController idTextController;
   late final TextEditingController passwordTextController;
-  late final TextEditingController nameTextController;
-  late final TextEditingController phoneNumberTextController;
-  late final TextEditingController signCodeTextController;
   late final FocusScopeNode focusScopeNode;
-  late final FocusNode emailFocusNode;
   late final FocusNode pwFocusNode;
-  late final FocusNode nameFocusNode;
-  late final FocusNode phoneFocusNode;
   var isSignCodeClicked = false.obs;
   var loading = false.obs;
   var resendPossibleTime = 0;
@@ -21,31 +15,19 @@ class SignUpController extends GetxController {
   List<bool> isChecked = List.generate(2, (index) => false).obs;
   @override
   void onInit() {
-    emailTextController = TextEditingController();
-    passwordTextController = TextEditingController();
-    nameTextController = TextEditingController();
-    phoneNumberTextController = TextEditingController();
-    signCodeTextController = TextEditingController();
     focusScopeNode = FocusScopeNode();
-    emailFocusNode = FocusNode();
     pwFocusNode = FocusNode();
-    nameFocusNode = FocusNode();
-    phoneFocusNode = FocusNode();
+    idTextController = TextEditingController();
+    passwordTextController = TextEditingController();
     super.onInit();
   }
 
   @override
   void onClose() {
-    emailTextController.dispose();
-    passwordTextController.dispose();
-    nameTextController.dispose();
-    phoneNumberTextController.dispose();
-    signCodeTextController.dispose();
     focusScopeNode.dispose();
-    emailFocusNode.dispose();
     pwFocusNode.dispose();
-    nameFocusNode.dispose();
-    phoneFocusNode.dispose();
+    idTextController.dispose();
+    passwordTextController.dispose();
     super.onClose();
   }
 

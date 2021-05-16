@@ -120,6 +120,7 @@ class MySliverAppBar extends StatelessWidget {
     this.textTheme,
     this.shape,
     this.titleTextStyle,
+    this.isLeading = true,
   }) : super(key: key);
 
   final Widget? leading;
@@ -140,7 +141,7 @@ class MySliverAppBar extends StatelessWidget {
   final bool snap;
   final bool stretch;
   final TextStyle? titleTextStyle;
-
+  final bool isLeading;
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
@@ -159,7 +160,7 @@ class MySliverAppBar extends StatelessWidget {
       stretch: stretch,
       elevation: elevation,
       shadowColor: shadowColor,
-      leading: leading ?? defaultLeading(),
+      leading: isLeading ? leading ?? defaultLeading() : null,
       actions: actions,
       forceElevated: forceElevated,
       backgroundColor: backgroundColor,

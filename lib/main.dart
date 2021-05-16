@@ -7,8 +7,10 @@ import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBread/findBreadScreen.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
+import 'package:bbangnarae_frontend/screens/Login/loginController.dart';
 import 'package:bbangnarae_frontend/screens/Login/loginScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
+import 'package:bbangnarae_frontend/screens/SignUp/signUpController.dart';
 import 'package:bbangnarae_frontend/screens/SignUp/signUpScreen.dart';
 import 'package:bbangnarae_frontend/shared/auth/authBinding.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
@@ -95,11 +97,18 @@ class MyApp extends StatelessWidget {
                 name: '/login',
                 page: () => LoginScreen(),
                 transition: Transition.downToUp,
+                binding: BindingsBuilder(() {
+                  Get.put(LoginController());
+                  Get.lazyPut(() => SignUpController());
+                }),
               ),
               GetPage(
                 name: '/signUp',
                 page: () => SignUpScreen(),
-                transition: Transition.rightToLeft,
+                transition: Transition.downToUp,
+                binding: BindingsBuilder(() {
+                  Get.lazyPut(() => SignUpController());
+                }),
               ),
             ],
           ),
@@ -107,6 +116,11 @@ class MyApp extends StatelessWidget {
       }),
     );
   }
+}
+
+String getCurrentRoute() {
+  print("새로 실행하나?");
+  return Get.currentRoute;
 }
 
 class App extends StatelessWidget {
@@ -142,7 +156,7 @@ class _MainPageState extends State<MainPage> {
     Cart(),
     MyPage(),
   ];
-  final List<String> _pageNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "내주변빵집"];
+  final List<String> _pageNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "마이페이지"];
   late PageController pageController;
   int _selectedIndex = 0;
 

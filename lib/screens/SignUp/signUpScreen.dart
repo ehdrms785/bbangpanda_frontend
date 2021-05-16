@@ -1,10 +1,13 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
+import 'package:bbangnarae_frontend/screens/SignUp/signUpController.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:bbangnarae_frontend/shared/dialog/policy_dialog.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+import 'package:bbangnarae_frontend/shared/sharedClass.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedValidator.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
+import 'package:bbangnarae_frontend/theme/buttonTheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,51 +30,38 @@ final String createUserMutation = """
   }
 """;
 
-class SignUpScreen extends StatefulWidget {
-  @override
-  _SignUpScreenState createState() => _SignUpScreenState();
-}
-
-class _SignUpScreenState extends State<SignUpScreen> {
-  var username, email, phoneNumber, password, token;
-  bool _isInAsyncCall = false;
+class SignUpScreen extends StatelessWidget {
   final formKey = GlobalKey<FormState>();
-  FirebaseAuth _auth = FirebaseAuth.instance..setLanguageCode('ko');
-  String _verificationId = '';
-  final emailTextController = TextEditingController();
-  final passwordTextController = TextEditingController();
-  final nameTextController = TextEditingController();
-  final phoneNumberTextController = TextEditingController();
-  final signCodeTextController = TextEditingController();
-  final ValueNotifier<bool> _isSignCodeClicked = ValueNotifier<bool>(false);
-  late int resendPossibleTime;
-  var _loading = false.obs;
+  final FirebaseAuth _auth = FirebaseAuth.instance..setLanguageCode('ko');
+  final List<String> termsList = ['이용약관에 동의합니다.', '개인정보 수집 및 이용에 동의합니다.'];
+  final SignUpController signUpCtr = Get.find();
+
   @override
   Widget build(BuildContext context) {
-    print("회원가입 페이지 빌드");
-
     return Scaffold(
-      body: ModalProgressScreen(
-        isAsyncCall: _isInAsyncCall,
-        child: CustomScrollView(
-          slivers: [
-            MySliverAppBar(
-              title: "회원가입",
-              actions: [backToFirstRouteButton],
-            ),
-            SliverToBoxAdapter(
-              child: FormContainer(
-                child: Column(
-                  children: [
-                    MyForm(),
-                    MakeGap(),
-                    TermsList(),
-                    SignUpButton(),
-                  ],
+      body: Obx(
+        () => ModalProgressScreen(
+          isAsyncCall: signUpCtr.isInAsyncCall.value,
+          child: CustomScrollView(
+            slivers: [
+              MySliverAppBar(
+                title: "회원가입",
+                actions: [backToFirstRouteButton],
+              ),
+              SliverToBoxAdapter(
+                child: FormContainer(
+                  child: Column(
+                    children: [
+                      MyForm(),
+                      MakeGap(),
+                      TermsList(context),
+                      SignUpButton(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -80,12 +70,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 // ==============
 /////////// Functions
   ///
-  late final ConfirmationResult confirmationResult;
+
   void verifyPhoneNumber(
     String phoneNumber,
   ) async {
     if (phoneValidator(phoneNumber) != null) {
-      Get.snackbar("알림", '휴대폰번호를 올바르게 입력 해 주세요.');
+      showSnackBar(message: "휴대폰번호를 올바르게 입력 해 주세요.");
       return;
     }
     print("클릭됨");
@@ -95,7 +85,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       timeout: const Duration(seconds: 10),
       verificationCompleted: (PhoneAuthCredential credential) async {
         // ANDROID ONLY?
-        
         print("Recapcha 없이 인증 (안드로이드 Only)");
       },
       verificationFailed: (FirebaseAuthException err) {
@@ -107,34 +96,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
       },
       codeSent: (String verificationId, int? resendToken) async {
         // SMS Code 받아서
-        print("헬로");
-        _verificationId = verificationId;
-        Get.snackbar("알림", "휴대폰으로 인증코드가 전송되었습니다.");
+        signUpCtr.verificationId = verificationId;
+        signUpCtr.loadingStateChange(false);
+        showSnackBar(message: "휴대폰으로 인증코드가 전송되었습니다.");
       },
       codeAutoRetrievalTimeout: (verificationId) {
         // Auto-resolution timed out...
-         _verificationId = verificationId;
+        signUpCtr.verificationId = verificationId;
         print("4번");
       },
     );
+
+    // signUpCtr.loadingStateChange(false);
   }
 
   Future<void> _signUpWithServer() async {
     return Future(() async {
       if (this.formKey.currentState!.validate()) {
-        setState(() {
-          _isInAsyncCall = true;
-        });
-
-        if (_auth.currentUser != null) {
-          Get.snackbar("알림", '이미 로그인 되어 있습니다.');
-          return;
-        }
-
+        signUpCtr.isInAsyncCallStateChange(true);
         try {
+          if (signUpCtr.isChecked.contains(false)) {
+            showSnackBar(message: "이용약관을 동의 해 주세요.");
+            return;
+          }
+          if (signUpCtr.isSignCodeClicked.value == false) {
+            showSnackBar(message: "휴대폰으로 인증번호를 보내 주세요.");
+            return;
+          }
+          if (_auth.currentUser != null) {
+            showSnackBar(message: "이미 로그인 되어 있습니다.");
+            return;
+          }
           final PhoneAuthCredential credential = PhoneAuthProvider.credential(
-            verificationId: _verificationId,
-            smsCode: signCodeTextController.text,
+            verificationId: signUpCtr.verificationId,
+            smsCode: signUpCtr.signCodeTextController.text,
           );
           await _auth.signInWithCredential(credential);
 
@@ -144,37 +139,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
             print("정상 작동했나? $ok");
             await _auth.signOut();
             if (ok) {
-              Get.back(result: emailTextController.text);
+              Get.back(result: signUpCtr.emailTextController.text);
               return;
             }
           }
         } on FirebaseAuthException catch (e) {
           print("\n\n에러발생 (아마 코드오류??)");
           print(e.code);
-            if(!Get.find<AuthController>().isInternetOn) {
-           showError(title: "XE00000", message: "인터넷 연결을 확인 해 주세요.");
-           return;
-        }
-        if(e.code == "invalid-verification-id") {
-                      Get.snackbar("알림", "인증번호를 재 전송 해 주세요.");
+          if (!Get.find<AuthController>().isInternetOn) {
+            showError(title: "XE00000", message: "인터넷 연결을 확인 해 주세요.");
             return;
-        }
+          }
+          if (e.code == "invalid-verification-id") {
+            showSnackBar(message: "인증번호를 재 전송 해 주세요.");
+            return;
+          }
           if (e.code == "invalid-verification-code") {
-            Get.snackbar("알림", "올바르지 않은 인증번호 입니다.");
+            showSnackBar(message: "올바르지 않은 인증번호 입니다.");
             return;
           }
           return;
         } finally {
-          setState(() {
-            _isInAsyncCall = false;
-          });
+          signUpCtr.isInAsyncCallStateChange(false);
         }
       } else {
-        String? snackBarMessage = signUpTotalValidator(email: emailTextController.text, password: passwordTextController.text name: nameTextController.text, phonenumber: phoneNumberTextController.text, signCode: signCodeTextController.text);
-        if(snackBarMessage != null) {
-         showSnackBar(title: "회원가입 실패", message: snackBarMessage);
+        String? snackBarMessage = signUpTotalValidator(
+            email: signUpCtr.emailTextController.text,
+            password: signUpCtr.passwordTextController.text,
+            name: signUpCtr.nameTextController.text,
+            phonenumber: signUpCtr.phoneNumberTextController.text,
+            signCode: signUpCtr.signCodeTextController.text);
+        if (snackBarMessage != null) {
+          showSnackBar(title: "회원가입 실패", message: snackBarMessage);
         }
-
       }
     });
   }
@@ -186,11 +183,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final result = await client.mutate(MutationOptions(
         document: gql(createUserMutation),
         variables: {
-          'username': nameTextController.text,
-          'email': emailTextController.text,
-          // 'address': address ?? '',
-          'phonenumber': phoneNumberTextController.text,
-          'password': passwordTextController.text,
+          'username': signUpCtr.nameTextController.text,
+          'email': signUpCtr.emailTextController.text,
+          'phonenumber': signUpCtr.phoneNumberTextController.text,
+          'password': signUpCtr.passwordTextController.text,
           'uid': uid
         },
       ));
@@ -199,7 +195,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         print(result.exception);
         var internet = await internetCheck();
         print('interNet 상태 $internet');
-        if(!await internetCheck()) {
+        if (!await internetCheck()) {
           showError(title: "XE00000", message: "인터넷 연결을 확인 해 주세요.");
         }
         showError(
@@ -223,9 +219,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
         // Get.offAll(Home());
         return true;
       } else {
-        var _errorBox = createUserResult['error'].split('\n');
+        final _errorBox = createUserResult['error'].split('\n');
+        final ErrorCode error =
+            ErrorCode(errorCode: _errorBox[0], errorMessage: _errorBox[1]);
         print("계정 생성 실패");
-        showError(title: _errorBox[0], message: _errorBox[1]);
+        print(error.errorCode);
+        switch (error.errorCode) {
+          case 'Error Code X00021-1':
+            print("헬로");
+            signUpCtr.focusScopeNode.requestFocus(signUpCtr.emailFocusNode);
+            break;
+          case 'Error Code X00021-2':
+            signUpCtr.focusScopeNode.requestFocus(signUpCtr.nameFocusNode);
+            break;
+          case 'Error Code X00021-3':
+            signUpCtr.focusScopeNode.requestFocus(signUpCtr.phoneFocusNode);
+            break;
+        }
+        showError(title: error.errorCode, message: error.errorMessage);
         return false;
       }
     } catch (e) {
@@ -238,28 +249,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
 /////////// Widgets
   ///
   Widget SignUpButton() {
-    return SizedBox(
-      width: 80.0.w,
-      child: ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-        ),
-        onPressed: () async {
-          setState(() {
-            _isInAsyncCall = true;
-          });
-          print("시작");
-          await _signUpWithServer();
-          print("끝");
-          setState(() {
-            _isInAsyncCall = false;
-          });
-        },
-        child: Text(
-          '회원가입',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14.0.sp,
+    return Container(
+      margin: EdgeInsets.only(top: 2.0.h),
+      child: SizedBox(
+        width: 80.0.w,
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+          ),
+          onPressed: () async {
+            await _signUpWithServer();
+          },
+          child: Text(
+            '회원가입',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14.0.sp,
+            ),
           ),
         ),
       ),
@@ -270,42 +276,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
         key: this.formKey, // 나중에 한꺼번에 폼필드 데이터 Save할때 사용
         child: TextFieldList(),
       );
-  List<bool> isChecked = List.generate(2, (index) => false).obs;
-  List<String> termsList = ['이용약관에 동의합니다.', '개인정보 수집 및 이용에 동의합니다.'];
-  Widget TermsList() => Container(
+  Widget TermsList(BuildContext context) => Container(
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade400),
         ),
         child: Column(
           children: [
-            Obx(() => Padding(
+            Obx(
+              () => Padding(
                 padding: const EdgeInsets.all(0),
                 child: Row(
                   children: [
                     Checkbox(
                       onChanged: (val) {
-                        for (int i = 0; i < isChecked.length; i++) {
-                          isChecked[i] = val!;
+                        for (int i = 0; i < signUpCtr.isChecked.length; i++) {
+                          signUpCtr.isChecked[i] = val!;
                         }
                       },
-                      value: !isChecked.contains(false),
+                      value: !signUpCtr.isChecked.contains(false),
                     ),
                     Text("약관 전체동의"),
                   ],
-                ))),
-            // Obx(
-            //   () => CheckboxListTile(
-            //     title: Text("약관 전체동의"),
-            //     value: !isChecked.contains(false),
-            //     contentPadding: EdgeInsets.zero,
-            //     controlAffinity: ListTileControlAffinity.leading,
-            //     onChanged: (val) {
-            //       for (int i = 0; i < isChecked.length; i++) {
-            //         isChecked[i] = val!;
-            //       }
-            //     },
-            //   ),
-            // ),
+                ),
+              ),
+            ),
             Divider(
               indent: 0.0,
               thickness: 1.0,
@@ -319,9 +313,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         Checkbox(
                             onChanged: (val) {
-                              isChecked[0] = val!;
+                              signUpCtr.isChecked[0] = val!;
                             },
-                            value: isChecked[0]),
+                            value: signUpCtr.isChecked[0]),
                         Text(termsList[0]),
                         TextButton(
                           onPressed: () {
@@ -345,9 +339,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         Checkbox(
                             onChanged: (val) {
-                              isChecked[1] = val!;
+                              signUpCtr.isChecked[1] = val!;
                             },
-                            value: isChecked[1]),
+                            value: signUpCtr.isChecked[1]),
                         Text(termsList[1]),
                         TextButton(
                           onPressed: () {
@@ -394,110 +388,102 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       );
 
-  Widget TextFieldList() => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RenderTextFormField(
-            label: '이메일 입력',
-            controller: emailTextController,
-            validator: (val) {
-              return emailValidator(val);
-            },
-            autoFocus: true,
-            useIcon: true,
-          ),
-          RenderTextFormField(
-            label: '비밀번호 입력',
-            controller: passwordTextController,
-            isSecure: true,
-            validator: (val) {
-              return passwordValidator(val);
-            },
-            useIcon: true,
-          ),
-          RenderTextFormField(
-            label: '이름 입력',
-            controller: nameTextController,
-            validator: (val) {
-              return nameValidator(val);
-            },
-          ),
-          RenderTextFormField(
-            label: '휴대폰 번호 입력',
-            controller: phoneNumberTextController,
-            validator: (val) {
-              return phoneValidator(val);
-            },
-            additional: ValueListenableBuilder(
-              valueListenable: _isSignCodeClicked,
-              builder: (context, bool isCliked, _) => Container(
+  Widget TextFieldList() => FocusScope(
+        node: signUpCtr.focusScopeNode,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RenderTextFormField(
+              label: '이메일 입력',
+              controller: signUpCtr.emailTextController,
+              validator: (val) {
+                return emailValidator(val);
+              },
+              focusNode: signUpCtr.emailFocusNode,
+              autoFocus: true,
+              useIcon: true,
+            ),
+            RenderTextFormField(
+                label: '비밀번호 입력',
+                controller: signUpCtr.passwordTextController,
+                validator: (val) {
+                  return passwordValidator(val);
+                },
+                isSecure: true,
+                useIcon: true,
+                focusNode: signUpCtr.pwFocusNode),
+            RenderTextFormField(
+                label: '이름 입력',
+                controller: signUpCtr.nameTextController,
+                validator: (val) {
+                  return nameValidator(val);
+                },
+                focusNode: signUpCtr.nameFocusNode),
+            RenderTextFormField(
+              label: '휴대폰 번호 입력',
+              controller: signUpCtr.phoneNumberTextController,
+              validator: (val) {
+                return phoneValidator(val);
+              },
+              focusNode: signUpCtr.phoneFocusNode,
+              additional: Container(
                 width: 20.0.w,
                 height: 5.0.h,
                 margin: EdgeInsets.only(left: 3.0.w),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    _loading.value = true;
-                    await sendSignCode(isCliked);
-                    _loading.value = false;
-                    // });
-                  },
-                  style: ButtonStyle(padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero)),
-                  child:  Obx( () { return _loading.value == true ?Center(child: CupertinoActivityIndicator()) :Center(
-                      child: Text(isCliked? "재전송" : "인증번호", style: TextStyle(fontSize: 12.0.sp)),
-                    ); }
-                 
-                  
-                
-                  
+                child: Obx(
+                  () => ElevatedButton(
+                    onPressed: signUpCtr.loading.value
+                        ? null
+                        : () async {
+                            if (signUpCtr.signCodeResendTimeCheck() > 0) return;
+                            signUpCtr.loadingStateChange(true);
+                            await sendSignCode();
+                          },
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          EdgeInsets.zero),
+                      backgroundColor: elevatedButtonBackground,
+                    ),
+                    child: signUpCtr.loading.value
+                        ? Center(child: CupertinoActivityIndicator())
+                        : Center(
+                            child: Text(
+                                signUpCtr.isSignCodeClicked.value
+                                    ? "재전송"
+                                    : "인증번호",
+                                style: TextStyle(fontSize: 12.0.sp)),
+                          ),
                   ),
-                
                 ),
               ),
             ),
-          ),
-          RenderTextFormField(
-            label: '인증번호 6자리',
-            controller: signCodeTextController,
-            maxLength: 6,
-            validator: (val) {
-              return signCodeValidator(val);
-            },
-          ),
-        ],
+            RenderTextFormField(
+              label: '인증번호 6자리',
+              controller: signUpCtr.signCodeTextController,
+              maxLength: 6,
+              validator: (val) {
+                return signCodeValidator(val);
+              },
+            ),
+          ],
+        ),
       );
-  Future<void> sendSignCode(bool isCliked) async {
+  Future<void> sendSignCode() async {
     return Future(() async {
-      if (phoneValidator(phoneNumberTextController.text) != null) {
-        Get.snackbar("알림", "휴대폰 번호를 정확히 입력 해 주세요");
+      if (phoneValidator(signUpCtr.phoneNumberTextController.text) != null) {
+        showSnackBar(message: "휴대폰 번호를 정확히 입력 해 주세요");
+
         return;
       }
-      if (isCliked) {
+      final isSignCodeClicked = signUpCtr.isSignCodeClicked.value;
+      if (isSignCodeClicked) {
         print("\n\n다시 클릭했을 때");
-        int _remainSeconds = ((resendPossibleTime -
-                    (new DateTime.now().millisecondsSinceEpoch)) /
-                1000)
-            .round();
-        print('$_remainSeconds 초 !');
-        if (_remainSeconds > 0) {
-          Get.snackbar(
-              "알림", '인증번호 재발송은 자주 할 수 없습니다.\n$_remainSeconds 초 후에 시도 해 주세요.');
-          return;
-        } else {
-          verifyPhoneNumber(phoneNumberTextController.text);
-          resendPossibleTime =
-              (new DateTime.now().millisecondsSinceEpoch) + 30000;
-          print('resendTime: $resendPossibleTime');
-        }
+        if (signUpCtr.signCodeResendTimeCheck() > 0) return;
       } else {
-        print("\n\n클릭 처음 했을 때");
-        verifyPhoneNumber(phoneNumberTextController.text);
-        print("기다리는지 확인");
-
-        resendPossibleTime =
-            (new DateTime.now().millisecondsSinceEpoch) + 30000;
-
-        _isSignCodeClicked.value = true;
+        signUpCtr.isSignCodeClicked.value = true;
       }
+      verifyPhoneNumber(signUpCtr.phoneNumberTextController.text);
+      signUpCtr.setResendPossibleTime();
     });
   }
 }

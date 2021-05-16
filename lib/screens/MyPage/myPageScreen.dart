@@ -1,10 +1,8 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
-import 'package:bbangnarae_frontend/screens/Login/loginScreen.dart';
-import 'package:bbangnarae_frontend/screens/MyPage/query.dart';
-import 'package:bbangnarae_frontend/screens/SignUp/signUpScreen.dart';
-import 'package:bbangnarae_frontend/shared/publicValues.dart';
-import 'package:bbangnarae_frontend/shared/query.dart';
+import 'package:bbangnarae_frontend/shared/auth/authController.dart';
+import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
+import 'package:bbangnarae_frontend/theme/buttonTheme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -67,44 +65,112 @@ class _MyPageState extends State<MyPage> {
 // });
 
     return Scaffold(
-      appBar: PrefferedAppBar(context),
-      body: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-
-        builder: (context, AsyncSnapshot<User?> snapshot) {
-          if (!snapshot.hasData) {
-            // 로그인 하지 않은 기본 화면 제공
-            // return
-            // Queries.loginQuery
-          }
-          return SingleChildScrollView(
-            child: Container(
-              height: 90.0.h,
-              color: Colors.red.shade100,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(child: Text("${snapshot.data?.phoneNumber}님 안녕하세요")),
-                  TextButton(
-                    onPressed: () {
-                      Get.toNamed('/login');
-                    },
-                    child: Text("로그인"),
-                  ),
-                  TextButton(
-                      onPressed: () {
-                        FirebaseAuth.instance.signOut();
-                      },
-                      child: Text("로그아웃"))
-                ],
-              ),
+      body: CustomScrollView(
+        slivers: [
+          MySliverAppBar(title: "마이페이지", isLeading: false),
+          SliverFillRemaining(
+            child: Obx(
+              () {
+                if (Get.find<AuthController>().isLoggedIn.value == false) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 2.0.w, vertical: 1.0.h),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 10.0.h,
+                          child: Row(
+                            children: [
+                              Container(
+                                // color: Colors.blue.shade400,
+                                width: 48.0.w,
+                                height: double.infinity,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "빵판다 회원이 되시면",
+                                      style: TextStyle(
+                                        color: Colors.grey.shade500,
+                                        fontSize: 12.5.sp,
+                                      ),
+                                    ),
+                                    SizedBox(height: 1.0.h),
+                                    Text(
+                                      "다양한 혜택이 기다려요!",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14.0.sp,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                // color: Colors.grey,
+                                width: 48.0.w,
+                                height: double.infinity,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Get.toNamed('/login');
+                                      },
+                                      child: Text("로그인"),
+                                      style: textButtonRoundedBorder,
+                                    ),
+                                    SizedBox(width: 2.5.w),
+                                    TextButton(
+                                      onPressed: () {
+                                        Get.toNamed('/signUp');
+                                      },
+                                      child: Text("회원가입"),
+                                      style: textButtonRoundedBorder,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // Get.find<AuthController>().isLoggedIn.value = true;
+                          },
+                          child: Text("로그인"),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        child: Center(child: Text("로그인 해야함")),
+                      ),
+                      TextButton(
+                        onPressed: logout,
+                        child: Text("로그아웃"),
+                      ),
+                    ],
+                  );
+                }
+                return Container();
+              },
             ),
-          );
-        },
-        // },
+          ),
+        ],
       ),
     );
+
+    // },
   }
 
   Future<bool> tokenCheck() {

@@ -24,7 +24,7 @@ void showError({
 }
 
 void showSnackBar({
-  required String title,
+  String title = "알림",
   required String message,
 }) {
   Get.snackbar(
