@@ -7,17 +7,17 @@ import 'package:hive/hive.dart';
 class AuthController extends GetxController {
   late final StreamSubscription<ConnectivityResult> internetSubscription;
 
-  late RxBool isLoggedIn;
+  late RxBool isLoggedIn = true.obs;
   late bool isInternetOn;
   @override
   void onInit() async {
-    if (Hive.box('auth').get('token') != null &&
-        Hive.box('auth').get('refreshToken') != null) {
+    if (Hive.box('auth').get('token') != '' &&
+        Hive.box('auth').get('refreshToken') != '') {
       print("토큰 들어있다");
-      isLoggedIn = (await tokenCheck()).obs;
+      isLoggedIn((await tokenCheck()));
     } else {
       print("토큰 없다");
-      isLoggedIn = false.obs;
+      isLoggedIn.value = false;
     }
     print(isLoggedIn);
     var connectivityResult = await (Connectivity().checkConnectivity());

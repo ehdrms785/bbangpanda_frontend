@@ -1,4 +1,4 @@
-import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/material.dart';
 

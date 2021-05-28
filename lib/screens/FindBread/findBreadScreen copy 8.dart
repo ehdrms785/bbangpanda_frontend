@@ -398,6 +398,8 @@ class _BakeryListTabState extends State<BakeryListTab>
         ),
       );
   Widget BakeryList() {
+    // print('hasMore 업데이트 안되나?${controller.hasMore}');
+
     return MixinBuilder<BakeryFilterController>(
       id: "bakeryList",
       builder: (controller) {
@@ -409,9 +411,12 @@ class _BakeryListTabState extends State<BakeryListTab>
           key: ValueKey("BLKey"), // BakeryList Key
           delegate: SliverChildBuilderDelegate(
             (context, index) {
+              print("아이템 빌더 : 인덱스 $index");
+              print("length :${controller.bakeriesResult.length}");
+              print("hasMore :${controller.hasMore.value}");
               if (index == controller.bakeriesResult.length) {
                 print("마지막 인덱스");
-                // 더 이상 아이템이 없을 때
+                // 더 이상 아이템이 업을 때
                 if (controller.hasMore.value == false) {
                   print("마지막 인덱스 들어옴");
                   return Divider(
@@ -431,111 +436,98 @@ class _BakeryListTabState extends State<BakeryListTab>
               }
               return Container(
                 key: ValueKey(index),
+                // color: Colors
                 height: 35.0.h,
-                child: Builder(
-                  builder: (context) {
-                    final bakeryResultList = controller.bakeriesResult[index];
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          bakeryResultList['name'],
-                          style: TextStyle(
-                              fontSize: 15.0.sp, fontWeight: FontWeight.w800),
-                        ),
-                        SizedBox(
-                          height: 1.0.h,
-                        ),
-                        Builder(
-                          builder: (context) {
-                            final List<dynamic> result =
-                                bakeryResultList['bakeryFeatures']
-                                    .where((e) => int.parse(e['id']) > 2)
-                                    .toList();
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.bakeriesResult[index]!['name'],
+                      style: TextStyle(
+                          fontSize: 15.0.sp, fontWeight: FontWeight.w800),
+                    ),
+                    SizedBox(
+                      height: 1.0.h,
+                    ),
+                    Builder(
+                      builder: (context) {
+                        final List<dynamic> result = controller
+                            .bakeriesResult[index]!['bakeryFeatures']
+                            .where((e) => int.parse(e['id']) > 2)
+                            .toList();
+                        print("테스트값 결과");
 
-                            return Row(children: [
-                              ...result.map((element) => Text(
-                                  '#${element['filter']} ',
-                                  style: TextStyle(
-                                      fontSize: 10.0.sp,
-                                      color: Colors.grey.shade400,
-                                      fontWeight: FontWeight.w300))),
-                            ]);
-                          },
-                        ),
-                        SizedBox(
-                          height: 1.0.h,
-                        ),
-                        Visibility(
-                          visible: bakeryResultList['description'] == null
-                              ? false
-                              : true,
-                          child: Column(
-                            children: [
-                              Text(
-                                bakeryResultList['description'] ?? '',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(
-                                height: 1.0.h,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Builder(
-                          builder: (context) {
-                            final List<dynamic> result =
-                                bakeryResultList['signitureBreads']
-                                    .map((value) => value['name'])
-                                    .toList();
+                        print(result);
+                        return Row(children: [
+                          ...result.map((element) => Text(
+                              '#${element['filter']} ',
+                              style: TextStyle(
+                                  fontSize: 10.0.sp,
+                                  color: Colors.grey.shade400,
+                                  fontWeight: FontWeight.w300))),
+                        ]);
+                      },
+                    ),
+                    SizedBox(
+                      height: 1.0.h,
+                    ),
+                    Text(
+                      controller.bakeriesResult[index]!['description'] ??
+                          '소개 없음',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(
+                      height: 1.0.h,
+                    ),
+                    Builder(
+                      builder: (context) {
+                        final List<dynamic> result = controller
+                            .bakeriesResult[index]!['signitureBreads']
+                            .map((value) => value['name'])
+                            .toList();
 
-                            return Visibility(
-                              visible: result.length != 0,
-                              child: Row(children: [
-                                Text('대표빵: '),
-                                ...result.map((element) => Text('$element ',
-                                    style: TextStyle(
-                                        fontSize: 10.0.sp,
-                                        color: Colors.grey.shade400,
-                                        fontWeight: FontWeight.w300))),
-                              ]),
-                            );
-                          },
-                        ),
-                        Container(
-                          width: double.infinity,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 30.0.w,
-                                height: 20.0.h,
-                                child: Image.asset(
-                                  'assets/breadImage.jpg',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Container(
-                                width: 30.0.w,
-                                height: 20.0.h,
-                                child: Image.asset(
-                                  'assets/breadImage.jpg',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Container(
-                                width: 30.0.w,
-                                height: 20.0.h,
-                                child: Image.asset(
-                                  'assets/breadImage.jpg',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ],
+                        return Row(children: [
+                          Text('대표빵: '),
+                          ...result.map((element) => Text('#$element ',
+                              style: TextStyle(
+                                  fontSize: 10.0.sp,
+                                  color: Colors.grey.shade400,
+                                  fontWeight: FontWeight.w300))),
+                        ]);
+                      },
+                    ),
+                    Container(
+                      width: double.infinity,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 30.0.w,
+                            height: 20.0.h,
+                            child: Image.asset(
+                              'assets/breadImage.jpg',
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                          Container(
+                            width: 30.0.w,
+                            height: 20.0.h,
+                            child: Image.asset(
+                              'assets/breadImage.jpg',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Container(
+                            width: 30.0.w,
+                            height: 20.0.h,
+                            child: Image.asset(
+                              'assets/breadImage.jpg',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

@@ -1,169 +1,70 @@
-import 'package:bbangnarae_frontend/graphqlConfig.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/myPageController.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/settingScreen/settingScreen.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:bbangnarae_frontend/theme/buttonTheme.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:hive/hive.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-final String EditProfileMutation = """
-  mutation editProfile(\$username: String, \$phonenumber: String, \$address: String) {
-    editProfile(username: \$username, phonenumber: \$phonenumber, address: \$address) {
-        ok
-        error
-     }
-  }
-""";
-final String ReissueTokenMutation = """
-  mutation reissueToken(\$refreshToken: String!) {
-    reissueToken(refreshToken: \$refreshToken) {
-          ok
-          refreshToken
-          error
-     }
-  }
-""";
-late final QueryOptions options = QueryOptions(
-  document: gql(EditProfileMutation),
-  variables: {'username': '다로'},
-  fetchPolicy: FetchPolicy.cacheFirst,
-  cacheRereadPolicy: CacheRereadPolicy.mergeOptimistic,
+// late final QueryOptions options = QueryOptions(
+//   document: gql(EditProfileMutation),
+//   variables: {'username': '다로'},
+//   fetchPolicy: FetchPolicy.cacheFirst,
+//   cacheRereadPolicy: CacheRereadPolicy.mergeOptimistic,
 
-  // pollInterval: Duration(seconds: 5),
-);
+//   // pollInterval: Duration(seconds: 5),
+// );
 
-class MyPage extends StatefulWidget {
-  @override
-  _MyPageState createState() => _MyPageState();
-}
-
-class _MyPageState extends State<MyPage> {
-  // final _auth = FirebaseAuth.instance;
-
-  // @override
-  // void initState() {
-  //   _auth.userChanges().listen((User? user) {
-  //     print("유저변경 체크중");
-  //     print(user);
-  //   });
-  //   super.initState();
-  // }
-
+class MyPageScreen extends StatelessWidget {
+  late final MypageController myPageCtr = Get.find();
   @override
   Widget build(BuildContext context) {
-//     FirebaseAuth.instance.onAuthStateChanged(function(user) {
-//   if (user) {
-//     // User is signed in.
-//   } else {
-//     // No user is signed in.
-//   }
-// });
-
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           MySliverAppBar(title: "마이페이지", isLeading: false),
           SliverFillRemaining(
-            child: Obx(
-              () {
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.0.w, vertical: 2.0.h),
+              child: Obx(() {
                 if (Get.find<AuthController>().isLoggedIn.value == false) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 2.0.w, vertical: 1.0.h),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          height: 10.0.h,
-                          child: Row(
-                            children: [
-                              Container(
-                                // color: Colors.blue.shade400,
-                                width: 48.0.w,
-                                height: double.infinity,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "빵판다 회원이 되시면",
-                                      style: TextStyle(
-                                        color: Colors.grey.shade500,
-                                        fontSize: 12.5.sp,
-                                      ),
-                                    ),
-                                    SizedBox(height: 1.0.h),
-                                    Text(
-                                      "다양한 혜택이 기다려요!",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14.0.sp,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                // color: Colors.grey,
-                                width: 48.0.w,
-                                height: double.infinity,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Get.toNamed('/login');
-                                      },
-                                      child: Text("로그인"),
-                                      style: textButtonRoundedBorder,
-                                    ),
-                                    SizedBox(width: 2.5.w),
-                                    TextButton(
-                                      onPressed: () {
-                                        Get.toNamed('/signUp');
-                                      },
-                                      child: Text("회원가입"),
-                                      style: textButtonRoundedBorder,
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Get.find<AuthController>().isLoggedIn.value = true;
-                          },
-                          child: Text("로그인"),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
                   return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        child: Center(child: Text("로그인 해야함")),
-                      ),
-                      TextButton(
-                        onPressed: logout,
-                        child: Text("로그아웃"),
-                      ),
+                      NotLoginedHeader(),
+                      Divider(),
+                      InformationSection(),
                     ],
                   );
+                } else {
+                  return Obx(() {
+                    if (myPageCtr.isLoading.value == true) {
+                      return Center(
+                        child: CupertinoActivityIndicator(),
+                      );
+                    }
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LoginHeader(),
+                        InformationSection(),
+                        TextButton(
+                          onPressed: logout,
+                          child: Text("로그아웃"),
+                        ),
+                      ],
+                    );
+                  });
                 }
-                return Container();
-              },
+              }),
             ),
           ),
         ],
@@ -173,59 +74,177 @@ class _MyPageState extends State<MyPage> {
     // },
   }
 
-  Future<bool> tokenCheck() {
-    return Future(() async {
-      // print('expiredTime:${Hive.box('auth').get('expiredTime')}');
-      // Node 서버가 Flutter 클라이언트 서버 200초 느리다. 이유는 모르겠지만
-      // 그래서 200초 마이너스
-      var nowTime =
-          ((DateTime.now().millisecondsSinceEpoch) / 1000).floor() - 200;
+  Widget InformationSection() {
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: 2.0.h),
+          child: Text(
+            "정보",
+            style: TextStyle(
+              fontSize: 15.0.sp,
+            ),
+          ),
+        ),
+        ListTile(
+          leading: Icon(Icons.sticky_note_2_outlined),
+          minLeadingWidth: double.minPositive,
+          onTap: () {
+            print("tab");
+          },
+          title: Text("공지사항"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        ListTile(
+          leading: Icon(Icons.headset_mic_outlined),
+          minLeadingWidth: double.minPositive,
+          onTap: () {
+            print("tab");
+          },
+          title: Text("고객센터"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        ListTile(
+          leading: Icon(Icons.question_answer),
+          minLeadingWidth: double.minPositive,
+          onTap: () {
+            print("tab");
+          },
+          title: Text("문의 · 건의하기"),
+          contentPadding: EdgeInsets.zero,
+        ),
+      ],
+    );
+  }
 
-      // Refresh Token Expired 체크 (604800 1주일)
-      if (nowTime + 600 > Hive.box('auth').get('customTokenExpired')) {
-        var result = await client.mutate(
-          MutationOptions(document: gql(ReissueTokenMutation), variables: {
-            'refreshToken': Hive.box('auth').get('refreshToken')
-          }),
-        );
-        print(result);
-        if (result.data != null) {
-          var reissueTokenResult = result.data?['reissueToken'];
-          // print(ok);
-          try {
-            if (reissueTokenResult['ok']) {
-              final newCustomToken =
-                  await FirebaseAuth.instance.currentUser?.getIdToken(true);
-              await Hive.box('auth').putAll({
-                'token': newCustomToken,
-                'customTokenExpired':
-                    (DateTime.now().millisecondsSinceEpoch / 1000).floor(),
-              });
-              GraphQLConfiguration.setToken(Hive.box('auth').get('token'));
-              String? refToken = reissueTokenResult['refreshToken'];
-              if (refToken != null) {
-                print("RefToken 커몬");
-                await Hive.box('auth').putAll(
-                  {
-                    'refreshToken': refToken,
-                    'refreshTokenExpired':
-                        reissueTokenResult['refreshTokenExpired']
+  Widget NotLoginedHeader() {
+    return Container(
+      height: 10.0.h,
+      child: Row(
+        children: [
+          Container(
+            // color: Colors.blue.shade400,
+            width: 47.0.w,
+            height: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: Text(
+                    "빵판다 회원이 되시면",
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 12.5.sp,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 1.0.h),
+                Text(
+                  "다양한 혜택이 기다려요!",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.0.sp,
+                  ),
+                )
+              ],
+            ),
+          ),
+          Container(
+            // color: Colors.grey,
+            width: 45.0.w,
+            height: double.infinity,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Get.toNamed('/login');
                   },
-                );
-              }
-              return true;
-            } else {
-              return false;
-              // 로그아웃 시키고 재 인증 받도록 !
-            }
-          } catch (err) {
-            print(err);
-            return false;
-          }
-        }
-      }
-      return true;
-    });
+                  child: Text("로그인"),
+                  style: textButtonRoundedBorder,
+                ),
+                // SizedBox(width: 2.5.w),
+                TextButton(
+                  onPressed: () {
+                    Get.toNamed('/signUp');
+                  },
+                  child: Text("회원가입"),
+                  style: textButtonRoundedBorder,
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget LoginHeader() {
+    return Container(
+      height: 10.0.h,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            // color: Colors.blue.shade400,
+            width: 60.0.w,
+            height: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  myPageCtr.userResult['username'] ?? "빵판다인",
+                  style: TextStyle(
+                    fontSize: 20.0.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 1.0.h),
+                Text(
+                  "등급 혜택보기 구현 예정",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.0.sp,
+                  ),
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                width: 13.0.w,
+                padding: EdgeInsets.all(2.0.w),
+                decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(25)),
+                margin: EdgeInsets.only(right: 5.0.w),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: IconButton(
+                    icon: Icon(Icons.settings),
+                    onPressed: () {
+                      Get.to(SettingScreen(),
+                          transition: Transition.rightToLeft);
+                    },
+                    constraints: BoxConstraints(),
+                    padding: EdgeInsets.zero,
+                    splashColor: Colors.blue.shade200,
+                    splashRadius: 7.0.w,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 

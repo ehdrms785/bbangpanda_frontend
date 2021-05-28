@@ -1,5 +1,5 @@
 import 'package:bbangnarae_frontend/model/filterListModel.dart';
-import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';

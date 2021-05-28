@@ -1,4 +1,5 @@
-import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
+import 'package:bbangnarae_frontend/theme/textFieldTheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -65,7 +66,7 @@ PreferredSizeWidget PrefferedAppBar(BuildContext context) {
       centerTitle: true,
       // backgroundColor: Colors.red,
       title: ValueListenableBuilder(
-        valueListenable: p_appBarTitleValueNotifier,
+        valueListenable: SharedValues.p_appBarTitleValueNotifier,
         builder: (context, String title, _) {
           return Center(
             child: Text(
@@ -121,6 +122,7 @@ class MySliverAppBar extends StatelessWidget {
     this.shape,
     this.titleTextStyle,
     this.isLeading = true,
+    this.bottom,
   }) : super(key: key);
 
   final Widget? leading;
@@ -142,6 +144,7 @@ class MySliverAppBar extends StatelessWidget {
   final bool stretch;
   final TextStyle? titleTextStyle;
   final bool isLeading;
+  final PreferredSizeWidget? bottom;
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
@@ -169,6 +172,7 @@ class MySliverAppBar extends StatelessWidget {
       textTheme: textTheme,
       shape: shape,
       titleTextStyle: titleTextStyle,
+      bottom: bottom,
     );
   }
 
@@ -183,6 +187,53 @@ class MySliverAppBar extends StatelessWidget {
         ),
       );
 }
+
+Widget MyAppBar({required String title}) => Column(
+      children: [
+        Column(
+          children: [
+            Container(
+              height: 6.0.h,
+              padding: EdgeInsets.symmetric(vertical: 1.0.h),
+              // color: Colors.blue.shade600,
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    child: Center(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                            fontSize: 14.0.sp,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  Container(
+                      color: Colors.white12,
+                      width: 10.0.w,
+                      child: IconButton(
+                        icon: Icon(Icons.clear),
+                        color: Colors.grey.shade600,
+                        onPressed: () {
+                          Get.back();
+                        },
+                        padding: const EdgeInsets.all(0),
+                      ))
+                ],
+              ),
+            ),
+            Divider(
+              indent: 0.0,
+              height: 0.0,
+              thickness: 0.2.h,
+            ),
+            SizedBox(height: 2.0.h)
+          ],
+        ),
+      ],
+    );
 
 Widget FormContainer({required Widget child}) {
   return Column(
@@ -210,3 +261,81 @@ Widget MakeGap() => Column(
         )
       ],
     );
+Widget removeTextFieldIcon(TextEditingController controller) {
+  return Container(
+    width: 5.0.w,
+    child: GestureDetector(
+      onTap: () {
+        controller.clear();
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Icon(Icons.clear),
+      ),
+    ),
+  );
+}
+
+Widget secureTextFieldIcon(Rx<bool?> isSecureObs) {
+  return Container(
+    width: 5.0.w,
+    child: GestureDetector(
+      onTap: () {
+        isSecureObs.value = !isSecureObs.value!;
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: isSecureObs.value!
+            ? Icon(Icons.lock_rounded)
+            : Icon(Icons.lock_open_rounded),
+      ),
+    ),
+  );
+}
+
+Widget commonTextField({
+  required String label,
+  required TextEditingController controller,
+  String? originValue,
+  bool enabled = true,
+  bool readOnly = false,
+  Widget? additional,
+  void Function()? onTap,
+  void Function(String)? onChanged,
+}) {
+  if (originValue != null) {
+    controller.text = originValue;
+  }
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: !enabled ? Colors.grey.shade400 : null,
+        ),
+      ),
+      Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: TextFormField(
+              onTap: onTap,
+              controller: controller,
+              onChanged: onChanged,
+              readOnly: readOnly,
+              style: textFieldTextStyle(enabled),
+              decoration: textFieldInputDecoration,
+            ),
+          ),
+          if (additional != null) additional,
+        ],
+      ),
+      SizedBox(
+        height: 3.0.h,
+      ),
+    ],
+  );
+}

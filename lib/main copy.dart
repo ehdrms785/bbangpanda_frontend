@@ -6,16 +6,21 @@ import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
 import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindBread/findBreadScreen.dart';
+import 'package:bbangnarae_frontend/screens/FindBread/model/bakeryFilterController.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
-import 'package:bbangnarae_frontend/screens/Login/loginController.dart';
-import 'package:bbangnarae_frontend/screens/Login/loginScreen.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/Login/loginController.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/Login/loginScreen.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/SignUp/signUpController.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/SignUp/signUpScreen.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/editProfileScreen/editProfileController.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/editProfileScreen/editProfileScreen.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/myPageController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
-import 'package:bbangnarae_frontend/screens/SignUp/signUpController.dart';
-import 'package:bbangnarae_frontend/screens/SignUp/signUpScreen.dart';
-import 'package:bbangnarae_frontend/shared/auth/authBinding.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/smsAuthScreen/smsAuthController.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/smsAuthScreen/smsAuthScreen.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:bbangnarae_frontend/shared/loader.dart';
-import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/theme/mainTheme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,7 +34,6 @@ import 'package:hive/hive.dart';
 import 'package:get/get.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:connectivity/connectivity.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,9 +45,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
-  // final isLoggedin =
-  // final isLoggedin = loggedInCheck();
-  final isLoggedin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +71,12 @@ class MyApp extends StatelessWidget {
             theme: getMainTheme(),
             darkTheme: getMainDarkTheme(),
             initialRoute: '/init',
-            initialBinding: AuthBinding(),
+            initialBinding: BindingsBuilder(() async {
+              // AuthBinding();
+              Get.put(AuthController(), permanent: true);
+              Get.lazyPut(() => MypageController());
+              Get.lazyPut(() => BakeryFilterController());
+            }),
             getPages: [
               GetPage(
                 name: '/init',
@@ -79,7 +85,7 @@ class MyApp extends StatelessWidget {
                   splash: 'lib/images/splash.png',
                   splashIconSize: 30.0.h,
                   centered: true,
-                  backgroundColor: mainColor,
+                  backgroundColor: SharedValues.mainColor,
                   nextScreen: App(),
                   splashTransition: SplashTransition.fadeTransition,
                   pageTransitionType: PageTransitionType.scale,
@@ -88,11 +94,26 @@ class MyApp extends StatelessWidget {
               GetPage(
                 name: '/',
                 page: () => App(),
+                binding: BindingsBuilder(() {
+                  // Get.put(MypageController());
+                }),
               ),
               GetPage(
-                  name: '/myPage',
-                  page: () => MyPage(),
-                  settings: RouteSettings(name: "myPage")),
+                name: '/myPage',
+                page: () => MyPageScreen(),
+                binding: BindingsBuilder(() {
+                  // Get.put(MypageController());
+                  // Get.lazyPut(() => MypageController());
+                }),
+              ),
+              GetPage(
+                name: '/editProfile',
+                page: () => EditProfileScreen(),
+                binding: BindingsBuilder(() {
+                  Get.lazyPut(() => EditProfileController());
+                  // Get.put(MypageController());
+                }),
+              ),
               GetPage(
                 name: '/login',
                 page: () => LoginScreen(),
@@ -110,17 +131,28 @@ class MyApp extends StatelessWidget {
                   Get.lazyPut(() => SignUpController());
                 }),
               ),
+              GetPage(
+                name: '/smsAuth',
+                page: () => SmsAuthScreen(),
+                binding: BindingsBuilder(() {
+                  Get.lazyPut(() => SmsAuthController());
+                }),
+              ),
+              GetPage(
+                name: '/filteredContent',
+                page: () => EditProfileScreen(),
+                binding: BindingsBuilder(() {
+                  // Get.lazyPut(() => BakeryFilterController());
+                  // Get.lazyPut(() => BakeryFilterController());
+                  // Get.put(MypageController());
+                }),
+              ),
             ],
           ),
         );
       }),
     );
   }
-}
-
-String getCurrentRoute() {
-  print("새로 실행하나?");
-  return Get.currentRoute;
 }
 
 class App extends StatelessWidget {
@@ -154,7 +186,7 @@ class _MainPageState extends State<MainPage> {
     FindBakery(),
     FindBread(),
     Cart(),
-    MyPage(),
+    MyPageScreen(),
   ];
   final List<String> _pageNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "마이페이지"];
   late PageController pageController;
@@ -183,7 +215,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void onPageChanged(int index) {
-    p_appBarTitleValueNotifier.value = _pageNames[index];
+    SharedValues.p_appBarTitleValueNotifier.value = _pageNames[index];
     print("페이지 체인지");
     if (_selectedIndex != index)
       setState(() {

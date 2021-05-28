@@ -75,6 +75,7 @@ flutter:
   assets:
     - assets/breadIcon.png
     - assets/splash1000.png
+    - assets/breadImage.jpg
     - assets/서비스 이용약관.md
     - assets/개인정보 처리방침.md
     - lib/images/splash.png

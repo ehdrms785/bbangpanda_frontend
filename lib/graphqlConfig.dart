@@ -3,13 +3,13 @@ import "package:graphql_flutter/graphql_flutter.dart";
 import 'package:hive/hive.dart';
 
 class GraphQLConfiguration {
-  static String? token = 'Bearer ${Hive.box("auth").get('token') ?? ''}';
+  static String? token = 'Bearer ${Hive.box("auth").get('token')}';
 
-  static HttpLink httpLink = HttpLink('https://7a27ee8c225f.ngrok.io/graphql');
+  static HttpLink httpLink = HttpLink('https://1becab245645.ngrok.io/graphql');
   // static Link? link;
 
   static ValueNotifier<GraphQLClient> graphqlInit() {
-    final AuthLink authLink = AuthLink(getToken: () => token);
+    final AuthLink authLink = AuthLink(getToken: () => 'Bearer $token');
     final Link link = authLink.concat(httpLink);
     ValueNotifier<GraphQLClient> client = ValueNotifier(
       GraphQLClient(
@@ -21,7 +21,7 @@ class GraphQLConfiguration {
   }
 
   static void setToken(String? newToken) {
-    token = newToken;
+    token = 'Bearer $newToken';
   }
 
   static GraphQLClient clientToQuery() {

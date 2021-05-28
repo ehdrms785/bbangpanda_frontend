@@ -1,7 +1,9 @@
 import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
-import 'package:bbangnarae_frontend/shared/publicValues.dart';
+import 'package:bbangnarae_frontend/shared/auth/authController.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 // IsOptionIntersection이 필요 없을 것 같아져서 교체
 // 합집합으로 해 버리면 글루텐프리와 같은 옵션을 추가하는 의미가 없어진다;;
 
