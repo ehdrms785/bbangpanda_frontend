@@ -43,8 +43,9 @@ Future<bool> tokenCheck() async {
     // Token 만료시간이 10분 이하로 남았을 때
     print('tokenExpired: ${Hive.box('auth').get('tokenExpired')}');
     print('nowTime: $nowTime');
-
-    if (nowTime + 600 > Hive.box('auth').get('tokenExpired')) {
+    final tokenExpiredTime = Hive.box('auth').get('tokenExpired');
+    if (tokenExpiredTime == null) return false;
+    if (nowTime + 600 > tokenExpiredTime) {
       final result = await client.mutate(
         MutationOptions(
             document: gql(Queries.reissueTokenMutation),
@@ -62,6 +63,7 @@ Future<bool> tokenCheck() async {
             print("들어왔나?");
             final newToken =
                 await FirebaseAuth.instance.currentUser?.getIdToken(true);
+            print('newToken: $newToken');
             await Hive.box('auth').putAll({
               'token': newToken,
               'tokenExpired':

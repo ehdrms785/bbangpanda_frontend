@@ -2,13 +2,19 @@ import 'package:bbangnarae_frontend/screens/FindBread/support/findPageApi.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class BakeryFilterController extends GetxController {
+class ShowBreadsController extends GetxController {
   var isLoading = true.obs;
   var isFetchMoreLoading = false;
   var hasMore = true.obs;
   var filterLoading = true.obs;
-  late RxList<dynamic> bakeriesResult = [].obs;
+  late RxList<dynamic> breadsResult = [].obs;
   late RxList<dynamic> bakeryFilterResult = [].obs;
+  late RxList<dynamic> breadLargeCategories = [
+    {'id': 0, 'category': '전체'},
+    {'id': 1, 'category': '소프트브레드'},
+    {'id': 2, 'category': '하드브레드'},
+    {'id': 3, 'category': '디저트'},
+  ].obs;
   RxList<dynamic> filterWidget = [].obs;
   RxInt cursorId = 0.obs;
   final int FetchMinimum = 2;
@@ -17,9 +23,7 @@ class BakeryFilterController extends GetxController {
 
   @override
   void onInit() async {
-    print("\n\n 1. FetchBakeryFilter 순서 체크 로직 \n\n");
-    fetchBakeryFilter();
-    print("3. FetchFilterBakeries 시작");
+    print("1.FetchFilteredBreads 시작");
     fetchFilterdBakeries();
     super.onInit();
   }
@@ -50,18 +54,17 @@ class BakeryFilterController extends GetxController {
 
       if (result != null) {
         print(result.data);
-        bakeriesResult =
+        breadsResult =
             (result.data?['getFilteredBakeryList'] as List<Object?>).obs;
 
-        if (bakeriesResult.length == 0 ||
-            bakeriesResult.length < FetchMinimum) {
+        if (breadsResult.length == 0 || breadsResult.length < FetchMinimum) {
           print("Fetch 한 데이터가 없거나 적어서 hasMore: false 합니다");
           hasMore(false);
           update(['bakeryList']);
           return;
         }
-        cursorId(bakeriesResult[bakeriesResult.length - 1]!['id']);
-        // print(bakeriesResult);
+        cursorId(breadsResult[breadsResult.length - 1]!['id']);
+        // print(breadsResult);
 
       }
     } catch (err) {
@@ -99,7 +102,7 @@ class BakeryFilterController extends GetxController {
         print("\n\n FetchMore 데이터 보기 \n\n");
         print(_newBakeriesResult);
 
-        bakeriesResult([...bakeriesResult, ..._newBakeriesResult]);
+        breadsResult([...breadsResult, ..._newBakeriesResult]);
         cursorId(_newBakeriesResult[_newBakeriesResult.length - 1]!['id']);
       }
     } catch (err) {
@@ -113,7 +116,7 @@ class BakeryFilterController extends GetxController {
     }
   }
 
-  void fetchBakeryFilter() async {
+  void fetchBreadFilter() async {
     try {
       final result = await FindPageApi.fetchBakeryFilter();
       if (result != null) {

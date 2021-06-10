@@ -116,7 +116,12 @@ class SignUpScreen extends StatelessWidget {
                               signUpCtr.isChecked[0] = val!;
                             },
                             value: signUpCtr.isChecked[0]),
-                        Text(signUpCtr.termsList[0]),
+                        Text(
+                          signUpCtr.termsList[0],
+                          style: TextStyle(
+                            fontSize: 10.0.sp,
+                          ),
+                        ),
                         TextButton(
                           onPressed: () {
                             showModalBottomSheet(
@@ -131,7 +136,10 @@ class SignUpScreen extends StatelessWidget {
                               ),
                             );
                           },
-                          child: Text("본문보기"),
+                          child: Text("본문보기",
+                              style: TextStyle(
+                                fontSize: 11.0.sp,
+                              )),
                         )
                       ],
                     ),
@@ -142,7 +150,12 @@ class SignUpScreen extends StatelessWidget {
                               signUpCtr.isChecked[1] = val!;
                             },
                             value: signUpCtr.isChecked[1]),
-                        Text(signUpCtr.termsList[1]),
+                        Text(
+                          signUpCtr.termsList[1],
+                          style: TextStyle(
+                            fontSize: 10.0.sp,
+                          ),
+                        ),
                         TextButton(
                           onPressed: () {
                             showModalBottomSheet(
@@ -154,7 +167,10 @@ class SignUpScreen extends StatelessWidget {
                               ),
                             );
                           },
-                          child: Text("본문보기"),
+                          child: Text("본문보기",
+                              style: TextStyle(
+                                fontSize: 11.0.sp,
+                              )),
                         )
                       ],
                     ),

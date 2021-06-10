@@ -15,8 +15,20 @@ class FindBakeryQuery {
       }
     }
   }
+
+  
   """;
+
   static String getBakeryFilterQuery = """
+    query getBakeryFilter() {
+      getBakeryFilter() {
+        id
+        filter
+      }
+  }
+  """;
+
+  static String getBreadFilterQuery = """
     query getBakeryFilter() {
       getBakeryFilter() {
         id

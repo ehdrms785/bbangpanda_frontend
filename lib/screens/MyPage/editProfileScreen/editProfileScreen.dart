@@ -1,5 +1,6 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/editProfileScreen/editProfileController.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/myPageController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/support/query.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedValidator.dart';
@@ -22,6 +23,10 @@ class EditProfileScreen extends StatelessWidget {
           slivers: [
             MySliverAppBar(
               title: "회원정보 수정",
+              leading: backArrowButtton(onPressed: () {
+                editProfCtr.isSomeFieldChanged(false);
+                Get.back();
+              }),
               actions: [
                 Obx(
                   () => SizedBox(
@@ -44,6 +49,9 @@ class EditProfileScreen extends StatelessWidget {
                                             editProfCtr.phoneTextController.text
                                       }),
                                 );
+                                Get.find<MypageController>()
+                                        .userResult['username'] =
+                                    editProfCtr.nameTextController.text;
                                 print(result);
                                 if (!result.hasException) {
                                   if (result.data!['editProfile']['ok']) {

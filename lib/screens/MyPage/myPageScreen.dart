@@ -27,46 +27,45 @@ class MyPageScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           MySliverAppBar(title: "마이페이지", isLeading: false),
-          SliverFillRemaining(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.0.w, vertical: 2.0.h),
-              child: Obx(() {
-                if (Get.find<AuthController>().isLoggedIn.value == false) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      NotLoginedHeader(),
-                      Divider(),
-                      InformationSection(),
-                    ],
-                  );
-                } else {
-                  return Obx(() {
-                    if (myPageCtr.isLoading.value == true) {
-                      return Center(
-                        child: CupertinoActivityIndicator(),
-                      );
-                    }
+          SliverList(
+            delegate: SliverChildListDelegate([
+              Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 4.0.w, vertical: 2.0.h),
+                child: Obx(() {
+                  if (Get.find<AuthController>().isLoggedIn.value == false) {
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        LoginHeader(),
+                        NotLoginedHeader(),
+                        Divider(),
                         InformationSection(),
-                        TextButton(
-                          onPressed: logout,
-                          child: Text("로그아웃"),
-                        ),
                       ],
                     );
-                  });
-                }
-              }),
-            ),
-          ),
+                  } else {
+                    return Obx(() {
+                      if (myPageCtr.isLoading.value == true) {
+                        return Center(
+                          child: CupertinoActivityIndicator(),
+                        );
+                      }
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LoginHeader(),
+                          InformationSection(),
+                        ],
+                      );
+                    });
+                  }
+                }),
+              ),
+            ]),
+          )
         ],
       ),
     );
@@ -200,7 +199,7 @@ class MyPageScreen extends StatelessWidget {
                 Text(
                   myPageCtr.userResult['username'] ?? "빵판다인",
                   style: TextStyle(
-                    fontSize: 20.0.sp,
+                    fontSize: 18.0.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -209,7 +208,7 @@ class MyPageScreen extends StatelessWidget {
                   "등급 혜택보기 구현 예정",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14.0.sp,
+                    fontSize: 12.0.sp,
                   ),
                 )
               ],

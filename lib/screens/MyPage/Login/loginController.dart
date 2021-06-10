@@ -90,6 +90,7 @@ class LoginController extends GetxController {
                     'password': passwordTextController.text
                   }));
         if (result.hasException) {
+          print(result.exception);
           return ErrorCode(errorMessage: "로그인 접속 오류 잠시 후 다시 시도 해 주세요");
         }
         if (result.data != null) {

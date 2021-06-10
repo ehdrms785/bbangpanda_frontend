@@ -1,4 +1,4 @@
-import 'package:bbangnarae_frontend/screens/FindBread/model/bakeryFilterController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,162 +7,27 @@ import 'package:flutter/rendering.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
-var isShowAppBar = true.obs;
-
-class FindBread extends StatefulWidget {
+class ShowBakeriesTab extends StatefulWidget {
+  ShowBakeriesTab({Key? key, this.isShowAppBar}) : super(key: key);
+  late final isShowAppBar;
   @override
-  _FindBreadState createState() => _FindBreadState();
+  _ShowBakeriesTabState createState() => _ShowBakeriesTabState();
 }
 
-class _FindBreadState extends State<FindBread>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-  late final ScrollController _scrollController;
-
-  @override
-  void initState() {
-    _tabController = TabController(length: 3, vsync: this);
-    _scrollController = ScrollController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      initialIndex: 0,
-      child: SafeArea(
-        child: Scaffold(
-          appBar: MainAppBar(),
-          body: Column(
-            children: [
-              TabListContainer(),
-              TabViewList(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget MainAppBar() => PreferredSize(
-        preferredSize: Size.fromHeight(5.0.h),
-        child: Obx(
-          () => AnimatedContainer(
-            height: isShowAppBar.value ? 5.0.h : 0.0,
-            duration: Duration(milliseconds: 200),
-            child: AppBar(
-              title: Text("마켓"),
-              centerTitle: true,
-              leading: Icon(Icons.ac_unit_sharp),
-              actions: [
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.access_alarm),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.zoom_out_outlined),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-  Widget TabListContainer() => Container(
-        height: 7.0.h,
-        child: CustomScrollView(
-          key: Key("MainScroll"),
-          physics: NeverScrollableScrollPhysics(),
-          controller: _scrollController,
-          slivers: [TabList()],
-        ),
-      );
-  Widget TabList() => SliverAppBar(
-        pinned: true,
-        title: Container(
-          width: double.infinity,
-          child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              physics: NeverScrollableScrollPhysics(),
-              unselectedLabelColor: Colors.grey.withOpacity(0.3),
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicatorPadding: EdgeInsets.zero,
-              indicatorWeight: 0.2.h,
-              tabs: [
-                Tab(
-                  child: Container(
-                    width: 10.0.w,
-                    child: Center(
-                        child: Text("빵집", style: TextStyle(fontSize: 13.0.sp))),
-                  ),
-                ),
-                Tab(
-                  child: Container(
-                    width: 10.0.w,
-                    child: Center(
-                        child: Text("빵", style: TextStyle(fontSize: 13.0.sp))),
-                  ),
-                ),
-                Tab(
-                  child: Container(
-                    width: 18.0.w,
-                    child: Center(
-                        child:
-                            Text("즐겨찾기", style: TextStyle(fontSize: 13.0.sp))),
-                  ),
-                ),
-              ]),
-        ),
-      );
-  Widget TabViewList() => Expanded(
-        child: TabBarView(
-          controller: _tabController,
-          children: <Widget>[
-            BakeryListTab(),
-            HelloWorld(),
-            HelloWorld(),
-          ],
-        ),
-      );
-}
-
-class BakeryListTab extends StatefulWidget {
-  @override
-  _BakeryListTabState createState() => _BakeryListTabState();
-}
-
-class _BakeryListTabState extends State<BakeryListTab>
+class _ShowBakeriesTabState extends State<ShowBakeriesTab>
     with AutomaticKeepAliveClientMixin {
   late final ScrollController _scrollController;
-  final BakeryFilterController controller = Get.find();
+  final ShowBakeriesController controller = Get.find();
   @override
   void initState() {
+      print("ShowBakeries Init!");
     _scrollController = ScrollController();
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection ==
           ScrollDirection.forward) {
-        isShowAppBar(true);
+        widget.isShowAppBar(true);
       } else {
-        isShowAppBar(false);
+        widget.isShowAppBar(false);
         if (_scrollController.position.pixels + 50 >=
                 _scrollController.position.maxScrollExtent &&
             !controller.isFetchMoreLoading &&
@@ -239,7 +104,7 @@ class _BakeryListTabState extends State<BakeryListTab>
         toolbarHeight: 0, // bottom을 Title로 쓰기 위해
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(5.0.h),
-          child: GetBuilder<BakeryFilterController>(
+          child: GetBuilder<ShowBakeriesController>(
             id: "filterBar",
             builder: (controller) {
               // if (controller.filterLoading.value) {
@@ -365,7 +230,7 @@ class _BakeryListTabState extends State<BakeryListTab>
 
     // Obx(() {
     //   controller.bakeryFilterResult;
-    //   // 처음 BakeryFilterController를 초기화 할 때
+    //   // 처음 ShowBakeriesController를 초기화 할 때
     //   // FetchBakeryFilter를 하기 때문에 굳이 필요 없을 것 같지만
     //   // 남겨두는 이유는.. 인터넷 사용이 끊겨있는 상태에서
     //   // 결과를 받아왔다가 다시 요청하게 될 경우를 염두해두는것..
@@ -508,7 +373,7 @@ class _BakeryListTabState extends State<BakeryListTab>
         ),
       );
   Widget BakeryList() {
-    return MixinBuilder<BakeryFilterController>(
+    return MixinBuilder<ShowBakeriesController>(
       id: "bakeryList",
       builder: (controller) {
         if (controller.isLoading.value == true &&
@@ -666,22 +531,4 @@ class _BakeryListTabState extends State<BakeryListTab>
   // hasMore가 바뀌어도 밑에 SliverList의 Indicator가
   // 변하지 않는다. (그래서 일단 이곳에 넣었다)
 
-}
-
-class HelloWorld extends StatefulWidget {
-  @override
-  _HelloWorldState createState() => _HelloWorldState();
-}
-
-class _HelloWorldState extends State<HelloWorld>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    print("헬로베이비");
-    return Container();
-  }
 }

@@ -84,7 +84,7 @@ PreferredSizeWidget PrefferedAppBar(BuildContext context) {
   );
 }
 
-Widget backArrowButtton({double? size}) {
+Widget backArrowButtton({double? size, void Function()? onPressed}) {
   if (size == null) {
     size = 16.0.sp;
   }
@@ -93,9 +93,11 @@ Widget backArrowButtton({double? size}) {
       icon: Icon(Icons.arrow_back_ios_sharp),
       iconSize: size,
       color: Colors.grey.shade600,
-      onPressed: () {
-        Get.back();
-      },
+      onPressed: onPressed != null
+          ? onPressed
+          : () {
+              Get.back();
+            },
     ),
   );
 }
@@ -283,11 +285,13 @@ Widget secureTextFieldIcon(Rx<bool?> isSecureObs) {
       onTap: () {
         isSecureObs.value = !isSecureObs.value!;
       },
-      child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: isSecureObs.value!
-            ? Icon(Icons.lock_rounded)
-            : Icon(Icons.lock_open_rounded),
+      child: Obx(
+        () => Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: isSecureObs.value!
+              ? Icon(Icons.lock_rounded)
+              : Icon(Icons.lock_open_rounded),
+        ),
       ),
     ),
   );
@@ -338,4 +342,25 @@ Widget commonTextField({
       ),
     ],
   );
+}
+
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+
+  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+
+  @override
+  __KeepAliveWrapperState createState() => __KeepAliveWrapperState();
+}
+
+class __KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -1,4 +1,4 @@
-import 'package:bbangnarae_frontend/screens/FindBread/support/findBakeryApi.dart';
+import 'package:bbangnarae_frontend/screens/FindBread/support/findPageApi.dart';
 import 'package:get/get.dart';
 
 class BakeryFilterController extends GetxController {

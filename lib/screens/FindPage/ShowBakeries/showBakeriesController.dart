@@ -2,11 +2,26 @@ import 'package:bbangnarae_frontend/screens/FindBread/support/findPageApi.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class BakeryFilterController extends GetxController {
+/*
+FilterIdList
+-택배 && 매장 관련
+  1: 택배가능
+  2: 매장취식
+  
+  
+- 빵옵션 관련
+  3: 우리밀
+  4: 유기농밀
+  5: 글루텐프리
+  6: 무가당
+  7: 천연발효
+*/
+class ShowBakeriesController extends GetxController {
   var isLoading = true.obs;
   var isFetchMoreLoading = false;
   var hasMore = true.obs;
   var filterLoading = true.obs;
+
   late RxList<dynamic> bakeriesResult = [].obs;
   late RxList<dynamic> bakeryFilterResult = [].obs;
   RxList<dynamic> filterWidget = [].obs;
@@ -45,14 +60,16 @@ class BakeryFilterController extends GetxController {
   void fetchFilterdBakeries() async {
     try {
       isLoading(true);
+
       final result =
           await FindPageApi.fetchFilteredBakeries(filterIdList: filterIdList);
 
       if (result != null) {
-        print(result.data);
+        print("이곳을확인");
+        // print(result.data);
         bakeriesResult =
             (result.data?['getFilteredBakeryList'] as List<Object?>).obs;
-
+        print(result.data!['getBakeryFilter']);
         if (bakeriesResult.length == 0 ||
             bakeriesResult.length < FetchMinimum) {
           print("Fetch 한 데이터가 없거나 적어서 hasMore: false 합니다");

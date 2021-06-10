@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
-import 'package:bbangnarae_frontend/model/filterListModel.dart';
 import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
 import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
-import 'package:bbangnarae_frontend/screens/FindBakery/findBakeryScreen.dart';
-import 'package:bbangnarae_frontend/screens/FindBread/findBreadScreen.dart';
-import 'package:bbangnarae_frontend/screens/FindBread/model/bakeryFilterController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryScreen.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/findPageScreen.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/Login/loginController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/Login/loginScreen.dart';
@@ -49,7 +50,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print("현재 저장된 토큰 ${GraphQLConfiguration.token}");
-
+    // 화면방향 세로 고정
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     // 스테이터스바 색 조정
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.white,
@@ -58,97 +60,96 @@ class MyApp extends StatelessWidget {
     return GraphQLProvider(
       client: GraphQLConfiguration.graphqlInit(),
       child: ResponsiveSizer(builder: (context, orientation, screenType) {
-        return MultiProvider(
-          providers: [
-            ChangeNotifierProvider<FilteredList>(
-              create: (context) => FilteredList(),
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: '빵나래 프로젝트',
+          themeMode: ThemeMode.light, // Change it as you want
+          theme: getMainTheme(),
+          darkTheme: getMainDarkTheme(),
+          initialRoute: '/init',
+          initialBinding: BindingsBuilder(() async {
+            // AuthBinding();
+            Get.put(AuthController(), permanent: true);
+            Get.lazyPut(() => MypageController());
+            Get.lazyPut(() => ShowBakeriesController());
+            Get.lazyPut(() => ShowBreadsController());
+          }),
+          getPages: [
+            GetPage(
+              name: '/init',
+              page: () => AnimatedSplashScreen(
+                animationDuration: Duration(milliseconds: 1000),
+                splash: 'lib/images/splash.png',
+                splashIconSize: 30.0.h,
+                centered: true,
+                backgroundColor: SharedValues.mainColor,
+                nextScreen: App(),
+                splashTransition: SplashTransition.fadeTransition,
+                pageTransitionType: PageTransitionType.scale,
+              ),
             ),
+            GetPage(
+              name: '/',
+              page: () => App(),
+              binding: BindingsBuilder(() {
+                // Get.put(MypageController());
+              }),
+            ),
+            GetPage(
+              name: '/myPage',
+              page: () => MyPageScreen(),
+              binding: BindingsBuilder(() {
+                // Get.put(MypageController());
+                // Get.lazyPut(() => MypageController());
+              }),
+            ),
+            GetPage(
+              name: '/editProfile',
+              page: () => EditProfileScreen(),
+              binding: BindingsBuilder(() {
+                Get.lazyPut(() => EditProfileController());
+                // Get.put(MypageController());
+              }),
+            ),
+            GetPage(
+              name: '/login',
+              page: () => LoginScreen(),
+              transition: Transition.downToUp,
+              binding: BindingsBuilder(() {
+                Get.put(LoginController());
+                Get.lazyPut(() => SignUpController());
+              }),
+            ),
+            GetPage(
+              name: '/signUp',
+              page: () => SignUpScreen(),
+              transition: Transition.downToUp,
+              binding: BindingsBuilder(() {
+                Get.lazyPut(() => SignUpController());
+              }),
+            ),
+            GetPage(
+              name: '/smsAuth',
+              page: () => SmsAuthScreen(),
+              binding: BindingsBuilder(() {
+                Get.lazyPut(() => SmsAuthController());
+              }),
+            ),
+            GetPage(
+              name: '/filteredContent',
+              page: () => FindPageScreen(),
+              binding: BindingsBuilder(() {
+                // Get.lazyPut(() => ShowBreadsController());
+              }),
+            ),
+            GetPage(
+              name: '/breadLargeCategory/:categoryId',
+              page: () => BreadLargeCategoryScreen(),
+              binding: BindingsBuilder(() {
+                Get.lazyPut(() => BreadLargeCategoryController());
+              }),
+            )
           ],
-          child: GetMaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: '빵나래 프로젝트',
-            themeMode: ThemeMode.light, // Change it as you want
-            theme: getMainTheme(),
-            darkTheme: getMainDarkTheme(),
-            initialRoute: '/init',
-            initialBinding: BindingsBuilder(() async {
-              // AuthBinding();
-              Get.put(AuthController(), permanent: true);
-              Get.lazyPut(() => MypageController());
-              Get.lazyPut(() => BakeryFilterController());
-            }),
-            getPages: [
-              GetPage(
-                name: '/init',
-                page: () => AnimatedSplashScreen(
-                  animationDuration: Duration(milliseconds: 1000),
-                  splash: 'lib/images/splash.png',
-                  splashIconSize: 30.0.h,
-                  centered: true,
-                  backgroundColor: SharedValues.mainColor,
-                  nextScreen: App(),
-                  splashTransition: SplashTransition.fadeTransition,
-                  pageTransitionType: PageTransitionType.scale,
-                ),
-              ),
-              GetPage(
-                name: '/',
-                page: () => App(),
-                binding: BindingsBuilder(() {
-                  // Get.put(MypageController());
-                }),
-              ),
-              GetPage(
-                name: '/myPage',
-                page: () => MyPageScreen(),
-                binding: BindingsBuilder(() {
-                  // Get.put(MypageController());
-                  // Get.lazyPut(() => MypageController());
-                }),
-              ),
-              GetPage(
-                name: '/editProfile',
-                page: () => EditProfileScreen(),
-                binding: BindingsBuilder(() {
-                  Get.lazyPut(() => EditProfileController());
-                  // Get.put(MypageController());
-                }),
-              ),
-              GetPage(
-                name: '/login',
-                page: () => LoginScreen(),
-                transition: Transition.downToUp,
-                binding: BindingsBuilder(() {
-                  Get.put(LoginController());
-                  Get.lazyPut(() => SignUpController());
-                }),
-              ),
-              GetPage(
-                name: '/signUp',
-                page: () => SignUpScreen(),
-                transition: Transition.downToUp,
-                binding: BindingsBuilder(() {
-                  Get.lazyPut(() => SignUpController());
-                }),
-              ),
-              GetPage(
-                name: '/smsAuth',
-                page: () => SmsAuthScreen(),
-                binding: BindingsBuilder(() {
-                  Get.lazyPut(() => SmsAuthController());
-                }),
-              ),
-              GetPage(
-                name: '/filteredContent',
-                page: () => EditProfileScreen(),
-                binding: BindingsBuilder(() {
-                  // Get.lazyPut(() => BakeryFilterController());
-                  // Get.lazyPut(() => BakeryFilterController());
-                  // Get.put(MypageController());
-                }),
-              ),
-            ],
-          ),
         );
       }),
     );
@@ -183,12 +184,13 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     Home(),
-    FindBakery(),
-    FindBread(),
+    Home(),
+    FindPageScreen(),
     Cart(),
     MyPageScreen(),
   ];
   final List<String> _pageNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "마이페이지"];
+
   late PageController pageController;
   int _selectedIndex = 0;
 
@@ -212,6 +214,7 @@ class _MainPageState extends State<MainPage> {
     //     _selectedIndex = index;
     //   });
     pageController.jumpToPage(index);
+    // Get.toNamed(_pageRoutes[index]);
   }
 
   void onPageChanged(int index) {
@@ -241,8 +244,8 @@ class _MainPageState extends State<MainPage> {
           backgroundColor: colorScheme.surface,
           selectedItemColor: colorScheme.onSurface,
           unselectedItemColor: colorScheme.onSurface.withOpacity(0.60),
-          selectedFontSize: 14,
-          unselectedFontSize: 12,
+          selectedFontSize: 12.0.sp,
+          unselectedFontSize: 11.0.sp,
           // elevation: 2.0,
           onTap: _switchTap,
           items: [

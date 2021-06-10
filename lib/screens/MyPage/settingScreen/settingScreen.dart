@@ -1,3 +1,4 @@
+import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,8 +15,9 @@ class SettingScreen extends StatelessWidget {
             MySliverAppBar(
               title: "설정",
             ),
-            SliverFillRemaining(
-              child: Column(
+            SliverList(
+                delegate: SliverChildListDelegate([
+              Column(
                 children: [
                   ListTile(
                     leading: null,
@@ -27,15 +29,13 @@ class SettingScreen extends StatelessWidget {
                   ),
                   ListTile(
                     leading: null,
-                    onTap: () {
-                      print("tab");
-                    },
+                    onTap: logout,
                     title: Text("로그아웃"),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ],
               ),
-            )
+            ])),
           ],
         ),
       ),
