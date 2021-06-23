@@ -2,6 +2,7 @@ import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/theme/textFieldTheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -195,7 +196,7 @@ Widget MyAppBar({required String title}) => Column(
         Column(
           children: [
             Container(
-              height: 6.0.h,
+              height: 8.0.h,
               padding: EdgeInsets.symmetric(vertical: 1.0.h),
               // color: Colors.blue.shade600,
               child: Stack(
@@ -221,7 +222,7 @@ Widget MyAppBar({required String title}) => Column(
                         onPressed: () {
                           Get.back();
                         },
-                        padding: const EdgeInsets.all(0),
+                        padding: EdgeInsets.only(left: 3.0.w),
                       ))
                 ],
               ),
@@ -251,17 +252,22 @@ Widget FormContainer({required Widget child}) {
   );
 }
 
-Widget MakeGap() => Column(
+Widget MakeGap({double? height = 0.0}) => Column(
       children: [
         Divider(
           indent: 0.0,
           thickness: 1.0,
-          height: 0.0,
+          height: height,
         ),
         SizedBox(
           height: 2.0.h,
         )
       ],
+    );
+Widget SliverIndicator() => SliverToBoxAdapter(
+      child: Center(
+        child: CupertinoActivityIndicator(),
+      ),
     );
 Widget removeTextFieldIcon(TextEditingController controller) {
   return Container(
@@ -309,6 +315,8 @@ Widget commonTextField({
 }) {
   if (originValue != null) {
     controller.text = originValue;
+    controller.selection =
+        TextSelection.collapsed(offset: controller.text.length);
   }
   return Column(
     mainAxisSize: MainAxisSize.min,
@@ -363,4 +371,41 @@ class __KeepAliveWrapperState extends State<KeepAliveWrapper>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class DecoratedTabBar extends StatelessWidget implements PreferredSizeWidget {
+  DecoratedTabBar({required this.tabBar, required this.decoration});
+
+  final TabBar tabBar;
+  final BoxDecoration decoration;
+
+  @override
+  Size get preferredSize => tabBar.preferredSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(child: Container(decoration: decoration)),
+        tabBar,
+      ],
+    );
+  }
+}
+
+class CustomPageViewScrollPhysics extends ScrollPhysics {
+  const CustomPageViewScrollPhysics({ScrollPhysics? parent})
+      : super(parent: parent);
+
+  @override
+  CustomPageViewScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return CustomPageViewScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  SpringDescription get spring => const SpringDescription(
+        mass: 80,
+        stiffness: 100,
+        damping: 1,
+      );
 }

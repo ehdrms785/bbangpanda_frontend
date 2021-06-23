@@ -1,12 +1,8 @@
-import 'dart:async';
-
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
 import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryScreen.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/findPageScreen.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/Login/loginController.dart';
@@ -28,7 +24,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
@@ -41,6 +36,8 @@ void main() async {
   await initHiveForFlutter();
 
   await Hive.openBox('auth');
+  await Hive.openBox('graphqlCache');
+  Hive.box('graphqlCache').clear();
   runApp(MyApp());
 }
 
@@ -71,9 +68,10 @@ class MyApp extends StatelessWidget {
             // AuthBinding();
             Get.put(AuthController(), permanent: true);
             Get.lazyPut(() => MypageController());
-            Get.lazyPut(() => ShowBakeriesController());
-            Get.lazyPut(() => ShowBreadsController());
+            // Get.lazyPut(() => ShowBakeriesController());
+            // Get.lazyPut(() => ShowBreadsController());
           }),
+
           getPages: [
             GetPage(
               name: '/init',
@@ -143,9 +141,10 @@ class MyApp extends StatelessWidget {
               }),
             ),
             GetPage(
-              name: '/breadLargeCategory/:categoryId',
+              name: '/breadLargeCategory',
               page: () => BreadLargeCategoryScreen(),
               binding: BindingsBuilder(() {
+                // Get.create(() => BreadLargeCategoryController());
                 Get.lazyPut(() => BreadLargeCategoryController());
               }),
             )
@@ -228,6 +227,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("실행완료!");
     final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
       child: Scaffold(

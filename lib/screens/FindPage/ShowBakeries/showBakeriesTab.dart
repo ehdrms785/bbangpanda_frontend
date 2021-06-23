@@ -1,3 +1,5 @@
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
@@ -17,33 +19,20 @@ class ShowBakeriesTab extends StatefulWidget {
 class _ShowBakeriesTabState extends State<ShowBakeriesTab>
     with AutomaticKeepAliveClientMixin {
   late final ScrollController _scrollController;
-  final ShowBakeriesController controller = Get.find();
+  late final ShowBakeriesController controller;
+
   @override
   void initState() {
-      print("ShowBakeries Init!");
-    _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        widget.isShowAppBar(true);
-      } else {
-        widget.isShowAppBar(false);
-        if (_scrollController.position.pixels + 50 >=
-                _scrollController.position.maxScrollExtent &&
-            !controller.isFetchMoreLoading &&
-            controller.hasMore.value) {
-          print("FetchMore 실행 !");
-          Future.microtask(() => controller.fetchMoreFilterBakeries());
-        }
-      }
-    });
+    print("ShowBakeries Init!");
+    Get.create(() => ShowBakeriesController(isShowAppBar: widget.isShowAppBar),
+        tag: 'showBakeryTab');
+    controller = Get.find(tag: 'showBakeryTab');
+    _scrollController = controller.scrollController;
     super.initState();
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(() {});
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -53,38 +42,39 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.0.w),
-      child: Obx(
-        () => ModalProgressScreen(
-          isAsyncCall: controller.isLoading.value,
-          // 처음 로딩 돌아갈 때 굳이 밑에 이중로딩 돌아가지 않게
-          // 하려는 작업!
-          child: controller.isLoading.value
-              ? Container()
-              : CustomScrollView(
-                  key: ValueKey('bakeryScroll'),
-                  controller: _scrollController,
-                  slivers: [
-                    NewBakeryBox(),
-                    SliverToBoxAdapter(child: Divider()),
-                    FilterBar(),
-                    SliverToBoxAdapter(child: Divider()),
-                    BakeryList(),
-
-                    // SliverToBoxAdapter(
-                    //   child: Container(
-                    //       height: 5.0.h,
-                    //       color: Colors.grey,
-                    //       child: TextButton(
-                    //           onPressed: () async {
-                    //             controller.fetchMoreFilterBakeries();
-                    //           },
-                    //           child: Text("펫치모어"))),
-                    // ),
-                  ],
-                ),
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.0.w),
+        child: Obx(
+          () => ModalProgressScreen(
+            isAsyncCall: controller.isLoading.value,
+            // 처음 로딩 돌아갈 때 굳이 밑에 이중로딩 돌아가지 않게
+            // 하려는 작업!
+            child: controller.firstInitLoading.value
+                ? Center(child: CupertinoActivityIndicator())
+                : CustomScrollView(
+                    key: ValueKey('bakeryScroll'),
+                    controller: _scrollController,
+                    physics: const BouncingScrollPhysics(
+                        parent: const AlwaysScrollableScrollPhysics()),
+                    slivers: [
+                      CupertinoSliverRefreshControl(
+                        onRefresh: () => controller.refreshBakeryInfoData(),
+                      ),
+                      NewBakeryBox(),
+                      FilterBar(),
+                      SliverToBoxAdapter(
+                          child: Divider(
+                        height: 1,
+                      )),
+                      SliverToBoxAdapter(
+                          child: SizedBox(
+                        height: 2.0.h,
+                      )),
+                      BakeryList(),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
@@ -95,7 +85,11 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
           height: 10.0.h,
           color: Colors.grey.shade500,
           child: Center(
-            child: Text("신규입점 베이커리 구역"),
+            child: Text("신규입점 베이커리 구역",
+                style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 11.0.sp,
+                    fontWeight: FontWeight.w600)),
           ),
         ),
       );
@@ -103,24 +97,85 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
         pinned: true,
         toolbarHeight: 0, // bottom을 Title로 쓰기 위해
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(5.0.h),
-          child: GetBuilder<ShowBakeriesController>(
-            id: "filterBar",
-            builder: (controller) {
-              // if (controller.filterLoading.value) {
-              //   return Center(child: CupertinoActivityIndicator());
-              // }
-              return Container(
-                width: double.infinity,
-                height: 5.0.h,
-                child: Row(
+            preferredSize: Size.fromHeight(6.5.h),
+            child: Container(
+              width: double.infinity,
+              height: 6.5.h,
+              child: Obx(() {
+                if (controller.filterLoading.value) {
+                  return Center(child: CupertinoActivityIndicator());
+                }
+                return Row(
                   children: [
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return Obx(
+                              () => Wrap(
+                                children: [
+                                  MyAppBar(title: "정렬 설정"),
+                                  ...BakerySortFilters.map((sortFilter) =>
+                                      ListTile(
+                                        onTap: () {
+                                          controller
+                                              .sortFilterId(sortFilter.id);
+                                          controller.refreshBakeryInfoData();
+                                          Get.back();
+                                        },
+                                        title: Text(sortFilter.filter),
+                                        selected: sortFilter.id ==
+                                            controller.sortFilterId.value,
+                                        selectedTileColor: Colors.grey,
+                                      )),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                        // margin: EdgeInsets.only(left: 2.0.w),
+                        child: RawChip(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          label: Text(
+                            "${BakerySortFilters.where((element) => element.id == controller.sortFilterId.value).first.filter} ∇",
+                            style: TextStyle(
+                                fontSize: 9.0.sp, fontWeight: FontWeight.w600),
+                          ),
+                          labelPadding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(25),
+                          )),
+                          showCheckmark: false,
+                          padding: EdgeInsets.all(5.0),
+                        ),
+                      ),
+                    ),
+                    Text(' ㅣ', style: TextStyle(color: Colors.grey)),
                     Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      child: ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: <Color>[
+                              Colors.black,
+                              Colors.transparent,
+                              Colors.transparent,
+                              Colors.black,
+                            ],
+                            stops: [0.0, 0.05, 0.95, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstOut,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
                           children: [
+                            SizedBox(width: 2.0.w),
                             ...(controller.bakeryFilterResult.where((filter) {
                               if (controller.filterIdList
                                   .contains(filter['id'])) {
@@ -132,11 +187,19 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                                 .map((e) {
                               return Padding(
                                 padding: EdgeInsets.only(right: 2.0.w),
-                                child: ChoiceChip(
-                                  label: Text(e['filter'],
-                                      style: TextStyle(color: Colors.black)),
+                                child: RawChip(
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  label: Text(
+                                    e['filter'],
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 9.0.sp,
+                                        fontWeight: FontWeight.w600),
+                                  ),
                                   selected: false,
                                   selectedColor: Colors.blueAccent.shade200,
+                                  showCheckmark: false,
                                 ),
                               );
                             }),
@@ -146,16 +209,30 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                     ),
                     FilterIcon(),
                   ],
-                ),
-              );
+                );
+              }),
+            )),
+      );
+  Widget FilterIcon() => IconButton(
+        icon: Icon(Icons.filter_list),
+        onPressed: () async {
+          showModalBottomSheet(
+            isDismissible: false, // 위에 빈공간 눌렀을때 자동으로 없어지게 하는 기능
+            isScrollControlled: true, // 풀 스크린 가능하게 만들어줌
+            context: context,
+            builder: (context) {
+              return FilterModal();
             },
-          ),
-        ),
+          ).whenComplete(() {
+            print("종료");
+            return;
+          });
+        },
       );
   Widget FilterModal() {
     // TempFilterIdList는 현재 filterIdList를 복사한 값으로 사용
-    controller.tempFilterIdList.clear();
-    controller.tempFilterIdList.addAll(controller.filterIdList);
+    // controller.tempFilterIdList.clear();
+    // controller.tempFilterIdList.addAll(controller.filterIdList);
     return Container(
         width: 100.0.w,
         height: 90.0.h,
@@ -227,97 +304,6 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
             );
           }),
         ));
-
-    // Obx(() {
-    //   controller.bakeryFilterResult;
-    //   // 처음 ShowBakeriesController를 초기화 할 때
-    //   // FetchBakeryFilter를 하기 때문에 굳이 필요 없을 것 같지만
-    //   // 남겨두는 이유는.. 인터넷 사용이 끊겨있는 상태에서
-    //   // 결과를 받아왔다가 다시 요청하게 될 경우를 염두해두는것..
-    //   // if (controller.tempFilterIdList.length == 0) {
-    //   //   controller.fetchBakeryFilter();
-    //   // }
-    //   // if (controller.filterLoading.value) {
-    //   //   return Center(child: CupertinoActivityIndicator());
-    //   // }
-
-    //   return Padding(
-    //     padding: EdgeInsets.symmetric(horizontal: 4.0.w),
-    //     child: Column(
-    //       // mainAxisSize: MainAxisSize.max,
-
-    //       children: [
-    //         MyAppBar(title: "필터"),
-    //         Builder(
-    //           builder: (context) {
-    //             List<Widget> filterWidget = [];
-
-    //             controller.bakeryFilterResult
-    //                 .asMap()
-    //                 .entries
-    //                 .forEach((MapEntry entry) {
-    //               filterWidget.add(MakeChoiceChip(entry));
-    //               if (entry.key == 1) {
-    //                 filterWidget.add(Divider());
-    //               }
-    //             });
-    //             return Container(
-    //               width: double.infinity,
-    //               child: Wrap(
-    //                   // alignment: WrapAlignment.start,
-    //                   // alignment: WrapAlignment.spaceEvenly,
-    //                   spacing: 0.0,
-    //                   runSpacing: 0.0,
-    //                   children: [...filterWidget]),
-    //             );
-    //           },
-    //         ),
-
-    //         // 맨 아래에 버튼을 두기 위한 Expanded
-    //         Expanded(
-    //           child: Align(
-    //             alignment: Alignment.bottomCenter,
-    //             child: Container(
-    //               padding: EdgeInsets.symmetric(vertical: 2.5.h),
-    //               child: Row(
-    //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //                 children: [
-    //                   SizedBox(
-    //                     width: 30.0.w,
-    //                     height: 5.0.h,
-    //                     child: ElevatedButton(
-    //                       child: Text("초기화",
-    //                           style: TextStyle(color: Colors.black)),
-    //                       onPressed: () {
-    //                         controller.initFilterSelected();
-    //                       },
-    //                       style: ElevatedButton.styleFrom(
-    //                         primary: Colors.white,
-    //                       ),
-    //                     ),
-    //                   ),
-    //                   SizedBox(
-    //                     width: 50.0.w,
-    //                     height: 5.0.h,
-    //                     child: ElevatedButton(
-    //                       child: Text("적용"),
-    //                       onPressed: () async {
-    //                         Get.back();
-    //                         controller.applyFilterChanged();
-    //                       },
-    //                       style: ElevatedButton.styleFrom(),
-    //                     ),
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //           ),
-    //         )
-    //       ],
-    //     ),
-    //   );
-    // },
-    // ));
   }
 
   Widget MakeChoiceChip(MapEntry entry) => ChoiceChip(
@@ -351,48 +337,31 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
         },
         label: Text(entry.value['filter'], style: TextStyle()),
       );
-  Widget FilterIcon() => IconButton(
-        icon: Icon(Icons.filter_list),
-        onPressed: () async {
-          showModalBottomSheet(
-            isDismissible: false, // 위에 빈공간 눌렀을때 자동으로 없어지게 하는 기능
-            isScrollControlled: true, // 풀 스크린 가능하게 만들어줌
-            context: context,
-            builder: (context) {
-              return FilterModal();
-            },
-          ).whenComplete(() {
-            print("종료");
-            return;
-          });
-        },
-      );
-  Widget SliverIndicator() => SliverToBoxAdapter(
-        child: Center(
-          child: CupertinoActivityIndicator(),
-        ),
-      );
+
   Widget BakeryList() {
-    return MixinBuilder<ShowBakeriesController>(
-      id: "bakeryList",
-      builder: (controller) {
+    return Obx(
+      () {
+        // Obx의 단점이 SliverList 안에 hasMoreValue가 있으면
+        // 해당을 반영해서 UI 업데이트를 하지 않는다.
+        // 그래서 이렇게 명시적으로 써 준다.
+        controller.hasMore.value;
         if (controller.isLoading.value == true &&
-            controller.bakeriesResult.isEmpty) {
+            controller.simpleBakeriesListResult.isEmpty) {
           return SliverIndicator();
         }
         return SliverList(
           key: ValueKey("BLKey"), // BakeryList Key
           delegate: SliverChildBuilderDelegate(
             (context, index) {
-              if (index == controller.bakeriesResult.length) {
-                print("마지막 인덱스");
+              if (index == controller.simpleBakeriesListResult.length) {
+                print("마지막 인덱스 하하");
                 // 더 이상 아이템이 없을 때
                 if (controller.hasMore.value == false) {
-                  if (controller.bakeriesResult.length == 0) {
+                  if (controller.simpleBakeriesListResult.length == 0) {
                     return Container(
                       height: 50.0.h,
                       child: Center(
-                          child: Text("해당 조건의 빵집이 없어요 (빵..)",
+                          child: Text("해당 조건의 빵집이 없어요.",
                               style: TextStyle(fontSize: 20.0.sp))),
                     );
                   }
@@ -402,7 +371,7 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                     thickness: 2.0,
                   );
                 }
-                if (controller.bakeriesResult.length > 1) {
+                if (controller.simpleBakeriesListResult.length > 0) {
                   return CupertinoActivityIndicator(
                     key: ValueKey(index),
                   );
@@ -411,85 +380,103 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                       key: ValueKey(index), visible: false, child: Container());
                 }
               }
+              BakerySimpleInfo bakeryData =
+                  controller.simpleBakeriesListResult[index];
               return Container(
                 key: ValueKey(index),
                 // height: 35.0.h,
                 child: Builder(
                   builder: (context) {
-                    final bakeryResultList = controller.bakeriesResult[index];
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(
-                          bakeryResultList['name'],
-                          style: TextStyle(
-                              fontSize: 15.0.sp, fontWeight: FontWeight.w800),
-                        ),
-                        SizedBox(
-                          height: 1.0.h,
-                        ),
-                        Builder(
-                          builder: (context) {
-                            final List<dynamic> result =
-                                bakeryResultList['bakeryFeatures']
-                                    .where((e) => int.parse(e['id']) > 2)
-                                    .toList();
-
-                            return Row(children: [
-                              ...result.map((element) => Text(
-                                  '#${element['filter']} ',
-                                  style: TextStyle(
-                                      fontSize: 10.0.sp,
-                                      color: Colors.grey.shade400,
-                                      fontWeight: FontWeight.w300))),
-                            ]);
-                          },
-                        ),
-                        SizedBox(
-                          height: 1.0.h,
-                        ),
-                        Visibility(
-                          visible: bakeryResultList['description'] == null
-                              ? false
-                              : true,
-                          child: Column(
+                        Container(
+                          height: 8.0.h,
+                          child: Wrap(
+                            direction: Axis.vertical,
                             children: [
-                              Text(
-                                bakeryResultList['description'] ?? '',
-                                overflow: TextOverflow.ellipsis,
+                              Container(
+                                width: 10.0.w,
+                                height: double.maxFinite,
+                                padding: EdgeInsets.zero,
+                                decoration: new BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
+                                    image: new AssetImage(bakeryData.thumbnail),
+                                  ),
+                                ),
                               ),
-                              SizedBox(
-                                height: 1.0.h,
+                              Container(width: 2.0.w),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    bakeryData.name,
+                                    style: TextStyle(
+                                        fontSize: 12.0.sp,
+                                        fontWeight: FontWeight.w800),
+                                  ),
+                                  Builder(
+                                    builder: (context) {
+                                      final List<dynamic> result = bakeryData
+                                          .bakeryFeature
+                                          .where((e) => int.parse(e['id']) > 2)
+                                          .toList();
+
+                                      return Row(children: [
+                                        ...result.map((element) => Text(
+                                            '#${element['filter']} ',
+                                            style: TextStyle(
+                                                fontSize: 9.0.sp,
+                                                color: Colors.grey.shade400,
+                                                fontWeight: FontWeight.w300))),
+                                      ]);
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                        Builder(
-                          builder: (context) {
-                            final List<dynamic> result =
-                                bakeryResultList['signitureBreads']
-                                    .map((value) => value['name'])
-                                    .toList();
-
-                            return Visibility(
-                              visible: result.length != 0,
-                              child: Row(children: [
-                                Text('대표빵: '),
-                                ...result.map((element) => Text('$element ',
+                        bakeryData.description == null
+                            ? Container()
+                            : Text(
+                                bakeryData.description ?? '',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                        bakeryData.signitureBreads?.length == 0
+                            ? Container()
+                            : Row(
+                                children: [
+                                  Text(
+                                    '대표빵: ',
                                     style: TextStyle(
-                                        fontSize: 10.0.sp,
-                                        color: Colors.grey.shade400,
-                                        fontWeight: FontWeight.w300))),
-                              ]),
-                            );
-                          },
-                        ),
+                                        fontSize: 9.0.sp,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  ...bakeryData.signitureBreads!.map(
+                                    (element) => Text(
+                                      '$element ',
+                                      style: TextStyle(
+                                          fontSize: 9.0.sp,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                ],
+                              ),
                         Container(
                           width: double.infinity,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                width: 30.0.w,
+                                width: 27.0.w,
                                 height: 20.0.h,
                                 child: Image.asset(
                                   'assets/breadImage.jpg',
@@ -497,7 +484,7 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                                 ),
                               ),
                               Container(
-                                width: 30.0.w,
+                                width: 27.0.w,
                                 height: 20.0.h,
                                 child: Image.asset(
                                   'assets/breadImage.jpg',
@@ -505,7 +492,7 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                                 ),
                               ),
                               Container(
-                                width: 30.0.w,
+                                width: 27.0.w,
                                 height: 20.0.h,
                                 child: Image.asset(
                                   'assets/breadImage.jpg',
@@ -515,13 +502,16 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                             ],
                           ),
                         ),
+                        Divider(
+                          height: 4.0.h,
+                        )
                       ],
                     );
                   },
                 ),
               );
             },
-            childCount: controller.bakeriesResult.length + 1,
+            childCount: controller.simpleBakeriesListResult.length + 1,
           ),
         );
       },

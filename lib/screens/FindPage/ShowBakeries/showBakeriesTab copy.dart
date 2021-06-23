@@ -1,4 +1,4 @@
-import 'package:bbangnarae_frontend/screens/FindBread/model/bakeryFilterController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,178 +7,30 @@ import 'package:flutter/rendering.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
-var isShowAppBar = true.obs;
-
-class FindBread extends StatefulWidget {
+class ShowBakeriesTab extends StatefulWidget {
+  ShowBakeriesTab({Key? key, this.isShowAppBar}) : super(key: key);
+  late final isShowAppBar;
   @override
-  _FindBreadState createState() => _FindBreadState();
+  _ShowBakeriesTabState createState() => _ShowBakeriesTabState();
 }
 
-class _FindBreadState extends State<FindBread>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-  late final ScrollController _scrollController;
-
-  @override
-  void initState() {
-    _tabController = TabController(length: 3, vsync: this);
-    _scrollController = ScrollController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      initialIndex: 0,
-      child: SafeArea(
-        child: Scaffold(
-          appBar: MainAppBar(),
-          body: Column(
-            children: [
-              TabListContainer(),
-              TabViewList(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget MainAppBar() => PreferredSize(
-        preferredSize: Size.fromHeight(5.0.h),
-        child: Obx(
-          () => AnimatedContainer(
-            height: isShowAppBar.value ? 5.0.h : 0.0,
-            duration: Duration(milliseconds: 200),
-            child: AppBar(
-              title: Text("마켓"),
-              centerTitle: true,
-              leading: Icon(Icons.ac_unit_sharp),
-              actions: [
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.access_alarm),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.zoom_out_outlined),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-  Widget TabListContainer() => Container(
-        height: 7.0.h,
-        child: CustomScrollView(
-          key: Key("MainScroll"),
-          physics: NeverScrollableScrollPhysics(),
-          controller: _scrollController,
-          slivers: [TabList()],
-        ),
-      );
-  Widget TabList() => SliverAppBar(
-        pinned: true,
-        title: Container(
-          width: double.infinity,
-          child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              physics: NeverScrollableScrollPhysics(),
-              unselectedLabelColor: Colors.grey.withOpacity(0.3),
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicatorPadding: EdgeInsets.zero,
-              indicatorWeight: 0.2.h,
-              tabs: [
-                Tab(
-                  child: Container(
-                    width: 10.0.w,
-                    child: Center(
-                        child: Text("빵집", style: TextStyle(fontSize: 13.0.sp))),
-                  ),
-                ),
-                Tab(
-                  child: Container(
-                    width: 10.0.w,
-                    child: Center(
-                        child: Text("빵", style: TextStyle(fontSize: 13.0.sp))),
-                  ),
-                ),
-                Tab(
-                  child: Container(
-                    width: 18.0.w,
-                    child: Center(
-                        child:
-                            Text("즐겨찾기", style: TextStyle(fontSize: 13.0.sp))),
-                  ),
-                ),
-              ]),
-        ),
-      );
-  Widget TabViewList() => Expanded(
-        child: TabBarView(
-          controller: _tabController,
-          children: <Widget>[
-            BakeryListTab(),
-            HelloWorld(),
-            HelloWorld(),
-          ],
-        ),
-      );
-}
-
-class BakeryListTab extends StatefulWidget {
-  @override
-  _BakeryListTabState createState() => _BakeryListTabState();
-}
-
-class _BakeryListTabState extends State<BakeryListTab>
+class _ShowBakeriesTabState extends State<ShowBakeriesTab>
     with AutomaticKeepAliveClientMixin {
   late final ScrollController _scrollController;
-  final BakeryFilterController controller = Get.find();
+  late final ShowBakeriesController controller;
+
   @override
   void initState() {
-    _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        isShowAppBar(true);
-      } else {
-        isShowAppBar(false);
-        if (_scrollController.position.pixels + 50 >=
-                _scrollController.position.maxScrollExtent &&
-            !controller.isFetchMoreLoading &&
-            controller.hasMore.value) {
-          print("FetchMore 실행 !");
-          Future.microtask(() => controller.fetchMoreFilterBakeries());
-        }
-      }
-    });
+    print("ShowBakeries Init!");
+    Get.create(() => ShowBakeriesController(isShowAppBar: widget.isShowAppBar),
+        tag: 'showBakeryTab');
+    controller = Get.find(tag: 'showBakeryTab');
+    _scrollController = controller.scrollController;
     super.initState();
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(() {});
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -189,37 +41,48 @@ class _BakeryListTabState extends State<BakeryListTab>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.0.w),
-      child: Obx(
-        () => ModalProgressScreen(
-          isAsyncCall: controller.isLoading.value,
-          // 처음 로딩 돌아갈 때 굳이 밑에 이중로딩 돌아가지 않게
-          // 하려는 작업!
-          child: controller.isLoading.value
-              ? Container()
-              : CustomScrollView(
-                  key: ValueKey('bakeryScroll'),
-                  controller: _scrollController,
-                  slivers: [
-                    NewBakeryBox(),
-                    SliverToBoxAdapter(child: Divider()),
-                    FilterBar(),
-                    SliverToBoxAdapter(child: Divider()),
-                    BakeryList(),
-
-                    // SliverToBoxAdapter(
-                    //   child: Container(
-                    //       height: 5.0.h,
-                    //       color: Colors.grey,
-                    //       child: TextButton(
-                    //           onPressed: () async {
-                    //             controller.fetchMoreFilterBakeries();
-                    //           },
-                    //           child: Text("펫치모어"))),
-                    // ),
-                  ],
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.0.w),
+        child: Obx(
+          () => ModalProgressScreen(
+            isAsyncCall: controller.isLoading.value,
+            // 처음 로딩 돌아갈 때 굳이 밑에 이중로딩 돌아가지 않게
+            // 하려는 작업!
+            child: CustomScrollView(
+              key: ValueKey('bakeryScroll'),
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(
+                  parent: const AlwaysScrollableScrollPhysics()),
+              slivers: [
+                CupertinoSliverRefreshControl(
+                  onRefresh: () => controller.applyFilterChanged(),
                 ),
+                NewBakeryBox(),
+                FilterBar(),
+                SliverToBoxAdapter(
+                    child: Divider(
+                  height: 1,
+                )),
+                SliverToBoxAdapter(
+                    child: SizedBox(
+                  height: 2.0.h,
+                )),
+                BakeryList(),
+
+                // SliverToBoxAdapter(
+                //   child: Container(
+                //       height: 5.0.h,
+                //       color: Colors.grey,
+                //       child: TextButton(
+                //           onPressed: () async {
+                //             controller.fetchMoreFilterBakeries();
+                //           },
+                //           child: Text("펫치모어"))),
+                // ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -230,7 +93,11 @@ class _BakeryListTabState extends State<BakeryListTab>
           height: 10.0.h,
           color: Colors.grey.shade500,
           child: Center(
-            child: Text("신규입점 베이커리 구역"),
+            child: Text("신규입점 베이커리 구역",
+                style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 11.0.sp,
+                    fontWeight: FontWeight.w600)),
           ),
         ),
       );
@@ -238,55 +105,61 @@ class _BakeryListTabState extends State<BakeryListTab>
         pinned: true,
         toolbarHeight: 0, // bottom을 Title로 쓰기 위해
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(5.0.h),
-          child: GetBuilder<BakeryFilterController>(
-            id: "filterBar",
-            builder: (controller) {
-              // if (controller.filterLoading.value) {
-              //   return Center(child: CupertinoActivityIndicator());
-              // }
-              return Container(
-                width: double.infinity,
-                height: 5.0.h,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ...(controller.bakeryFilterResult.where((filter) {
-                              if (controller.filterIdList
-                                  .contains(filter['id'])) {
-                                return true;
-                              } else {
-                                return false;
-                              }
-                            }).toList())
-                                .map((e) {
-                              return Padding(
-                                padding: EdgeInsets.only(right: 2.0.w),
-                                child: ChoiceChip(
-                                  label: Text(e['filter'],
-                                      style: TextStyle(color: Colors.black)),
-                                  selected: false,
-                                  selectedColor: Colors.blueAccent.shade200,
-                                ),
-                              );
-                            }),
-                          ],
+            preferredSize: Size.fromHeight(6.5.h),
+            child: Container(
+              width: double.infinity,
+              height: 6.5.h,
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      margin: EdgeInsets.only(left: 2.0.w),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: RawChip(
+                          label: Text("최신순"),
                         ),
                       ),
                     ),
-                    FilterIcon(),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
+                  ),
+                  Text(' ㅣ', style: TextStyle(color: Colors.grey)),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ...(controller.bakeryFilterResult.where((filter) {
+                            if (controller.filterIdList
+                                .contains(filter['id'])) {
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          }).toList())
+                              .map((e) {
+                            return Padding(
+                              padding: EdgeInsets.only(right: 2.0.w),
+                              child: RawChip(
+                                label: Text(e['filter'],
+                                    style: TextStyle(color: Colors.black)),
+                                selected: false,
+                                selectedColor: Colors.blueAccent.shade200,
+                                showCheckmark: false,
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                  FilterIcon(),
+                ],
+              ),
+            )),
       );
+
   Widget FilterModal() {
     // TempFilterIdList는 현재 filterIdList를 복사한 값으로 사용
     controller.tempFilterIdList.clear();
@@ -365,7 +238,7 @@ class _BakeryListTabState extends State<BakeryListTab>
 
     // Obx(() {
     //   controller.bakeryFilterResult;
-    //   // 처음 BakeryFilterController를 초기화 할 때
+    //   // 처음 ShowBakeriesController를 초기화 할 때
     //   // FetchBakeryFilter를 하기 때문에 굳이 필요 없을 것 같지만
     //   // 남겨두는 이유는.. 인터넷 사용이 끊겨있는 상태에서
     //   // 결과를 받아왔다가 다시 요청하게 될 경우를 염두해두는것..
@@ -508,9 +381,8 @@ class _BakeryListTabState extends State<BakeryListTab>
         ),
       );
   Widget BakeryList() {
-    return MixinBuilder<BakeryFilterController>(
-      id: "bakeryList",
-      builder: (controller) {
+    return Obx(
+      () {
         if (controller.isLoading.value == true &&
             controller.bakeriesResult.isEmpty) {
           return SliverIndicator();
@@ -574,7 +446,7 @@ class _BakeryListTabState extends State<BakeryListTab>
                               ...result.map((element) => Text(
                                   '#${element['filter']} ',
                                   style: TextStyle(
-                                      fontSize: 10.0.sp,
+                                      fontSize: 9.0.sp,
                                       color: Colors.grey.shade400,
                                       fontWeight: FontWeight.w300))),
                             ]);
@@ -622,9 +494,10 @@ class _BakeryListTabState extends State<BakeryListTab>
                         Container(
                           width: double.infinity,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                width: 30.0.w,
+                                width: 27.0.w,
                                 height: 20.0.h,
                                 child: Image.asset(
                                   'assets/breadImage.jpg',
@@ -632,7 +505,7 @@ class _BakeryListTabState extends State<BakeryListTab>
                                 ),
                               ),
                               Container(
-                                width: 30.0.w,
+                                width: 27.0.w,
                                 height: 20.0.h,
                                 child: Image.asset(
                                   'assets/breadImage.jpg',
@@ -640,7 +513,7 @@ class _BakeryListTabState extends State<BakeryListTab>
                                 ),
                               ),
                               Container(
-                                width: 30.0.w,
+                                width: 27.0.w,
                                 height: 20.0.h,
                                 child: Image.asset(
                                   'assets/breadImage.jpg',
@@ -666,22 +539,4 @@ class _BakeryListTabState extends State<BakeryListTab>
   // hasMore가 바뀌어도 밑에 SliverList의 Indicator가
   // 변하지 않는다. (그래서 일단 이곳에 넣었다)
 
-}
-
-class HelloWorld extends StatefulWidget {
-  @override
-  _HelloWorldState createState() => _HelloWorldState();
-}
-
-class _HelloWorldState extends State<HelloWorld>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    print("헬로베이비");
-    return Container();
-  }
 }

@@ -74,17 +74,10 @@ class LoginScreen extends StatelessWidget {
         print(Get.currentRoute);
         print(Get.currentRoute.runtimeType);
         print(Get.currentRoute == "/login");
-        final result = await Get.to(
+        Get.to(
           SignUpScreen(),
           transition: Transition.rightToLeft,
         );
-
-        print(Get.currentRoute);
-        print("기다리는지 체크");
-        if (result != null) {
-          loginCtr.idTextController.text = result;
-          loginCtr.pwFocusNode.requestFocus();
-        }
       },
       child: Container(
         width: 80.0.w,

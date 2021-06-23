@@ -1,26 +1,43 @@
-import 'package:bbangnarae_frontend/screens/FindBread/support/findPageApi.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/support/findPageApi.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class BakeryFilterController extends GetxController {
+class ShowBreadsController extends GetxController
+    with SingleGetTickerProviderMixin {
+  ShowBreadsController({this.tabLength: 0});
+  final int tabLength;
+  late final TabController tabController;
+  late final ScrollController scrollController;
+  late RxList<dynamic> breadLargeCategories = [
+    {'id': 0, 'category': '전체'},
+    {'id': 1, 'category': '소프트브레드'},
+    {'id': 2, 'category': '하드브레드'},
+    {'id': 3, 'category': '디저트'},
+  ].obs;
+
+  var isShowAppBar = true.obs;
   var isLoading = true.obs;
   var isFetchMoreLoading = false;
   var hasMore = true.obs;
-  var filterLoading = true.obs;
-  late RxList<dynamic> bakeriesResult = [].obs;
-  late RxList<dynamic> bakeryFilterResult = [].obs;
+  RxList<String> breadSortFilterIdList = ['1'].obs;
+  late RxList<String> breadOptionFilterIdList;
+
   RxList<dynamic> filterWidget = [].obs;
   RxInt cursorId = 0.obs;
   final int FetchMinimum = 2;
+
   RxList<String> filterIdList = ['1'].obs; // 제일 기본은 택배가능만 체크 된 상태
   RxList<String> tempFilterIdList = ['1'].obs;
+  var simpleBreadListResult = <BreadSimpleInfo>[].obs;
 
   @override
   void onInit() async {
-    print("\n\n 1. FetchBakeryFilter 순서 체크 로직 \n\n");
-    fetchBakeryFilter();
-    print("3. FetchFilterBakeries 시작");
-    fetchFilterdBakeries();
+    tabController = TabController(length: tabLength, vsync: this);
+    scrollController = ScrollController();
+    print("1.FetchFilteredBreads 시작");
+    // fetchFilterdBakeries();
+    Future.delayed(Duration(seconds: 3), () => isLoading(false));
     super.onInit();
   }
 
@@ -38,42 +55,10 @@ class BakeryFilterController extends GetxController {
     filterIdList.clear();
     filterIdList.addAll(tempFilterIdList);
     hasMore(true);
-    fetchFilterdBakeries();
     update(['filterBar']);
   }
 
-  void fetchFilterdBakeries() async {
-    try {
-      isLoading(true);
-      final result =
-          await FindPageApi.fetchFilteredBakeries(filterIdList: filterIdList);
-
-      if (result != null) {
-        print(result.data);
-        bakeriesResult =
-            (result.data?['getFilteredBakeryList'] as List<Object?>).obs;
-
-        if (bakeriesResult.length == 0 ||
-            bakeriesResult.length < FetchMinimum) {
-          print("Fetch 한 데이터가 없거나 적어서 hasMore: false 합니다");
-          hasMore(false);
-          update(['bakeryList']);
-          return;
-        }
-        cursorId(bakeriesResult[bakeriesResult.length - 1]!['id']);
-        // print(bakeriesResult);
-
-      }
-    } catch (err) {
-      print("에러발새생");
-      print(err);
-    } finally {
-      isLoading(false);
-      print("4. FetchFilteredBakeries 끝");
-    }
-  }
-
-  void fetchMoreFilterBakeries() async {
+  void fetchMoreFilterBreads() async {
     try {
       print("FetchMore ~들어왔다");
       // isFetchMoreLoading(true);
@@ -98,9 +83,6 @@ class BakeryFilterController extends GetxController {
         }
         print("\n\n FetchMore 데이터 보기 \n\n");
         print(_newBakeriesResult);
-
-        bakeriesResult([...bakeriesResult, ..._newBakeriesResult]);
-        cursorId(_newBakeriesResult[_newBakeriesResult.length - 1]!['id']);
       }
     } catch (err) {
       print("에러발새생1");
@@ -110,28 +92,6 @@ class BakeryFilterController extends GetxController {
       // isFetchMoreLoading(false);
       // update(['bakeryFilerModal']);
       isFetchMoreLoading = false;
-    }
-  }
-
-  void fetchBakeryFilter() async {
-    try {
-      final result = await FindPageApi.fetchBakeryFilter();
-      if (result != null) {
-        print("여기들어왔어요");
-        print(result);
-        bakeryFilterResult =
-            (result.data['getBakeryFilter'] as List<Object?>).obs;
-
-        print(bakeryFilterResult);
-      }
-    } catch (err) {
-      print("에러발생용");
-      print(err);
-    } finally {
-      filterLoading(false);
-      update(['filterBar']);
-      // update(['bakeryFilerModal']);
-      print("2. FetchBakeryFilter 끝");
     }
   }
 }

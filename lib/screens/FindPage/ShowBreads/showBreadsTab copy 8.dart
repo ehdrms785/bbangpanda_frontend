@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
+// 카테고리 & 필터2줄로 나눠보자
 class ShowBreadsTab extends StatefulWidget {
   ShowBreadsTab({Key? key, required this.isShowAppBar}) : super(key: key);
   late final RxBool isShowAppBar;
@@ -109,91 +110,113 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
         toolbarHeight: 0, // bottom을 Title로 쓰기 위해
 
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(6.0.h),
-          child: Column(
-            children: [
-              Container(
-                height: 5.0.h,
-                margin: EdgeInsets.symmetric(vertical: 0.5.h),
-                // color: Colors.amber.shade100,
-                child: ShaderMask(
-                  shaderCallback: (Rect bounds) {
-                    return LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: <Color>[
-                        Colors.black,
-                        Colors.transparent,
-                        Colors.transparent,
-                        Colors.black,
-                      ],
-                      stops: [0.0, 0.02, 0.97, 1.0],
-                    ).createShader(bounds);
-                  },
-                  blendMode: BlendMode.dstOut,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      SizedBox(width: 2.0.w),
-                      ...BreadCategories.map((e) {
-                        return GestureDetector(
-                          onTap: () {
-                            Get.toNamed('/breadLargeCategory',
-                                arguments: {'breadLargeCategory': e});
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 2.0.w),
-                            child: Chip(
-                              visualDensity: VisualDensity.compact,
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              label: Text(
-                                e.category,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 9.0.sp,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              // labelPadding: EdgeInsets.symmetric(
-                              //     horizontal: 1.0.w, vertical: 0),
-                              // padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(width: 0, color: Colors.grey),
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              backgroundColor: Colors.grey.shade200,
-                              // showCheckmark: false,
-                            ),
+          preferredSize: Size.fromHeight(6.5.h),
+          child: Container(
+            height: 6.5.h,
+            // color: Colors.amber.shade100,
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return Obx(
+                          () => Wrap(
+                            children: [
+                              MyAppBar(title: "정렬 설정"),
+                              ...BreadSortFilters.map((sortFilter) => ListTile(
+                                    onTap: () {
+                                      controller.sortFilterId(sortFilter.id);
+                                      controller.refreshBakeryInfoData();
+                                      Get.back();
+                                    },
+                                    title: Text(sortFilter.filter),
+                                    selected: sortFilter.id ==
+                                        controller.sortFilterId.value,
+                                    selectedTileColor: Colors.grey,
+                                  )),
+                            ],
                           ),
                         );
-                      }),
-                    ],
+                      },
+                    );
+                  },
+                  child: Container(
+                      // margin: EdgeInsets.only(left: 2.0.w),
+                      child: RawChip(
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    label: Text(
+                      "${BreadSortFilters.where((element) => element.id == controller.sortFilterId.value).first.filter} ∇",
+                      style: TextStyle(
+                          fontSize: 9.0.sp, fontWeight: FontWeight.w600),
+                    ),
+                    labelPadding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(25),
+                    )),
+                    showCheckmark: false,
+                    padding: EdgeInsets.all(5.0),
+                  )),
+                ),
+                Text(' |', style: TextStyle(color: Colors.grey)),
+                Expanded(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: <Color>[
+                          Colors.black,
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.black,
+                        ],
+                        stops: [0.0, 0.05, 0.95, 1.0],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstOut,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        SizedBox(width: 2.0.w),
+                        ...BreadCategories.map((e) {
+                          return GestureDetector(
+                            onTap: () {
+                              Get.toNamed('/breadLargeCategory');
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 2.0.w),
+                              child: RawChip(
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                label: Text(
+                                  e.category,
+                                  style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 9.0.sp,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                labelPadding:
+                                    EdgeInsets.symmetric(horizontal: 0.3.w),
+                                showCheckmark: false,
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+                FilterIcon(),
+              ],
+            ),
           ),
         ),
       );
   Widget FilterIcon() => GestureDetector(
-        child: RawChip(
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          label: Text(
-            "상세옵션 ∇",
-            style: TextStyle(fontSize: 9.0.sp, fontWeight: FontWeight.w600),
-          ),
-          labelPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(width: 0, color: Colors.grey),
-            // borderRadius: BorderRadius.only(
-            //   topRight: Radius.circular(25),
-            // ),
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          showCheckmark: false,
-          padding: EdgeInsets.all(5.0),
-          backgroundColor: Colors.transparent,
-        ),
+        child: Icon(Icons.filter_list),
         onTap: () async {
           showModalBottomSheet(
             isDismissible: false, // 위에 빈공간 눌렀을때 자동으로 없어지게 하는 기능
@@ -219,7 +242,7 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
           padding: EdgeInsets.symmetric(horizontal: 4.0.w),
           child: Obx(() {
             List<Widget> filterWidgetList = [];
-            controller.breadFilterResult
+            controller.bakeryFilterResult
                 .asMap()
                 .entries
                 .forEach((MapEntry entry) {

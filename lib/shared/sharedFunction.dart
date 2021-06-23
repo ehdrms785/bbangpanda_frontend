@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
+import 'package:time/time.dart';
 
 Future<bool> internetCheck() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
@@ -30,6 +31,7 @@ void logout() {
   GraphQLConfiguration.setToken(null);
   Get.find<AuthController>().isLoggedIn.value = false;
   FirebaseAuth.instance.signOut();
+  Get.until((route) => route.isFirst);
 }
 
 Future<bool> tokenCheck() async {
@@ -109,4 +111,39 @@ int signCodeResendTimeCheck(int resendPossibleTime) {
         message: "인증번호 재발송은 자주 할 수 없습니다.\n$_remainSeconds 초 후에 시도 해 주세요.");
   }
   return _remainSeconds;
+}
+
+String priceToString(int price) =>
+    price.toString().replaceAll(RegExp(r'\B(?=(\d{3})+(?!\d))'), ',');
+
+FetchPolicy useCacheWithExpiration(
+    {Duration? expiration, required String key, bool isRefresh: false}) {
+  if (expiration == null) expiration = 30.minutes;
+
+  var fetchPolicy = FetchPolicy.cacheOnly.obs;
+
+  void cachingLastFetchTime() {
+    Hive.box('graphqlCache')
+        .put(key, (expiration!.fromNow).millisecondsSinceEpoch);
+    fetchPolicy(FetchPolicy.networkOnly);
+  }
+
+  if (isRefresh) {
+    cachingLastFetchTime();
+  } else {
+    try {
+      var lastFetchTime = Hive.box('graphqlCache').get(key);
+
+      if (lastFetchTime == null ||
+          lastFetchTime < DateTime.now().millisecondsSinceEpoch) {
+        cachingLastFetchTime();
+      } else {
+        fetchPolicy(FetchPolicy.cacheFirst);
+      }
+    } catch (e) {
+      fetchPolicy(FetchPolicy.networkOnly);
+    }
+  }
+  print("FetchPolicy: ${fetchPolicy.value}");
+  return fetchPolicy.value;
 }

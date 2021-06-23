@@ -26,7 +26,11 @@ class LoginController extends GetxController {
   void onInit() {
     focusScopeNode = FocusScopeNode();
     pwFocusNode = FocusNode();
-    idTextController = TextEditingController();
+    idTextController =
+        TextEditingController(text: Get.parameters['email'] ?? '');
+    if (Get.parameters['email'] != null) {
+      pwFocusNode.requestFocus();
+    }
     passwordTextController = TextEditingController();
     super.onInit();
   }
@@ -130,6 +134,8 @@ class LoginController extends GetxController {
 
   void loginSubmit() async {
     if (loginFormKey.currentState!.validate()) {
+      // 포커스를 해제해주어야 비밀번호 틀렸을 때
+      // 다시 비밀번호에 포커스하고 텍스트가 써짐
       focusScopeNode.unfocus();
       isInAsyncCallStateChange(true);
       try {

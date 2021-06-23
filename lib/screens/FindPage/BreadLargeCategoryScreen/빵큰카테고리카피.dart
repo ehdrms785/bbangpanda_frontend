@@ -1,5 +1,5 @@
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/BreadSmallCategoryScreen/breadCategory.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadSmallCategoryScreen/breadSmallCategoryScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

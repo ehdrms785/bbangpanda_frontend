@@ -30,7 +30,7 @@ class SignUpController extends GetxController {
   var loading = false.obs;
   var resendPossibleTime = 0;
   var isInAsyncCall = false.obs;
-  String verificationId = '';
+  String _verificationId = '';
   List<bool> isChecked = List.generate(2, (index) => false).obs;
   @override
   void onInit() {
@@ -93,25 +93,35 @@ class SignUpController extends GetxController {
             showSnackBar(message: "이미 로그인 되어 있습니다.");
             return;
           }
+          print(
+              'verficationId: $_verificationId \n smsCode : ${signCodeTextController.text}');
           final PhoneAuthCredential credential = PhoneAuthProvider.credential(
-            verificationId: verificationId,
+            verificationId: _verificationId,
             smsCode: signCodeTextController.text,
           );
+          print("1번 체크");
+          print(credential);
           await _auth.signInWithCredential(credential);
-
+          print("2번 체크");
           if (_auth.currentUser != null) {
             print("유저 있음");
             bool ok = await signUpWithServer(uid: _auth.currentUser!.uid);
             print("정상 작동했나? $ok");
             await _auth.signOut();
             if (ok) {
-              Get.back(result: emailTextController.text);
+              // Get.toNamed()
+              // Get.reload()
+
+              Get.offAndToNamed("/login",
+                  parameters: {'email': emailTextController.text});
+              // Get.back(result: emailTextController.text);
               return;
             }
           }
         } on FirebaseAuthException catch (e) {
           print("\n\n에러발생 (아마 코드오류??)");
           print(e.code);
+          print(e);
           if (!Get.find<AuthController>().isInternetOn) {
             showError(title: "XE00000", message: "인터넷 연결을 확인 해 주세요.");
             return;
@@ -245,6 +255,7 @@ class SignUpController extends GetxController {
       verificationCompleted: (PhoneAuthCredential credential) async {
         // ANDROID ONLY?
         print("Recapcha 없이 인증 (안드로이드 Only)");
+        await _auth.signInWithCredential(credential);
       },
       verificationFailed: (FirebaseAuthException err) {
         print(err.code);
@@ -255,13 +266,23 @@ class SignUpController extends GetxController {
       },
       codeSent: (String verificationId, int? resendToken) async {
         // SMS Code 받아서
-        verificationId = verificationId;
+        _verificationId = verificationId;
+        // print('verificationId: ${verificationId}');
         loadingStateChange(false);
+        // PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        //     verificationId: verificationId, smsCode: "123456");
+
+        // print("룰루1");
+        // Sign the user in (or link) with the credential
+        // await _auth.signInWithCredential(credential);
+        // print("룰루2");
         showSnackBar(message: "휴대폰으로 인증코드가 전송되었습니다.");
       },
       codeAutoRetrievalTimeout: (verificationId) {
         // Auto-resolution timed out...
-        verificationId = verificationId;
+        _verificationId = verificationId;
+        print('verificationId2: ${verificationId}');
+
         print("4번");
       },
     );

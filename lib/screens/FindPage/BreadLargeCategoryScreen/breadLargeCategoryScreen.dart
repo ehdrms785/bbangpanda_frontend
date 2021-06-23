@@ -1,5 +1,5 @@
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/BreadSmallCategoryScreen/breadCategory.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadSmallCategoryScreen/breadSmallCategoryScreen.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,23 +15,28 @@ class BreadLargeCategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      initialIndex: 0,
-      child: SafeArea(
-        child: Scaffold(
-          appBar: MainAppBar(),
-          body: Padding(
-            // padding: EdgeInsets.zero,
-            padding: EdgeInsets.symmetric(horizontal: 3.0.w),
-            child: Column(
-              children: [
-                TabListContainer(),
-                TabViewList(),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: MainAppBar(),
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return Center(child: CupertinoActivityIndicator());
+          }
+          return DefaultTabController(
+            length: controller.smallCategoriesResult.length + 1,
+            initialIndex: 0,
+            child: Padding(
+              // padding: EdgeInsets.zero,
+              padding: EdgeInsets.symmetric(horizontal: 3.0.w),
+              child: Column(
+                children: [
+                  TabListContainer(),
+                  TabViewList(),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        }),
       ),
     );
   }
@@ -69,130 +74,72 @@ class BreadLargeCategoryScreen extends StatelessWidget {
           ),
         ),
       );
-  Widget TabListContainer() => Container(
-        height: 15.0.h,
-        // padding: EdgeInsets.symmetric(horizontal: 3.0.w),
-        color: Colors.blue.withOpacity(0.2),
-        child: CustomScrollView(
-          key: Key("BLCS"), // BakeryLargetCategoryScroll
-          physics: NeverScrollableScrollPhysics(),
-          controller: controller.scrollController,
-          slivers: [
-            TabList(),
-            SliverToBoxAdapter(
-              child: Divider(),
-            )
-          ],
-        ),
+  Widget TabListContainer() => CustomScrollView(
+        key: Key("BLCS"), // BakeryLargetCategoryScroll
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        // controller: controller.scrollController,
+        slivers: [
+          TabList(),
+        ],
       );
   Widget TabList() => SliverAppBar(
         pinned: true,
         automaticallyImplyLeading: false,
+        toolbarHeight: 7.0.h,
         titleSpacing: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              child: TabBar(
-                  controller: controller.tabController,
-                  isScrollable: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  unselectedLabelColor: Colors.grey.withOpacity(0.3),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicatorPadding: EdgeInsets.zero,
-                  indicatorWeight: 0.2.h,
-                  tabs: [
-                    Tab(
+        title: Container(
+          width: double.infinity,
+          child: DecoratedTabBar(
+            tabBar: TabBar(
+                controller: controller.tabController,
+                isScrollable: true,
+                physics: NeverScrollableScrollPhysics(),
+                unselectedLabelColor: Colors.grey.withOpacity(0.3),
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicatorPadding: EdgeInsets.zero,
+                indicatorWeight: 0.5.h,
+                tabs: [
+                  SizedBox(
+                    height: 5.0.h,
+                    child: Tab(
                       child: Text("전체", style: TextStyle(fontSize: 13.0.sp)),
                     ),
-                    Tab(
-                      child: Text("식빵", style: TextStyle(fontSize: 13.0.sp)),
-                    ),
-                    Tab(
-                      child: Text("치아바타", style: TextStyle(fontSize: 13.0.sp)),
-                    ),
-                    Tab(
-                      child: Text("크림빵", style: TextStyle(fontSize: 13.0.sp)),
-                    ),
-                  ]),
-            ),
-          ],
-        ),
-        bottom: PreferredSize(
-          child: Column(
-            children: [
-              Divider(
-                height: 0,
-              ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  // color: Colors.red.withOpacity(0.4),
-                  padding: EdgeInsets.symmetric(vertical: 1.0.h),
-                  child: Row(
-                    children: [
-                      RawChip(
-                        label: Text("최신순"),
-                      ),
-                      RawChip(
-                        label: Text("가격"),
-                      ),
-                      RawChip(
-                        label: Text("옵션"),
-                      ),
-                      RawChip(
-                        label: Text("테스트용으로 길~~~~게"),
-                      ),
-                      RawChip(
-                        label: Text("아차차차차타ㅏ하"),
-                      ),
-                    ],
                   ),
+                  ...controller.smallCategoriesResult.map(
+                    (smallCategory) => SizedBox(
+                        height: 5.0.h,
+                        child: Tab(
+                          child: Text(smallCategory['category']),
+                        )),
+                  ),
+                ]),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey,
+                  width: 0.1,
                 ),
               ),
-              Divider(
-                height: 0,
-              ),
-            ],
+            ),
           ),
-          preferredSize: Size.fromHeight(7.8.h),
         ),
-        shadowColor: Colors.red,
       );
   Widget TabViewList() => Expanded(
         child: TabBarView(
           controller: controller.tabController,
           children: <Widget>[
-            KeepAliveWrapper(
-              child: BreadSmallCategoryScreen(
-                largeCategory: BreadLargeCategory.all,
+            BreadSmallCategoryTab(
+              isShowAppBar: isShowAppBar,
+              largeCategoryId: controller.breadLargeCategory.id,
+            ),
+            ...controller.smallCategoriesResult.map(
+              (smallCategory) => BreadSmallCategoryTab(
+                isShowAppBar: isShowAppBar,
+                largeCategoryId: controller.breadLargeCategory.id,
+                smallCategoryId: smallCategory['id'],
               ),
             ),
-            // KeepAliveWrapper(
-            //   child: BreadSmallCategoryTest(
-            //     largeCategory: BreadLargeCategory.all,
-            //   ),
-            // ),
-            KeepAliveWrapper(
-              child: BreadSmallCategoryScreen(
-                largeCategory: BreadLargeCategory.softBread,
-              ),
-            ),
-            // KeepAliveWrapper(
-            //   child: BreadSmallCategoryTest(
-            //     largeCategory: BreadLargeCategory.softBread,
-            //   ),
-            // ),
-
-            BreadSmallCategoryScreen(
-              largeCategory: BreadLargeCategory.hardBread,
-            ),
-            BreadSmallCategoryScreen(
-              largeCategory: BreadLargeCategory.dessert,
-            ),
-            // HelloWorld(),
           ],
         ),
       );
@@ -227,16 +174,16 @@ class _HelloWorldState extends State<HelloWorld>
                   fit: BoxFit.cover,
                 ),
               ),
-              Text("가격 나오고"),
-              Text("베이커리명"),
-              Text("대충설명"),
+              Text("가격 나오고", style: TextStyle(fontSize: 12.0.sp)),
+              Text("베이커리명", style: TextStyle(fontSize: 12.0.sp)),
+              Text("대충설명", style: TextStyle(fontSize: 12.0.sp)),
             ],
           );
         }, childCount: 5),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 4.0.w,
-          mainAxisExtent: 35.0.h,
+          mainAxisExtent: 40.0.h,
         ),
       ),
     ]));

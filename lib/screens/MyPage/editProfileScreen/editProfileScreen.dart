@@ -28,8 +28,13 @@ class EditProfileScreen extends StatelessWidget {
                 Get.back();
               }),
               actions: [
-                Obx(
-                  () => SizedBox(
+                Obx(() {
+                  if (editProfCtr.isLoading.value) {
+                    return Center(
+                      child: CupertinoActivityIndicator(),
+                    );
+                  }
+                  return SizedBox(
                     child: TextButton(
                       child: Text("수정"),
                       onPressed: editProfCtr.isSomeFieldChanged.value &&
@@ -72,8 +77,8 @@ class EditProfileScreen extends StatelessWidget {
                             }
                           : null,
                     ),
-                  ),
-                ),
+                  );
+                }),
               ],
             ),
             SliverList(

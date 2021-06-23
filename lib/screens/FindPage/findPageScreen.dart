@@ -42,11 +42,14 @@ class _FindPageScreenState extends State<FindPageScreen>
       child: SafeArea(
         child: Scaffold(
           appBar: MainAppBar(),
-          body: Column(
-            children: [
-              TabListContainer(),
-              TabViewList(),
-            ],
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 3.0.w),
+            child: Column(
+              children: [
+                TabListContainer(),
+                TabViewList(),
+              ],
+            ),
           ),
         ),
       ),
@@ -87,56 +90,76 @@ class _FindPageScreenState extends State<FindPageScreen>
           ),
         ),
       );
-  Widget TabListContainer() => Container(
-        height: 7.0.h,
-        child: CustomScrollView(
-          key: Key("MainScroll"),
-          physics: NeverScrollableScrollPhysics(),
-          controller: _scrollController,
-          slivers: [TabList()],
-        ),
+  Widget TabListContainer() => CustomScrollView(
+        key: Key("MainScroll"),
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        // controller: _scrollController,
+        slivers: [
+          TabList(),
+        ],
       );
   Widget TabList() => SliverAppBar(
         pinned: true,
+        automaticallyImplyLeading: false,
+        toolbarHeight: 7.0.h,
+        titleSpacing: 0,
         title: Container(
           width: double.infinity,
-          child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              physics: NeverScrollableScrollPhysics(),
-              unselectedLabelColor: Colors.grey.withOpacity(0.3),
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicatorPadding: EdgeInsets.zero,
-              indicatorWeight: 0.2.h,
-              tabs: [
-                Tab(
-                  child: Container(
-                    width: 10.0.w,
-                    child: Center(
-                        child: Text("빵집", style: TextStyle(fontSize: 13.0.sp))),
+          // color: Colors.grey,
+          child: DecoratedTabBar(
+            tabBar: TabBar(
+                controller: _tabController,
+
+                // isScrollable: true,
+                physics: NeverScrollableScrollPhysics(),
+                unselectedLabelColor: Colors.grey.withOpacity(0.3),
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicatorPadding: EdgeInsets.zero,
+                indicatorWeight: 0.5.h,
+                labelPadding: EdgeInsets.zero,
+                tabs: [
+                  SizedBox(
+                    height: 5.0.h,
+                    child: Tab(
+                      child: Center(
+                          child:
+                              Text("빵집", style: TextStyle(fontSize: 12.0.sp))),
+                    ),
                   ),
-                ),
-                Tab(
-                  child: Container(
-                    width: 10.0.w,
-                    child: Center(
-                        child: Text("빵", style: TextStyle(fontSize: 13.0.sp))),
+                  SizedBox(
+                    height: 5.0.h,
+                    child: Tab(
+                      child: Center(
+                          child:
+                              Text("빵", style: TextStyle(fontSize: 12.0.sp))),
+                    ),
                   ),
-                ),
-                Tab(
-                  child: Container(
-                    width: 18.0.w,
-                    child: Center(
-                        child:
-                            Text("즐겨찾기", style: TextStyle(fontSize: 13.0.sp))),
+                  SizedBox(
+                    height: 5.0.h,
+                    child: Tab(
+                      child: Center(
+                          child:
+                              Text("마켓", style: TextStyle(fontSize: 12.0.sp))),
+                    ),
                   ),
+                ]),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey,
+                  width: 0.1,
                 ),
-              ]),
+              ),
+            ),
+          ),
         ),
       );
   Widget TabViewList() => Expanded(
         child: TabBarView(
           controller: _tabController,
+          // physics: NeverScrollableScrollPhysics(),
+          physics: CustomPageViewScrollPhysics(),
           children: <Widget>[
             ShowBakeriesTab(
               isShowAppBar: isShowAppBar,
