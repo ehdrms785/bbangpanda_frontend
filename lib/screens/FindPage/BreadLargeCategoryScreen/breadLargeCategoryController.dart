@@ -27,6 +27,7 @@ class BreadLargeCategoryController extends GetxController
     {'id': 3, 'category': '디저트'},
   ].obs;
 
+  RxBool isShowAppBar = true.obs;
   var isLoading = true.obs;
   RxString sortFilterId = '1'.obs; // 최신순
   var filterIdList = [].obs;

@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
-var isShowAppBar = true.obs;
+// var isShowAppBar = true.obs;
 
 class BreadLargeCategoryScreen extends StatelessWidget {
   final BreadLargeCategoryController controller = Get.find();
@@ -45,10 +45,12 @@ class BreadLargeCategoryScreen extends StatelessWidget {
         preferredSize: Size.fromHeight(5.0.h),
         child: Obx(
           () => AnimatedContainer(
-            height: isShowAppBar.value ? 5.0.h : 0.0,
+            height: controller.isShowAppBar.value ? 5.0.h : 0.0,
             duration: Duration(milliseconds: 200),
             child: AppBar(
-              title: Text("대분류"),
+              // automaticallyImplyLeading: false,
+              leading: backArrowButtton(),
+              title: Text(controller.breadLargeCategory.category),
               centerTitle: true,
               actions: [
                 GestureDetector(
@@ -129,13 +131,13 @@ class BreadLargeCategoryScreen extends StatelessWidget {
         child: TabBarView(
           controller: controller.tabController,
           children: <Widget>[
+            // 전체탭
             BreadSmallCategoryTab(
-              isShowAppBar: isShowAppBar,
               largeCategoryId: controller.breadLargeCategory.id,
             ),
+            // 나머지탭
             ...controller.smallCategoriesResult.map(
               (smallCategory) => BreadSmallCategoryTab(
-                isShowAppBar: isShowAppBar,
                 largeCategoryId: controller.breadLargeCategory.id,
                 smallCategoryId: smallCategory['id'],
               ),

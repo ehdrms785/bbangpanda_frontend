@@ -6,6 +6,9 @@ void showError({
   String title = "X00000",
   required String message,
 }) {
+  if (Get.isSnackbarOpen != null && Get.isSnackbarOpen == true) {
+    return;
+  }
   Get.snackbar(
     '',
     '',
@@ -27,6 +30,9 @@ void showSnackBar({
   String title = "알림",
   required String message,
 }) {
+  if (Get.isSnackbarOpen != null && Get.isSnackbarOpen == true) {
+    return;
+  }
   Get.snackbar(
     '',
     '',

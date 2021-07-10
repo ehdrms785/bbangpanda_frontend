@@ -2,6 +2,7 @@ import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/br
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadShareWidget.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/findpageScreenController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPagetypeDef.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
@@ -13,8 +14,6 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
 class ShowBreadsTab extends StatefulWidget {
-  ShowBreadsTab({Key? key, required this.isShowAppBar}) : super(key: key);
-  late final RxBool isShowAppBar;
   @override
   _ShowBreadsTabState createState() => _ShowBreadsTabState();
 }
@@ -26,7 +25,9 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
   @override
   void initState() {
     print("ShowBreads Init!");
-    Get.create(() => ShowBreadsController(isShowAppBar: widget.isShowAppBar),
+    Get.create(
+        () => ShowBreadsController(
+            isShowAppBar: FindPageScreenController.to.isShowAppBar),
         tag: 'showBreadTab');
     controller = Get.find(tag: 'showBreadTab');
     _scrollController = controller.scrollController;
@@ -64,7 +65,7 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
                   parent: const AlwaysScrollableScrollPhysics()),
               slivers: [
                 CupertinoSliverRefreshControl(
-                  onRefresh: () => controller.refreshBakeryInfoData(),
+                  onRefresh: () => controller.refreshBakeryInfoData,
                 ),
                 NewBreadBox(),
                 CategoryBar(),
@@ -135,11 +136,12 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
                     scrollDirection: Axis.horizontal,
                     children: [
                       SizedBox(width: 2.0.w),
-                      ...BreadCategories.map((e) {
+                      ...BreadLargeCategories.map((breadLargeCategory) {
                         return GestureDetector(
                           onTap: () {
-                            Get.toNamed('/breadLargeCategory',
-                                arguments: {'breadLargeCategory': e});
+                            Get.toNamed('/breadLargeCategory', arguments: {
+                              'breadLargeCategory': breadLargeCategory
+                            });
                           },
                           child: Padding(
                             padding: EdgeInsets.only(right: 2.0.w),
@@ -148,7 +150,7 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
                               materialTapTargetSize:
                                   MaterialTapTargetSize.shrinkWrap,
                               label: Text(
-                                e.category,
+                                breadLargeCategory.category,
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 9.0.sp,

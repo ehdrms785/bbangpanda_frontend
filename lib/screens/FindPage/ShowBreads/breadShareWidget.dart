@@ -8,19 +8,21 @@ import 'package:flutter/rendering.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
-Widget BreadList({required ShowBreadsController controller}) {
+Widget SimpleBreadList({
+  required RxBool isLoading,
+  required RxBool hasMore,
+  required RxList<dynamic> simpleBreadListResult,
+}) {
   return Obx(() {
     // Obx의 단점이 SliverList 안에 hasMoreValue가 있으면
     // 해당을 반영해서 UI 업데이트를 하지 않는다.
     // 그래서 이렇게 명시적으로 써 준다.
-    controller.hasMore.value;
-    if (controller.isLoading.value == true &&
-        controller.simpleBreadListResult.isEmpty) {
+    hasMore.value;
+    if (isLoading.value == true && simpleBreadListResult.isEmpty) {
       return SliverIndicator();
     }
     print("언제 업데이트 되나 보자zz");
-    if (controller.hasMore.value == false &&
-        controller.simpleBreadListResult.length == 0) {
+    if (hasMore.value == false && simpleBreadListResult.length == 0) {
       return SliverToBoxAdapter(
         child: Container(
           height: 50.0.h,
@@ -34,13 +36,13 @@ Widget BreadList({required ShowBreadsController controller}) {
       key: ValueKey("BrLKey"), // BreadList Key
       delegate: SliverChildBuilderDelegate((context, index) {
         print('$index 들어왔다');
-        if (index == controller.simpleBreadListResult.length) {
+        if (index == simpleBreadListResult.length) {
           print("마지막 인덱스z");
-          if (controller.hasMore.value == false) {
+          if (hasMore.value == false) {
             return Visibility(
                 key: ValueKey(index), visible: false, child: Container());
           }
-          if (controller.simpleBreadListResult.length > 1) {
+          if (simpleBreadListResult.length > 1) {
             return Align(
               alignment: Alignment.topRight,
               child: CupertinoActivityIndicator(
@@ -52,7 +54,7 @@ Widget BreadList({required ShowBreadsController controller}) {
                 key: ValueKey(index), visible: false, child: Container());
           }
         }
-        BreadSimpleInfo breadData = controller.simpleBreadListResult[index];
+        BreadSimpleInfo breadData = simpleBreadListResult[index];
         return Container(
           key: ValueKey(index),
           child: Column(
@@ -133,9 +135,9 @@ Widget BreadList({required ShowBreadsController controller}) {
           ),
         );
       },
-          childCount: !controller.hasMore.value
-              ? controller.simpleBreadListResult.length
-              : controller.simpleBreadListResult.length + 1),
+          childCount: !hasMore.value
+              ? simpleBreadListResult.length
+              : simpleBreadListResult.length + 1),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 4.0.w,
@@ -144,3 +146,249 @@ Widget BreadList({required ShowBreadsController controller}) {
     );
   });
 }
+
+Widget BreadFilterBar(BreadModel controller) => SliverAppBar(
+    pinned: true,
+    toolbarHeight: 0, // bottom을 Title로 쓰기 위해
+    bottom: PreferredSize(
+      preferredSize: Size.fromHeight(6.0.h),
+      child: Column(
+        children: [
+          Container(
+            height: 5.0.h,
+            margin: EdgeInsets.only(bottom: 0.5.h),
+            // color: Colors.amber.shade100,
+            child: Row(
+              // scrollDirection: Axis.horizontal,
+              children: [
+                SizedBox(width: 2.0.w),
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      isDismissible: true,
+                      isScrollControlled: true,
+                      context: Get.context!,
+                      builder: (context) {
+                        return Obx(
+                          () => Wrap(
+                            children: [
+                              MyAppBar(title: "정렬 설정"),
+                              ...BreadSortFilters.map((sortFilter) => ListTile(
+                                    onTap: () {
+                                      controller.sortFilterId(sortFilter.id);
+                                      controller.refreshBakeryInfoData();
+                                      Get.back();
+                                    },
+                                    title: Text(sortFilter.filter),
+                                    selected: sortFilter.id ==
+                                        controller.sortFilterId.value,
+                                    selectedTileColor: Colors.grey,
+                                  )),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                      margin: EdgeInsets.only(right: 2.0.w),
+                      child: Chip(
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        label: Text(
+                          "${BreadSortFilters.where((element) => element.id == controller.sortFilterId.value).first.filter} ∇",
+                          style: TextStyle(
+                              fontSize: 9.0.sp, fontWeight: FontWeight.w600),
+                        ),
+                        labelPadding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 0, color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        // showCheckmark: false,
+                        padding: EdgeInsets.all(5.0),
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: Colors.transparent,
+                      )),
+                ),
+                FilterIcon(controller),
+                Center(
+                    child: Text(' | ', style: TextStyle(color: Colors.grey))),
+                Expanded(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: <Color>[
+                          Colors.black,
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.black,
+                        ],
+                        stops: [0.0, 0.02, 0.97, 1.0],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstOut,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        SizedBox(width: 2.0.w),
+                        ...(controller.breadFilterResult.where((filter) {
+                          if (controller.filterIdList.contains(filter['id'])) {
+                            return true;
+                          } else {
+                            return false;
+                          }
+                        }).toList())
+                            .map((e) {
+                          return Padding(
+                            padding: EdgeInsets.only(right: 2.0.w),
+                            child: RawChip(
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              label: Text(
+                                e['filter'],
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 9.0.sp,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              selected: false,
+                              selectedColor: Colors.blueAccent.shade200,
+                              showCheckmark: false,
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+Widget FilterIcon(BreadModel controller) => GestureDetector(
+      child: RawChip(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        label: Text(
+          "상세옵션 ∇",
+          style: TextStyle(fontSize: 9.0.sp, fontWeight: FontWeight.w600),
+        ),
+        labelPadding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(width: 0, color: Colors.grey),
+          // borderRadius: BorderRadius.only(
+          //   topRight: Radius.circular(25),
+          // ),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        showCheckmark: false,
+        padding: EdgeInsets.all(5.0),
+        backgroundColor: Colors.transparent,
+      ),
+      onTap: () async {
+        showModalBottomSheet(
+          isDismissible: false, // 위에 빈공간 눌렀을때 자동으로 없어지게 하는 기능
+          isScrollControlled: true, // 풀 스크린 가능하게 만들어줌
+          context: Get.context!,
+          builder: (context) {
+            // return Container();
+            return FilterModal(controller);
+          },
+        ).whenComplete(() {
+          print("종료");
+          return;
+        });
+      },
+    );
+Widget FilterModal(BreadModel controller) {
+  // TempFilterIdList는 현재 filterIdList를 복사한 값으로 사용
+  // controller.tempFilterIdList.clear();
+  // controller.tempFilterIdList.addAll(controller.filterIdList);
+  return Container(
+      width: 100.0.w,
+      height: 90.0.h,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.0.w),
+        child: Obx(() {
+          List<Widget> filterWidgetList = [];
+          controller.breadFilterResult
+              .asMap()
+              .entries
+              .forEach((MapEntry entry) {
+            filterWidgetList
+                .add(MakeChoiceChip(controller.tempFilterIdList, entry));
+          });
+          return Column(
+            children: [
+              MyAppBar(title: "필터"),
+              Container(
+                width: double.infinity,
+                child: Wrap(
+                    spacing: 2.0.w,
+                    runSpacing: 0.0,
+                    children: [...filterWidgetList]),
+              ),
+
+              // 맨 아래에 버튼을 두기 위한 Expanded
+              Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 2.5.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SizedBox(
+                          width: 30.0.w,
+                          height: 5.0.h,
+                          child: ElevatedButton(
+                            child: Text("초기화",
+                                style: TextStyle(color: Colors.black)),
+                            onPressed: () {
+                              controller.initFilterSelected();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 50.0.w,
+                          height: 5.0.h,
+                          child: ElevatedButton(
+                            child: Text("적용"),
+                            onPressed: () async {
+                              Get.back();
+                              controller.applyFilterChanged;
+                            },
+                            style: ElevatedButton.styleFrom(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          );
+        }),
+      ));
+}
+
+Widget MakeChoiceChip(RxList<dynamic> tempFilterIdList, MapEntry entry) =>
+    ChoiceChip(
+      disabledColor: Colors.grey.shade700,
+      selectedColor: Colors.blueAccent.shade200,
+      selected: tempFilterIdList.contains((entry.key + 1).toString()),
+      onSelected: (value) {
+        // 택배가능, 매장취식 건들 때
+
+        tempFilterIdList.contains((entry.key + 1).toString())
+            ? tempFilterIdList.remove((entry.key + 1).toString())
+            : tempFilterIdList.add((entry.key + 1).toString());
+      },
+      label: Text(entry.value['filter'], style: TextStyle()),
+    );

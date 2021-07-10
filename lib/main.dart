@@ -3,7 +3,9 @@ import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
 import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryScreen.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/findPageScreen.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/findpageScreenController.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/Login/loginController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/Login/loginScreen.dart';
@@ -15,6 +17,10 @@ import 'package:bbangnarae_frontend/screens/MyPage/myPageController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/smsAuthScreen/smsAuthController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/smsAuthScreen/smsAuthScreen.dart';
+import 'package:bbangnarae_frontend/screens/SearchPage/searchDetailScreen/searchDetailScreen.dart';
+import 'package:bbangnarae_frontend/screens/SearchPage/searchDetailScreen/searchDetailScreenController.dart';
+import 'package:bbangnarae_frontend/screens/SearchPage/searchScreen.dart';
+import 'package:bbangnarae_frontend/screens/SearchPage/searchScreenController.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedValues.dart';
@@ -34,10 +40,13 @@ import 'package:page_transition/page_transition.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initHiveForFlutter();
-
   await Hive.openBox('auth');
   await Hive.openBox('graphqlCache');
   Hive.box('graphqlCache').clear();
+  await Hive.openBox('cache');
+  //천지인에서 .. 한글 인식 못 한다는 얘기가 있어서 넣어봄
+  FilteringTextInputFormatter.allow(RegExp('[ㄱ-ㅎ|가-힣|ㆍ|ᆢ]'));
+
   runApp(MyApp());
 }
 
@@ -68,6 +77,7 @@ class MyApp extends StatelessWidget {
             // AuthBinding();
             Get.put(AuthController(), permanent: true);
             Get.lazyPut(() => MypageController());
+            Get.lazyPut(() => FindPageScreenController());
             // Get.lazyPut(() => ShowBakeriesController());
             // Get.lazyPut(() => ShowBreadsController());
           }),
@@ -147,7 +157,25 @@ class MyApp extends StatelessWidget {
                 // Get.create(() => BreadLargeCategoryController());
                 Get.lazyPut(() => BreadLargeCategoryController());
               }),
-            )
+            ),
+            GetPage(
+              name: '/search',
+              page: () => SearchPage(),
+              binding: BindingsBuilder(() {
+                Get.lazyPut(
+                  () => SearchScreenController(),
+                );
+              }),
+            ),
+            GetPage(
+              name: '/searchDetail',
+              page: () => SearchDetailScreen(),
+              binding: BindingsBuilder(() {
+                // Get.create(() => SearchDetailScreenController(),
+                //     permanent: false);
+                // Get.lazyPut(() => SearchDetailScreenController());
+              }),
+            ),
           ],
         );
       }),
@@ -188,7 +216,7 @@ class _MainPageState extends State<MainPage> {
     Cart(),
     MyPageScreen(),
   ];
-  final List<String> _pageNames = ["빵나래 홈", "빵집 찾기", "빵 비교", "장바구니", "마이페이지"];
+  final List<String> _pageNames = ["홈", "찜", "빵쇼핑", "장바구니", "마이페이지"];
 
   late PageController pageController;
   int _selectedIndex = 0;
@@ -250,23 +278,27 @@ class _MainPageState extends State<MainPage> {
           onTap: _switchTap,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
               label: _pageNames[0],
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.storefront),
+              icon: Icon(Icons.favorite_border_sharp),
+              activeIcon: Icon(Icons.favorite),
               label: _pageNames[1],
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: Icon(Icons.breakfast_dining),
               label: _pageNames[2],
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
+              icon: Icon(Icons.shopping_cart_outlined),
+              activeIcon: Icon(Icons.shopping_cart),
               label: _pageNames[3],
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.location_searching),
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
               label: _pageNames[4],
             ),
           ],

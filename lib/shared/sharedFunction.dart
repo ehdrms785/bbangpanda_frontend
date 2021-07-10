@@ -147,3 +147,19 @@ FetchPolicy useCacheWithExpiration(
   print("FetchPolicy: ${fetchPolicy.value}");
   return fetchPolicy.value;
 }
+
+int calcEntirePeriod(DateTime startDate, DateTime endDate) {
+  int calcResult =
+      (endDate.millisecondsSinceEpoch - startDate.millisecondsSinceEpoch) ~/
+          3600000; // 3600초 (시간)
+  if (calcResult <= 0) return 0;
+  return calcResult;
+}
+
+int calcRemainedHours(DateTime endDate) {
+  int calcResult = (endDate.millisecondsSinceEpoch -
+          DateTime.now().millisecondsSinceEpoch) ~/
+      3600000;
+  if (calcResult <= 0) return 0;
+  return calcResult;
+}

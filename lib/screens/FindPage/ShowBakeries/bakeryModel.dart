@@ -1,4 +1,30 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 final SimpleBakeryFetchMinimum = 2;
+
+abstract class BakeryModel extends GetxController {
+  var firstInitLoading;
+  var isLoading;
+  var filterLoading;
+  var hasMore;
+  var isFetchMoreLoading;
+
+  late RxList<dynamic> bakeryFilterResult;
+  late RxInt cursorBakeryId;
+  late RxString sortFilterId; // 최신순
+  late RxList<String> filterIdList; // 제일 기본은 택배가능만 체크 된 상태
+  late RxList<String> tempFilterIdList;
+
+  late final ScrollController scrollController;
+
+  var simpleBakeriesListResult;
+
+  get applyFilterChanged;
+  get initFilterSelected;
+  get refreshBakeryInfoData;
+  // late Future<void> Function() refreshMarketOrderInfoData;
+}
 
 class BakerySortFilter {
   final String id;

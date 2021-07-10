@@ -6,26 +6,6 @@ import 'package:hive/hive.dart';
 import 'package:time/time.dart';
 
 class FindPageApi {
-  static Future<dynamic> fetchSimpleBakeriesInfo({
-    String sortFilterId: '1', // 최신순
-    List<String>? filterIdList,
-    int? cursorId,
-    bool? fetchMore = false,
-  }) async {
-    return await client.query(
-      QueryOptions(
-          document: gql(FindBakeryQuery.getSimpleBakeriesInfoQuery),
-          variables: {
-            'sortFilterId': sortFilterId,
-            'filterIdList': filterIdList,
-            ...(cursorId != 0 ? ({'cursorId': cursorId}) : {}),
-          },
-          fetchPolicy: fetchMore!
-              ? FetchPolicy.networkOnly
-              : FetchPolicy.cacheAndNetwork),
-    );
-  }
-
   static Future<dynamic> fetchBakeryFilter() async {
     print("하이브 GraphQL 캐시 테스트");
     print(Hive.box('graphqlCache').get('bakeryFilter'));
@@ -33,6 +13,17 @@ class FindPageApi {
       QueryOptions(
         document: gql(FindBakeryQuery.getBakeryFilterQuery),
         fetchPolicy: useCacheWithExpiration(key: 'bakeryFilter'),
+      ),
+    );
+  }
+
+  static Future<dynamic> fetchMarketOrderFilter() async {
+    print("하이브 GraphQL 캐시 테스트");
+    print(Hive.box('graphqlCache').get('marketOrderFilter'));
+    return await client.query(
+      QueryOptions(
+        document: gql(FindBakeryQuery.getMarketOrderFilterQuery),
+        fetchPolicy: useCacheWithExpiration(key: 'marketOrderFilter'),
       ),
     );
   }
@@ -48,6 +39,50 @@ class FindPageApi {
     );
   }
 
+  static Future<dynamic> fetchSimpleBakeriesInfo({
+    String sortFilterId: '1', // 최신순
+    required List<String> filterIdList,
+    int? cursorBakeryId,
+    bool? fetchMore = false,
+  }) async {
+    return await client.query(
+      QueryOptions(
+          document: gql(FindBakeryQuery.getSimpleBakeriesInfoQuery),
+          variables: {
+            'sortFilterId': sortFilterId,
+            'filterIdList': filterIdList,
+            ...(cursorBakeryId != 0
+                ? ({'cursorBakeryId': cursorBakeryId})
+                : {}),
+          },
+          fetchPolicy: fetchMore!
+              ? FetchPolicy.networkOnly
+              : FetchPolicy.cacheAndNetwork),
+    );
+  }
+
+  static Future<dynamic> fetchSimpleMarketOrdersInfo({
+    String sortFilterId: '1', // 최신순
+    required List<dynamic> filterIdList,
+    int? cursorMarketOrderId,
+    bool? fetchMore = false,
+  }) async {
+    return await client.query(
+      QueryOptions(
+          document: gql(FindBakeryQuery.getSimpleMarketOrdersInfoQuery),
+          variables: {
+            'sortFilterId': sortFilterId,
+            'filterIdList': filterIdList,
+            ...(cursorMarketOrderId != 0
+                ? ({'cursorMarketOrderId': cursorMarketOrderId})
+                : {}),
+          },
+          fetchPolicy: fetchMore!
+              ? FetchPolicy.networkOnly
+              : FetchPolicy.cacheAndNetwork),
+    );
+  }
+
 // largeCategoryId
 // smallCategoryId
 // sortFilterId
@@ -58,7 +93,7 @@ class FindPageApi {
     String? smallCategoryId,
     String sortFilterId: '1', //최신순
     List<dynamic>? filterIdList,
-    int? cursorId,
+    int? cursorBreadId,
     bool fetchMore: false,
   }) async {
     return await client.query(
@@ -73,7 +108,77 @@ class FindPageApi {
                 : {}),
             'sortFilterId': sortFilterId,
             'filterIdList': filterIdList,
-            ...(cursorId != 0 ? ({'cursorId': cursorId}) : {}),
+            ...(cursorBreadId != 0 ? ({'cursorBreadId': cursorBreadId}) : {}),
+          },
+          fetchPolicy: fetchMore
+              ? FetchPolicy.networkOnly
+              : FetchPolicy.cacheAndNetwork),
+    );
+  }
+
+  static Future<dynamic> fetchSearchedSimpleBreadsInfo({
+    required String searchTerm,
+    String sortFilterId: '1', //최신순
+    List<dynamic>? filterIdList,
+    int? cursorBreadId,
+    bool fetchMore: false,
+  }) async {
+    return await client.query(
+      QueryOptions(
+          document: gql(FindBakeryQuery.searchBreadsQuery),
+          variables: {
+            'searchTerm': searchTerm,
+            'sortFilterId': sortFilterId,
+            'filterIdList': filterIdList,
+            ...(cursorBreadId != 0 ? ({'cursorBreadId': cursorBreadId}) : {}),
+          },
+          fetchPolicy: fetchMore
+              ? FetchPolicy.networkOnly
+              : FetchPolicy.cacheAndNetwork),
+    );
+  }
+
+  static Future<dynamic> fetchSearchedSimpleBakeriesInfo({
+    required String searchTerm,
+    String sortFilterId: '1', //최신순
+    required List<dynamic> filterIdList,
+    int? cursorBakeryId,
+    bool fetchMore: false,
+  }) async {
+    return await client.query(
+      QueryOptions(
+          document: gql(FindBakeryQuery.searchBakeriesQuery),
+          variables: {
+            'searchTerm': searchTerm,
+            'sortFilterId': sortFilterId,
+            'filterIdList': filterIdList,
+            ...(cursorBakeryId != 0
+                ? ({'cursorBakeryId': cursorBakeryId})
+                : {}),
+          },
+          fetchPolicy: fetchMore
+              ? FetchPolicy.networkOnly
+              : FetchPolicy.cacheAndNetwork),
+    );
+  }
+
+  static Future<dynamic> fetchSearchedSimpleMarketOrdersInfo({
+    required String searchTerm,
+    String sortFilterId: '1', //최신순
+    required List<dynamic> filterIdList,
+    int? cursorMarketOrderId,
+    bool fetchMore: false,
+  }) async {
+    return await client.query(
+      QueryOptions(
+          document: gql(FindBakeryQuery.searchMarketOrdersQuery),
+          variables: {
+            'searchTerm': searchTerm,
+            'sortFilterId': sortFilterId,
+            'filterIdList': filterIdList,
+            ...(cursorMarketOrderId != 0
+                ? ({'cursorMarketOrderId': cursorMarketOrderId})
+                : {}),
           },
           fetchPolicy: fetchMore
               ? FetchPolicy.networkOnly

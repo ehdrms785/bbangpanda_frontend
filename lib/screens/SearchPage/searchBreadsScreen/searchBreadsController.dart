@@ -1,20 +1,13 @@
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPageApi.dart';
+import 'package:bbangnarae_frontend/screens/SearchPage/searchScreenController.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+
 import 'package:get/get.dart';
 
-class ShowBreadsController extends GetxController implements BreadModel {
-  ShowBreadsController(
-      {required this.isShowAppBar,
-      this.breadLargeCategoryId = '1',
-      this.breadSmallCategoryId});
-  // No Override
-  late final RxBool isShowAppBar;
-  late final String breadLargeCategoryId;
-  late final String? breadSmallCategoryId;
-  //override
+class SearchBreadsController extends GetxController implements BreadModel {
   var isLoading = true.obs;
   var firstInitLoading = true.obs;
   var isFetchMoreLoading = false;
@@ -24,7 +17,7 @@ class ShowBreadsController extends GetxController implements BreadModel {
   RxString sortFilterId = '1'.obs; // 최신순
   var filterIdList = [].obs;
 
-  late final ScrollController scrollController;
+  late ScrollController scrollController;
   RxList<String> breadSortFilterIdList = ['1'].obs;
   late RxList<dynamic> breadFilterResult = [].obs;
   late RxList<String> breadOptionFilterIdList;
@@ -39,29 +32,24 @@ class ShowBreadsController extends GetxController implements BreadModel {
   void onInit() async {
     print("ShowBreadsController onInit!");
 
-    scrollController = ScrollController();
+    scrollController = new ScrollController();
     scrollController.addListener(() {
       print("Scroll 움직인다");
-      if (scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        isShowAppBar(true);
-      } else {
-        isShowAppBar(false);
-        if (scrollController.position.pixels + 400 >=
-                scrollController.position.maxScrollExtent &&
-            !isFetchMoreLoading &&
-            hasMore.value) {
-          print("FetchMore 실행 !");
 
-          Future.microtask(() => fetchMoreSimpleBreadsInfo());
-        }
+      if (scrollController.position.pixels + 400 >=
+              scrollController.position.maxScrollExtent &&
+          !isFetchMoreLoading &&
+          hasMore.value) {
+        print("FetchMore 실행 합니다!");
+
+        Future.microtask(() => fetchMoreSimpleBreadsInfo());
       }
     });
 
     print("1번");
     await fetchBakeryFilter();
     print("2번");
-    await fetchSimpleBreadsInfo();
+    await fetchSearchedSimpleBreadInfo();
     print("3번");
     // fetchFilterdBakeries();
     firstInitLoading(false);
@@ -100,11 +88,11 @@ class ShowBreadsController extends GetxController implements BreadModel {
     }
   }
 
-  void _applyFilterChanged() async {
+  Future<void> _applyFilterChanged() async {
     filterIdList.clear();
     filterIdList.addAll(tempFilterIdList);
     hasMore(true);
-    await fetchSimpleBreadsInfo();
+    await fetchSearchedSimpleBreadInfo();
   }
 
   get applyFilterChanged => _applyFilterChanged();
@@ -118,44 +106,41 @@ class ShowBreadsController extends GetxController implements BreadModel {
 
   Future<void> _refreshBakeryInfoData() async {
     hasMore(true);
-    await fetchSimpleBreadsInfo();
+    await fetchSearchedSimpleBreadInfo();
   }
 
   Future<void> get refreshBakeryInfoData => _refreshBakeryInfoData();
-
-  Future<void> fetchSimpleBreadsInfo() async {
+  Future<void> fetchSearchedSimpleBreadInfo() async {
     return Future(() async {
       try {
         // print('largeCategoryId: $largeCategoryId');
         isLoading(true);
-        final result = await FindPageApi.fetchSimpleBreadsInfo(
-            // largeCategoryId: largeCategoryId,
-            sortFilterId: sortFilterId.value,
-            filterIdList: filterIdList,
-            largeCategoryId: breadLargeCategoryId,
-            smallCategoryId: breadSmallCategoryId);
+        final result = await FindPageApi.fetchSearchedSimpleBreadsInfo(
+          searchTerm: SearchScreenController.to.termTextController.value.text,
+          sortFilterId: sortFilterId.value,
+          filterIdList: filterIdList,
+        );
         print("FetchSimpleBreadInfo Result");
         print(result);
         if (result != null) {
           print("크롸!");
-          List<dynamic> getSimpleBreadsInfoData =
-              result.data['getSimpleBreadsInfo'];
+          List<dynamic> searchedSimpleBreadsInfoData =
+              result.data['searchBreads'];
           simpleBreadListResult.clear();
-
-          if (getSimpleBreadsInfoData.length > 0) {
-            getSimpleBreadsInfoData.forEach((breadInfoJson) {
+          print(searchedSimpleBreadsInfoData);
+          if (searchedSimpleBreadsInfoData.length > 0) {
+            searchedSimpleBreadsInfoData.forEach((breadInfoJson) {
               simpleBreadListResult
                   .add(new BreadSimpleInfo.fromJson(breadInfoJson));
             });
 
             print(simpleBreadListResult);
-            cursorBreadId(
-                getSimpleBreadsInfoData[getSimpleBreadsInfoData.length - 1]
-                    ['id']);
+            cursorBreadId(searchedSimpleBreadsInfoData[
+                searchedSimpleBreadsInfoData.length - 1]['id']);
           }
 
-          if (getSimpleBreadsInfoData.length == 0 ||
-              getSimpleBreadsInfoData.length < SimpleBreadFetchMinimum) {
+          if (searchedSimpleBreadsInfoData.length == 0 ||
+              searchedSimpleBreadsInfoData.length < SimpleBreadFetchMinimum) {
             print("SimpleBreads Fetch 한 데이터가 Minimum 이하라 hasMore : false");
             hasMore(false);
           }
@@ -175,15 +160,17 @@ class ShowBreadsController extends GetxController implements BreadModel {
       // isFetchMoreLoading(true);
       isFetchMoreLoading = true;
       print('cursorBreadId: ${cursorBreadId.value}');
-      final result = await FindPageApi.fetchSimpleBreadsInfo(
-          filterIdList: filterIdList,
-          sortFilterId: sortFilterId.value,
-          cursorBreadId: cursorBreadId.value,
-          fetchMore: true);
+      final result = await FindPageApi.fetchSearchedSimpleBreadsInfo(
+        searchTerm: SearchScreenController.to.termTextController.value.text,
+        sortFilterId: sortFilterId.value,
+        filterIdList: filterIdList,
+        cursorBreadId: cursorBreadId.value,
+        fetchMore: true,
+      );
       if (result != null) {
         print(result);
         final List<dynamic> _newSimpleBreadsInfoResult =
-            result.data['getSimpleBreadsInfo'];
+            result.data['searchBreads'];
         // 2개가 한 번에 가져오는 데이터 양이다. (나중에 바뀔 것임)
         // 최소로 가져올 수 있는 데이터보다 양이 적다는건 더 이상 가져올 데이터가 없다는 뜻!
         // 한 번더 Rendering을 하지 않기 위해 만든 로직

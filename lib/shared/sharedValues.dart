@@ -10,7 +10,7 @@ Function setEq = const SetEquality().equals;
 class SharedValues {
 // ignore: non_constant_identifier_names
   static ValueNotifier<String> _p_appBarTitleValueNotifier =
-      ValueNotifier<String>('빵나래 홈');
+      ValueNotifier<String>('빵판다 홈');
 // ignore: non_constant_identifier_names
   static ValueNotifier<String> get p_appBarTitleValueNotifier =>
       _p_appBarTitleValueNotifier;

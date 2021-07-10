@@ -59,11 +59,11 @@ class ModalProgressScreen extends StatelessWidget {
 
 PreferredSizeWidget PrefferedAppBar(BuildContext context) {
   return PreferredSize(
-    preferredSize: Size.fromHeight(MediaQuery.of(context).size.height / 20),
+    preferredSize: Size.fromHeight(5.0.h),
     child: AppBar(
       actions: [IconButton(icon: Icon(Icons.ac_unit), onPressed: () {})],
       //AppBar Shadow를 사라져보이게 하기 !
-      shadowColor: Colors.transparent,
+      // shadowColor: Colors.transparent,
       centerTitle: true,
       // backgroundColor: Colors.red,
       title: ValueListenableBuilder(
@@ -87,18 +87,20 @@ PreferredSizeWidget PrefferedAppBar(BuildContext context) {
 
 Widget backArrowButtton({double? size, void Function()? onPressed}) {
   if (size == null) {
-    size = 16.0.sp;
+    size = 18.0.sp;
   }
-  return SizedBox(
-    child: IconButton(
-      icon: Icon(Icons.arrow_back_ios_sharp),
-      iconSize: size,
-      color: Colors.grey.shade600,
-      onPressed: onPressed != null
-          ? onPressed
-          : () {
-              Get.back();
-            },
+  return Container(
+    child: SizedBox(
+      child: IconButton(
+        icon: Icon(Icons.arrow_back_ios_sharp),
+        iconSize: size,
+        color: Colors.black,
+        onPressed: onPressed != null
+            ? onPressed
+            : () {
+                Get.back();
+              },
+      ),
     ),
   );
 }
@@ -269,34 +271,49 @@ Widget SliverIndicator() => SliverToBoxAdapter(
         child: CupertinoActivityIndicator(),
       ),
     );
-Widget removeTextFieldIcon(TextEditingController controller) {
-  return Container(
-    width: 5.0.w,
+Widget removeTextFieldIcon(TextEditingController controller,
+    {double? size, RxBool? hasText}) {
+  size ??= 20.0.sp;
+  return Visibility(
+    visible: hasText?.value ?? true,
     child: GestureDetector(
       onTap: () {
         controller.clear();
+        hasText?.value = false;
       },
       child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: Icon(Icons.clear),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.grey.shade600,
+              border: Border.all(width: 0),
+              borderRadius: BorderRadius.circular(12.0)),
+          child: Icon(Icons.clear, size: size, color: Colors.white),
+        ),
       ),
     ),
   );
 }
 
-Widget secureTextFieldIcon(Rx<bool?> isSecureObs) {
-  return Container(
-    width: 5.0.w,
-    child: GestureDetector(
-      onTap: () {
-        isSecureObs.value = !isSecureObs.value!;
-      },
-      child: Obx(
-        () => Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: isSecureObs.value!
-              ? Icon(Icons.lock_rounded)
-              : Icon(Icons.lock_open_rounded),
+Widget secureTextFieldIcon(Rx<bool?> isSecureObs, {double? size}) {
+  size ??= 20.0.sp;
+  return GestureDetector(
+    onTap: () {
+      isSecureObs.value = !isSecureObs.value!;
+    },
+    child: Obx(
+      () => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.grey.shade600,
+              border: Border.all(width: 0),
+              borderRadius: BorderRadius.circular(12.0)),
+          child: Icon(
+            isSecureObs.value! ? Icons.lock_rounded : Icons.lock_open_rounded,
+            size: size,
+            color: Colors.white,
+          ),
         ),
       ),
     ),

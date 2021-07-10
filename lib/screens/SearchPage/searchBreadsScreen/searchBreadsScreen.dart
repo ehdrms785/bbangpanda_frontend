@@ -1,8 +1,6 @@
-import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadShareWidget.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
-import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+import 'package:bbangnarae_frontend/screens/SearchPage/searchBreadsScreen/searchBreadsController.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -10,38 +8,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-class BreadSmallCategoryTab extends StatefulWidget {
-  const BreadSmallCategoryTab(
-      {Key? key, required this.largeCategoryId, this.smallCategoryId})
-      : super(key: key);
-  final String largeCategoryId;
-  final String? smallCategoryId;
+class SearchBreadsScreen extends StatefulWidget {
   @override
-  _BreadSmallCategoryTabState createState() => _BreadSmallCategoryTabState();
+  _SearchBreadsScreenState createState() => _SearchBreadsScreenState();
 }
 
-class _BreadSmallCategoryTabState extends State<BreadSmallCategoryTab>
+class _SearchBreadsScreenState extends State<SearchBreadsScreen>
     with AutomaticKeepAliveClientMixin {
-  late final ScrollController _scrollController;
-  late final ShowBreadsController controller;
+  // late final ScrollController _scrollController;
+  late final SearchBreadsController controller;
   @override
   void initState() {
     print("ShowBreads Init!");
-    Get.create(
-        () => ShowBreadsController(
-            isShowAppBar: BreadLargeCategoryController.to.isShowAppBar,
-            breadLargeCategoryId: widget.largeCategoryId,
-            breadSmallCategoryId: widget.smallCategoryId),
-        tag: '${widget.largeCategoryId}/${widget.smallCategoryId}breadTab');
-    controller = Get.find(
-        tag: '${widget.largeCategoryId}/${widget.smallCategoryId}breadTab');
-    _scrollController = controller.scrollController;
+    Get.create(() => SearchBreadsController(), tag: 'searchBreads');
+    controller = Get.find(tag: 'searchBreads');
+
+    // _scrollController = controller.scrollController;
 
     super.initState();
   }
 
   @override
   void dispose() {
+    print("SearchBread Dispose!");
     super.dispose();
   }
 
@@ -51,29 +40,31 @@ class _BreadSmallCategoryTabState extends State<BreadSmallCategoryTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    print("BreadSmallCateogryScreen 빌드!");
+    print("SearchBreadsScreenState 빌드!");
     return Scaffold(
-      body: Obx(() => ModalProgressScreen(
-            isAsyncCall: controller.isLoading.value,
-            child: controller.firstInitLoading.value
-                ? Center(child: CupertinoActivityIndicator())
-                : CustomScrollView(
-                    key: ValueKey(widget.largeCategoryId),
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(
-                        parent: const AlwaysScrollableScrollPhysics()),
-                    slivers: [
-                        CupertinoSliverRefreshControl(
-                          onRefresh: () => Future(() => null),
-                        ),
-                        FilterBar(),
-                        SimpleBreadList(
-                            isLoading: controller.isLoading,
-                            hasMore: controller.hasMore,
-                            simpleBreadListResult:
-                                controller.simpleBreadListResult),
-                      ]),
-          )),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 2.0.w),
+        child: Obx(() => ModalProgressScreen(
+              isAsyncCall: controller.isLoading.value,
+              child: controller.firstInitLoading.value
+                  ? Center(child: CupertinoActivityIndicator())
+                  : CustomScrollView(
+                      controller: controller.scrollController,
+                      physics: const BouncingScrollPhysics(
+                          parent: const AlwaysScrollableScrollPhysics()),
+                      slivers: [
+                          CupertinoSliverRefreshControl(
+                            onRefresh: () => Future(() => null),
+                          ),
+                          FilterBar(),
+                          SimpleBreadList(
+                              isLoading: controller.isLoading,
+                              hasMore: controller.hasMore,
+                              simpleBreadListResult:
+                                  controller.simpleBreadListResult),
+                        ]),
+            )),
+      ),
     );
   }
 
@@ -280,7 +271,7 @@ class _BreadSmallCategoryTabState extends State<BreadSmallCategoryTab>
                               child: Text("초기화",
                                   style: TextStyle(color: Colors.black)),
                               onPressed: () {
-                                controller.initFilterSelected();
+                                controller.initFilterSelected;
                               },
                               style: ElevatedButton.styleFrom(
                                 primary: Colors.white,
@@ -294,7 +285,7 @@ class _BreadSmallCategoryTabState extends State<BreadSmallCategoryTab>
                               child: Text("적용"),
                               onPressed: () async {
                                 Get.back();
-                                controller.applyFilterChanged();
+                                controller.applyFilterChanged;
                               },
                               style: ElevatedButton.styleFrom(),
                             ),

@@ -1,6 +1,7 @@
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesTab.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsTab.dart';
-import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/showMarketOrdersScreen.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/findpageScreenController.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,32 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
-var isShowAppBar = true.obs;
-
-class FindPageScreen extends StatefulWidget {
-  @override
-  _FindPageScreenState createState() => _FindPageScreenState();
-}
-
-class _FindPageScreenState extends State<FindPageScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-  late final ScrollController _scrollController;
-
-  @override
-  void initState() {
-    _tabController = TabController(length: 3, vsync: this);
-    _scrollController = ScrollController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
+class FindPageScreen extends GetView<FindPageScreenController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -42,14 +18,11 @@ class _FindPageScreenState extends State<FindPageScreen>
       child: SafeArea(
         child: Scaffold(
           appBar: MainAppBar(),
-          body: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 3.0.w),
-            child: Column(
-              children: [
-                TabListContainer(),
-                TabViewList(),
-              ],
-            ),
+          body: Column(
+            children: [
+              TabListContainer(),
+              TabViewList(),
+            ],
           ),
         ),
       ),
@@ -60,10 +33,10 @@ class _FindPageScreenState extends State<FindPageScreen>
         preferredSize: Size.fromHeight(5.0.h),
         child: Obx(
           () => AnimatedContainer(
-            height: isShowAppBar.value ? 5.0.h : 0.0,
+            height: controller.isShowAppBar.value ? 5.0.h : 0.0,
             duration: Duration(milliseconds: 200),
             child: AppBar(
-              title: Text("마켓"),
+              title: Text("빵쇼핑"),
               centerTitle: true,
               leading: Icon(Icons.ac_unit_sharp),
               actions: [
@@ -71,9 +44,18 @@ class _FindPageScreenState extends State<FindPageScreen>
                   onTap: () {
                     print("TAB");
                   },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.access_alarm),
+                  child: GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/search');
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.grey,
+                        size: 20.0.sp,
+                      ),
+                    ),
                   ),
                 ),
                 GestureDetector(
@@ -82,7 +64,11 @@ class _FindPageScreenState extends State<FindPageScreen>
                   },
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.zoom_out_outlined),
+                    child: Icon(
+                      Icons.shopping_cart_outlined,
+                      color: Colors.grey,
+                      size: 20.0.sp,
+                    ),
                   ),
                 ),
               ],
@@ -94,7 +80,6 @@ class _FindPageScreenState extends State<FindPageScreen>
         key: Key("MainScroll"),
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
-        // controller: _scrollController,
         slivers: [
           TabList(),
         ],
@@ -109,7 +94,7 @@ class _FindPageScreenState extends State<FindPageScreen>
           // color: Colors.grey,
           child: DecoratedTabBar(
             tabBar: TabBar(
-                controller: _tabController,
+                controller: controller.tabController,
 
                 // isScrollable: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -157,36 +142,14 @@ class _FindPageScreenState extends State<FindPageScreen>
       );
   Widget TabViewList() => Expanded(
         child: TabBarView(
-          controller: _tabController,
+          controller: controller.tabController,
           // physics: NeverScrollableScrollPhysics(),
           physics: CustomPageViewScrollPhysics(),
           children: <Widget>[
-            ShowBakeriesTab(
-              isShowAppBar: isShowAppBar,
-            ),
-            ShowBreadsTab(
-              isShowAppBar: isShowAppBar,
-            ),
-            HelloWorld(),
+            ShowBakeriesTab(),
+            ShowBreadsTab(),
+            ShowMarketOrdersTab(),
           ],
         ),
       );
-}
-
-class HelloWorld extends StatefulWidget {
-  @override
-  _HelloWorldState createState() => _HelloWorldState();
-}
-
-class _HelloWorldState extends State<HelloWorld>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    print("헬로베이비");
-    return Container();
-  }
 }

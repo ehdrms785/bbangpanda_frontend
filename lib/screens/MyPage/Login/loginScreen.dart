@@ -29,11 +29,6 @@ class LoginScreen extends StatelessWidget {
                       MyForm(),
                       Find_Id_PW(),
                       signUpButton(),
-                      TextButton(
-                          onPressed: () {
-                            loginCtr.pwFocusNode.requestFocus();
-                          },
-                          child: Text("다음 포커스")),
                     ],
                   ),
                 ),
@@ -177,7 +172,7 @@ class RenderTextFormField extends StatelessWidget {
       {Key? key,
       required this.controller,
       required this.label,
-      required this.validator,
+      this.validator,
       this.isSecure = false,
       this.autoFocus = false,
       this.focusNode,
@@ -190,7 +185,7 @@ class RenderTextFormField extends StatelessWidget {
   final bool autoFocus;
   final TextEditingController controller;
   final String label;
-  final FormFieldValidator validator;
+  final FormFieldValidator? validator;
   final Widget? additional;
   final bool useIcon;
   final int? maxLength;
@@ -203,12 +198,12 @@ class RenderTextFormField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          // height: 6.0.h,
           child: Row(
             mainAxisSize: MainAxisSize.max,
             children: [
               Expanded(
                 child: Container(
+                  // color: Colors.red.shade100,
                   // width: additional == null ? 85.0.w : 72.0.w,
                   child: Obx(
                     () => TextFormField(

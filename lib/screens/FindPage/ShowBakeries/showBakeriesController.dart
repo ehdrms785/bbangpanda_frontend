@@ -1,4 +1,5 @@
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/findpageScreenController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPageApi.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPagetypeDef.dart';
 import 'package:flutter/material.dart';
@@ -19,21 +20,17 @@ FilterIdList
   6: 무가당
   7: 천연발효
 */
-class ShowBakeriesController extends GetxController {
-  ShowBakeriesController({required this.isShowAppBar});
 
-  late final RxBool isShowAppBar;
-  var isLoading = true.obs;
-  var isFetchMoreLoading = false;
-  var filterLoading = true.obs;
+class ShowBakeriesController extends GetxController implements BakeryModel {
   var firstInitLoading = true.obs;
-
+  var isLoading = true.obs;
+  var filterLoading = true.obs;
   var hasMore = true.obs;
+  var isFetchMoreLoading = false;
 
+  final RxBool isShowAppBar = FindPageScreenController.to.isShowAppBar;
   late RxList<dynamic> bakeryFilterResult = [].obs;
-  RxList<dynamic> filterWidget = [].obs;
-  RxInt cursorId = 0.obs;
-
+  RxInt cursorBakeryId = 0.obs;
   RxString sortFilterId = '1'.obs; // 최신순
   RxList<String> filterIdList = ['1'].obs; // 제일 기본은 택배가능만 체크 된 상태
   RxList<String> tempFilterIdList = ['1'].obs;
@@ -54,6 +51,7 @@ class ShowBakeriesController extends GetxController {
         isShowAppBar(true);
       } else {
         isShowAppBar(false);
+
         if (scrollController.position.pixels + 500 >=
                 scrollController.position.maxScrollExtent &&
             !isFetchMoreLoading &&
@@ -78,22 +76,33 @@ class ShowBakeriesController extends GetxController {
     super.onClose();
   }
 
-  void initFilterSelected() {
-    tempFilterIdList.clear();
-    tempFilterIdList.add('1');
-  }
-
-  Future<void> refreshBakeryInfoData() async {
+  Future<void> _refreshBakeryInfoData() async {
     hasMore(true);
     await fetchSimpleBakeriesInfo();
   }
 
-  Future<void> applyFilterChanged() async {
+  // Future<void> refreshMarketOrderInfoData () {
+
+  // }
+
+  Future<void> get refreshBakeryInfoData => _refreshBakeryInfoData();
+  void _initFilterSelected() async {
+    tempFilterIdList.clear();
+    tempFilterIdList.add('1');
+  }
+
+  @override
+  get initFilterSelected => _initFilterSelected();
+
+  void _applyFilterChanged() async {
     filterIdList.clear();
     filterIdList.addAll(tempFilterIdList);
     hasMore(true);
     await fetchSimpleBakeriesInfo();
   }
+
+  @override
+  get applyFilterChanged => _applyFilterChanged();
 
   Future<void> fetchSimpleBakeriesInfo() async {
     return Future(() async {
@@ -119,7 +128,7 @@ class ShowBakeriesController extends GetxController {
               simpleBakeriesListResult
                   .add(new BakerySimpleInfo.fromJson(bakeryInfoJson));
             });
-            cursorId(getSimpleBakeriesInfoData[
+            cursorBakeryId(getSimpleBakeriesInfoData[
                 getSimpleBakeriesInfoData.length - 1]!['id']);
           }
 
@@ -142,11 +151,11 @@ class ShowBakeriesController extends GetxController {
     try {
       print("fetchMoreSimpleBakeriesInfo ~들어왔다");
       isFetchMoreLoading = true;
-      print('cursorId: ${cursorId.value}');
+      print('cursorBakeryId: ${cursorBakeryId.value}');
       final result = await FindPageApi.fetchSimpleBakeriesInfo(
           sortFilterId: sortFilterId.value,
           filterIdList: filterIdList,
-          cursorId: cursorId.value,
+          cursorBakeryId: cursorBakeryId.value,
           fetchMore: true);
       if (result != null) {
         // print(result);
@@ -163,7 +172,7 @@ class ShowBakeriesController extends GetxController {
             simpleBakeriesListResult
                 .add(new BakerySimpleInfo.fromJson(bakeryInfoJson));
           });
-          cursorId(_newSimpleBakeriesResult[
+          cursorBakeryId(_newSimpleBakeriesResult[
               _newSimpleBakeriesResult.length - 1]!['id']);
         }
         if (_newSimpleBakeriesResult.length < SimpleBakeryFetchMinimum) {
@@ -203,4 +212,8 @@ class ShowBakeriesController extends GetxController {
       // print("2. FetchBakeryFilter 끝");
     }
   }
+
+  // @override
+  // Function initFilterSelected = () {};
+
 }

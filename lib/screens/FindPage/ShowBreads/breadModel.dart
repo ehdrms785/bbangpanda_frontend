@@ -1,7 +1,37 @@
 // List<String> SoftBreadCategory = ['식빵', '치아바타', '크림빵'];
 // List<String> HardBreadCategory = ['깜빠뉴'];
 // List<String> DessertBreadCategory = ['파운드,크럼블', '브라우니', '스콘', '쿠키', '케이크'];
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 final SimpleBreadFetchMinimum = 2;
+
+abstract class BreadModel extends GetxController {
+  var isLoading;
+  var firstInitLoading;
+  var isFetchMoreLoading;
+  var hasMore;
+  var filterLoading;
+
+  var filterIdList = [].obs;
+
+  late RxString sortFilterId; // 최신순
+  late ScrollController scrollController;
+  late RxList<String> breadSortFilterIdList;
+  late RxList<dynamic> breadFilterResult;
+  late RxList<String> breadOptionFilterIdList;
+
+  late RxList<dynamic> filterWidget;
+  late RxInt cursorBreadId;
+
+  late RxList<dynamic> tempFilterIdList;
+  var simpleBreadListResult;
+
+  get refreshBakeryInfoData;
+  get initFilterSelected;
+  get applyFilterChanged;
+}
+
 enum BreadLargeCategory {
   all,
   softBread,
@@ -15,7 +45,7 @@ class BreadCategory {
   BreadCategory({required this.id, required this.category});
 }
 
-final BreadCategories = [
+final BreadLargeCategories = [
   BreadCategory(id: '0', category: '전체'),
   BreadCategory(id: '1', category: '소프트브레드'),
   BreadCategory(id: '2', category: '하드브레드'),
