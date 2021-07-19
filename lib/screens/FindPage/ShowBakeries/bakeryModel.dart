@@ -38,6 +38,43 @@ final List<BakerySortFilter> BakerySortFilters = [
   BakerySortFilter(id: '3', filter: '리뷰많은순'),
 ];
 
+class BakeryDetailInfo {
+  final String thumbnail;
+  final String name;
+  final List<dynamic> bakeryFeature;
+  final String? description;
+  final List<dynamic>? signitureBreads;
+  final List<dynamic> breadLargeCategories;
+  final List<dynamic> breadSmallCategories;
+  final int dibedUserCount;
+
+  BakeryDetailInfo({
+    required this.thumbnail,
+    required this.name,
+    required this.bakeryFeature,
+    this.description,
+    this.signitureBreads,
+    required this.breadLargeCategories,
+    required this.breadSmallCategories,
+    required this.dibedUserCount,
+  });
+
+  BakeryDetailInfo.fromJson(Map<String, dynamic> bakeryJson, int dibedUsercount)
+      : thumbnail = 'assets/bakeryImage.jpg',
+        name = bakeryJson['name'],
+        bakeryFeature = bakeryJson['bakeryFeatures'],
+        description = bakeryJson['description'],
+        signitureBreads = bakeryJson['signitureBreads'],
+        breadLargeCategories = bakeryJson['breadLargeCategories'],
+        breadSmallCategories = bakeryJson['breadSmallCategories'],
+        dibedUserCount = dibedUsercount;
+
+  @override
+  String toString() {
+    return 'name: $name,  description: $description, bakeryFeature: $bakeryFeature,  signitureBreads: $signitureBreads \n breadLargeCategories $breadLargeCategories \n breadSmallCateogries: $breadSmallCategories \n dibedUserCount: $dibedUserCount';
+  }
+}
+
 class BakerySimpleInfo {
   final String thumbnail;
   final String name;

@@ -85,21 +85,75 @@ PreferredSizeWidget PrefferedAppBar(BuildContext context) {
   );
 }
 
-Widget backArrowButtton({double? size, void Function()? onPressed}) {
+PreferredSizeWidget MainAppBar({
+  required RxBool isShowAppBar,
+  String? title,
+  Widget? leading,
+  List<Widget>? actions,
+}) =>
+    PreferredSize(
+      preferredSize: Size.fromHeight(5.0.h),
+      child: Obx(
+        () => AnimatedContainer(
+          height: isShowAppBar.value ? 5.0.h : 0.0,
+          duration: Duration(milliseconds: 200),
+          child: AppBar(
+            title: title != null ? Text(title) : null,
+            centerTitle: true,
+            leading: leading ?? backArrowButtton(),
+            actions: actions ??
+                [
+                  GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/search');
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.grey,
+                        size: 20.0.sp,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      print("TAB");
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+                      child: Icon(
+                        Icons.shopping_cart_outlined,
+                        color: Colors.grey,
+                        size: 20.0.sp,
+                      ),
+                    ),
+                  ),
+                ],
+          ),
+        ),
+      ),
+    );
+
+Widget backArrowButtton({
+  double? size,
+  void Function()? onPressed,
+  Color? color: Colors.black,
+}) {
   if (size == null) {
     size = 18.0.sp;
   }
-  return Container(
-    child: SizedBox(
-      child: IconButton(
-        icon: Icon(Icons.arrow_back_ios_sharp),
-        iconSize: size,
-        color: Colors.black,
-        onPressed: onPressed != null
-            ? onPressed
-            : () {
-                Get.back();
-              },
+  return GestureDetector(
+    onTap: onPressed != null
+        ? onPressed
+        : () {
+            Get.back();
+          },
+    child: Container(
+      child: Icon(
+        Icons.arrow_back_ios_sharp,
+        color: color,
+        size: size,
       ),
     ),
   );

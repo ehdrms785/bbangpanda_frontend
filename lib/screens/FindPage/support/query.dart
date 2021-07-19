@@ -39,6 +39,7 @@ class FindBakeryQuery {
         signitureBreads {
           id
           name
+          thumbnail
         }
     }
   }
@@ -93,6 +94,7 @@ class FindBakeryQuery {
       query searchBreads(\$searchTerm: String!,\$sortFilterId: String!, \$filterIdList: [String!]!, \$cursorBreadId: Int) {
     searchBreads(searchTerm: \$searchTerm,sortFilterId: \$sortFilterId, filterIdList: \$filterIdList, cursorBreadId: \$cursorBreadId) {
       id
+      thumbnail
       bakeryName
       name
       price
@@ -111,6 +113,7 @@ class FindBakeryQuery {
       query getSimpleBreadsInfo(\$largeCategoryId: String, \$smallCategoryId: String, \$sortFilterId:String!, \$filterIdList: [String], \$cursorBreadId: Int) {
     getSimpleBreadsInfo(largeCategoryId: \$largeCategoryId,smallCategoryId: \$smallCategoryId, sortFilterId: \$sortFilterId, filterIdList: \$filterIdList, cursorBreadId: \$cursorBreadId) {
       id
+      thumbnail
       name
       bakeryName
       price
@@ -157,6 +160,35 @@ class FindBakeryQuery {
         id
         category
       }
+  }
+  """;
+
+  // =========== Bakery Detail Query
+  static String getBakeryDetailQuery = """
+      query getBakeryDetail(\$bakeryId: Int!) {
+    getBakeryDetail(bakeryId: \$bakeryId) {
+      bakery {
+        name
+        description
+        bakeryFeatures {
+          id
+          filter
+        }
+        signitureBreads {
+          id
+          name
+        }
+        breadLargeCategories {
+          id
+          category
+        }
+        breadSmallCategories {
+          id
+          category
+        }
+      }
+      dibedUserCount
+    }
   }
   """;
 }

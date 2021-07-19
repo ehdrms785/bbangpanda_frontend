@@ -79,8 +79,13 @@ flutter:
     - assets/breadIcon.png
     - assets/splash1000.png
     - assets/breadImage.jpg
+    - assets/bakeryImage.jpg
     - assets/서비스 이용약관.md
     - assets/개인정보 처리방침.md
+    - assets/100%호밀빵.jpg
+    - assets/다로팥빵.jpg
+    - assets/다로크림빵.png
+    - assets/아나식빵.jpg
     - lib/images/splash.png
     # - assets/splash.png
 

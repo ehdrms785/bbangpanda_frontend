@@ -1,3 +1,5 @@
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainController.dart';
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryShareWidget.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
@@ -76,15 +78,25 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
   }
 
   Widget NewBakeryBox() => SliverToBoxAdapter(
-        child: Container(
-          height: 10.0.h,
-          color: Colors.grey.shade500,
-          child: Center(
-            child: Text("신규입점 베이커리 구역",
-                style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 11.0.sp,
-                    fontWeight: FontWeight.w600)),
+        child: GestureDetector(
+          //임시
+          onTap: () {
+            print("탭했습니다");
+            Get.to(BakeryDetailMainScreen(), arguments: {'bakeryId': 1},
+                binding: BindingsBuilder(() {
+              Get.lazyPut(() => BakeryDetailMainController());
+            }));
+          },
+          child: Container(
+            height: 10.0.h,
+            color: Colors.grey.shade500,
+            child: Center(
+              child: Text("신규입점 베이커리 구역",
+                  style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 11.0.sp,
+                      fontWeight: FontWeight.w600)),
+            ),
           ),
         ),
       );

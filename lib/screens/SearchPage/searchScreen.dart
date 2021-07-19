@@ -85,12 +85,21 @@ class SearchPage extends GetView<SearchScreenController> {
                               spacing: 2.0.w,
                               runSpacing: 0,
                               children: [
-                                ...List.generate(
-                                  5,
-                                  (index) => RawChip(
-                                    label: Text('테스트 입니다요링 $index'),
-                                  ),
-                                )
+                                RawChip(
+                                  label: Text('다로'),
+                                ),
+                                RawChip(
+                                  label: Text('비건'),
+                                ),
+                                RawChip(
+                                  label: Text('베이커리'),
+                                ),
+                                // ...List.generate(
+                                //   5,
+                                //   (index) => RawChip(
+                                //     label: Text('테스트 입니다요링 $index'),
+                                //   ),
+                                // )
                               ],
                             ),
                           ],

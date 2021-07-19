@@ -115,6 +115,8 @@ class ShowMarketOrdersController extends GetxController
           simpleMarketOrdersListResult.clear();
           if (getSimpleMarketOrdersInfoData.length > 0) {
             getSimpleMarketOrdersInfoData.forEach((marketOrderInfoJson) {
+              print("여기보자!!!!!!");
+              print(marketOrderInfoJson['lineUpBreads']);
               simpleMarketOrdersListResult
                   .add(new MarketOrderSimpleInfo.fromJson(marketOrderInfoJson));
             });

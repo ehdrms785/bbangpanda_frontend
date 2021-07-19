@@ -197,4 +197,17 @@ class FindPageApi {
               key: 'breadSmallCategory$largeCategoryId', expiration: 12.hours)),
     );
   }
+
+  // Fetch Bakery Detail
+  static Future<dynamic> fetchBakeryDetail({
+    required int bakeryId,
+  }) async {
+    return await client.query(
+      QueryOptions(
+          document: gql(FindBakeryQuery.getBakeryDetailQuery),
+          variables: {
+            'bakeryId': bakeryId,
+          }),
+    );
+  }
 }

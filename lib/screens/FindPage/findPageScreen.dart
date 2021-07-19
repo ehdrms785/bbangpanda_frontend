@@ -17,7 +17,8 @@ class FindPageScreen extends GetView<FindPageScreenController> {
       initialIndex: 0,
       child: SafeArea(
         child: Scaffold(
-          appBar: MainAppBar(),
+          appBar:
+              MainAppBar(isShowAppBar: controller.isShowAppBar, title: "빵쇼핑"),
           body: Column(
             children: [
               TabListContainer(),
@@ -29,53 +30,48 @@ class FindPageScreen extends GetView<FindPageScreenController> {
     );
   }
 
-  PreferredSizeWidget MainAppBar() => PreferredSize(
-        preferredSize: Size.fromHeight(5.0.h),
-        child: Obx(
-          () => AnimatedContainer(
-            height: controller.isShowAppBar.value ? 5.0.h : 0.0,
-            duration: Duration(milliseconds: 200),
-            child: AppBar(
-              title: Text("빵쇼핑"),
-              centerTitle: true,
-              leading: Icon(Icons.ac_unit_sharp),
-              actions: [
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: GestureDetector(
-                    onTap: () {
-                      Get.toNamed('/search');
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.grey,
-                        size: 20.0.sp,
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(
-                      Icons.shopping_cart_outlined,
-                      color: Colors.grey,
-                      size: 20.0.sp,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+  // PreferredSizeWidget MainAppBar() => PreferredSize(
+  //       preferredSize: Size.fromHeight(5.0.h),
+  //       child: Obx(
+  //         () => AnimatedContainer(
+  //           height: controller.isShowAppBar.value ? 5.0.h : 0.0,
+  //           duration: Duration(milliseconds: 200),
+  //           child: AppBar(
+  //             title: Text("빵쇼핑"),
+  //             centerTitle: true,
+  //             leading: Icon(Icons.ac_unit_sharp),
+  //             actions: [
+  //               GestureDetector(
+  //                 onTap: () {
+  //                   Get.toNamed('/search');
+  //                 },
+  //                 child: Padding(
+  //                   padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+  //                   child: Icon(
+  //                     Icons.search,
+  //                     color: Colors.grey,
+  //                     size: 20.0.sp,
+  //                   ),
+  //                 ),
+  //               ),
+  //               GestureDetector(
+  //                 onTap: () {
+  //                   print("TAB");
+  //                 },
+  //                 child: Padding(
+  //                   padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+  //                   child: Icon(
+  //                     Icons.shopping_cart_outlined,
+  //                     color: Colors.grey,
+  //                     size: 20.0.sp,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     );
   Widget TabListContainer() => CustomScrollView(
         key: Key("MainScroll"),
         shrinkWrap: true,

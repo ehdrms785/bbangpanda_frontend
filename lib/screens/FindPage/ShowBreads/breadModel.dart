@@ -101,7 +101,7 @@ class BreadSimpleInfo {
   BreadSimpleInfo.fromJson(Map<String, dynamic> json)
       :
         // thumbnail: json['thumbnail'],
-        thumbnail = 'assets/breadImage.jpg',
+        thumbnail = json['thumbnail'] ?? 'assets/breadImage.jpg',
         name = json['name'],
         bakeryName = json['bakeryName'],
         description = json['description'],

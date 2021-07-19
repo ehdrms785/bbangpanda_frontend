@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainController.dart';
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
@@ -54,171 +58,207 @@ Widget SimpleBakeryList({
               }
             }
             BakerySimpleInfo bakeryData = simpleBakeriesListResult[index];
-            return Container(
-              key: ValueKey(index),
-              // height: 35.0.h,
-              child: Builder(
-                builder: (context) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        // color: Colors.grey,
-                        height: 7.0.h,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 12.0.w,
-                              height: double.maxFinite,
-                              padding: EdgeInsets.zero,
-                              decoration: new BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment.topCenter,
-                                  image: new AssetImage(bakeryData.thumbnail),
+            return GestureDetector(
+              onTap: () {
+                print("탭했습니다");
+                Get.to(BakeryDetailMainScreen(), arguments: {'bakeryId': 1},
+                    binding: BindingsBuilder(() {
+                  Get.lazyPut(() => BakeryDetailMainController());
+                }));
+              },
+              child: Container(
+                color: Colors.transparent,
+                key: ValueKey(index),
+                width: double.infinity,
+                // height: 35.0.h,
+                child: Builder(
+                  builder: (context) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 7.0.h,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 12.0.w,
+                                height: double.maxFinite,
+                                padding: EdgeInsets.zero,
+                                decoration: new BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
+                                    image: new AssetImage(bakeryData.thumbnail),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Container(width: 2.0.w),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        bakeryData.name,
-                                        style: TextStyle(
-                                            fontSize: 12.0.sp,
-                                            fontWeight: FontWeight.w800),
-                                      ),
-                                      SizedBox(width: 2.0.w),
-                                      bakeryData.signitureBreads?.length == 0
-                                          ? Container()
-                                          : Container(
-                                              padding: const EdgeInsets.all(4),
-                                              color: Colors.green.shade700
-                                                  .withOpacity(0.1),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    '대표빵 - ',
-                                                    style: TextStyle(
-                                                        fontSize: 9.0.sp,
-                                                        color: Colors.grey,
-                                                        fontWeight:
-                                                            FontWeight.w500),
-                                                  ),
-                                                  ...bakeryData.signitureBreads!
-                                                      .map(
-                                                    (element) => Text(
-                                                      '$element${bakeryData.signitureBreads!.indexOf(element) == bakeryData.signitureBreads!.length - 1 ? '' : 'ㆍ'}',
-                                                      style: TextStyle(
+                              Container(width: 2.0.w),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      // mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          bakeryData.name,
+                                          style: TextStyle(
+                                              fontSize: 12.0.sp,
+                                              fontWeight: FontWeight.w800),
+                                        ),
+                                        SizedBox(width: 2.0.w),
+                                        bakeryData.signitureBreads?.length == 0
+                                            ? Container()
+                                            : Flexible(
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(4),
+                                                  color: Colors.green.shade700
+                                                      .withOpacity(0.1),
+                                                  child: RichText(
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    text: TextSpan(
+                                                        text: "대표빵 - ",
+                                                        style: TextStyle(
                                                           fontSize: 9.0.sp,
                                                           color: Colors.grey,
                                                           fontWeight:
-                                                              FontWeight.w500),
-                                                    ),
+                                                              FontWeight.w500,
+                                                        ),
+                                                        children: [
+                                                          ...bakeryData
+                                                              .signitureBreads!
+                                                              .map(
+                                                            (element) =>
+                                                                TextSpan(
+                                                              text:
+                                                                  '$element${bakeryData.signitureBreads!.indexOf(element) == bakeryData.signitureBreads!.length - 1 ? '' : 'ㆍ'}',
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      9.0.sp,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
+                                                          ),
+                                                        ]),
                                                   ),
-                                                ],
+                                                ),
                                               ),
-                                            ),
-                                    ],
-                                  ),
-                                  Builder(
-                                    builder: (context) {
-                                      final List<dynamic> result = bakeryData
-                                          .bakeryFeature
-                                          .where((e) => int.parse(e['id']) > 2)
-                                          .toList();
-
-                                      return Row(children: [
-                                        ...result.map((element) => Text(
-                                            '#${element['filter']} ',
-                                            style: TextStyle(
-                                                fontSize: 9.0.sp,
-                                                color: Colors.grey.shade400,
-                                                fontWeight: FontWeight.w300))),
-                                      ]);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                                // color: Colors.grey,
-                                child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          CupertinoIcons.star,
-                                          color: Colors.red,
-                                          size: 16.0.sp,
-                                        ),
-                                        Text("1.2만",
-                                            style: TextStyle(fontSize: 8.0.sp)),
                                       ],
-                                    )))
-                          ],
+                                    ),
+                                    Builder(
+                                      builder: (context) {
+                                        final List<dynamic> result = bakeryData
+                                            .bakeryFeature
+                                            .where(
+                                                (e) => int.parse(e['id']) > 2)
+                                            .toList();
+
+                                        return Row(children: [
+                                          ...result.map((element) => Text(
+                                              '#${element['filter']} ',
+                                              style: TextStyle(
+                                                  fontSize: 9.0.sp,
+                                                  color: Colors.grey.shade400,
+                                                  fontWeight:
+                                                      FontWeight.w300))),
+                                        ]);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 10.0.w,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    print("여긴 취향존중");
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5.0),
+                                    child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              CupertinoIcons.star,
+                                              color: Colors.red,
+                                              size: 16.0.sp,
+                                            ),
+                                            Text('${Random().nextInt(200)}',
+                                                style: TextStyle(
+                                                    fontSize: 8.0.sp)),
+                                          ],
+                                        )),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                      bakeryData.description == null
-                          ? Container()
-                          : Container(
-                              margin: EdgeInsets.only(bottom: 1.0.h),
-                              child: Text(
-                                bakeryData.description!,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontSize: 11.0.sp,
-                                    color: Colors.grey.shade700,
-                                    fontWeight: FontWeight.w500),
+                        bakeryData.description == null
+                            ? Container()
+                            : Container(
+                                margin: EdgeInsets.only(bottom: 1.0.h),
+                                child: Text(
+                                  bakeryData.description!,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 11.0.sp,
+                                      color: Colors.grey.shade700,
+                                      fontWeight: FontWeight.w500),
+                                ),
                               ),
-                            ),
-                      Container(
-                        width: double.infinity,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              width: 30.0.w,
-                              height: 20.0.h,
-                              child: Image.asset(
-                                'assets/breadImage.jpg',
-                                fit: BoxFit.cover,
+                        Container(
+                          width: double.infinity,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                width: 30.0.w,
+                                height: 20.0.h,
+                                child: Image.asset(
+                                  'assets/breadImage.jpg',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            Container(
-                              width: 30.0.w,
-                              height: 20.0.h,
-                              child: Image.asset(
-                                'assets/breadImage.jpg',
-                                fit: BoxFit.cover,
+                              Container(
+                                width: 30.0.w,
+                                height: 20.0.h,
+                                child: Image.asset(
+                                  'assets/breadImage.jpg',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            Container(
-                              width: 30.0.w,
-                              height: 20.0.h,
-                              child: Image.asset(
-                                'assets/breadImage.jpg',
-                                fit: BoxFit.cover,
+                              Container(
+                                width: 30.0.w,
+                                height: 20.0.h,
+                                child: Image.asset(
+                                  'assets/breadImage.jpg',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Divider(
-                        height: 2.5.h,
-                      )
-                    ],
-                  );
-                },
+                        Divider(
+                          height: 2.5.h,
+                        )
+                      ],
+                    );
+                  },
+                ),
               ),
             );
           },
@@ -345,6 +385,7 @@ Widget BakeryFilterBar(BakeryModel controller) => SliverAppBar(
             ),
           )),
     );
+
 Widget FilterIcon(BakeryModel controller) => GestureDetector(
       child: RawChip(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

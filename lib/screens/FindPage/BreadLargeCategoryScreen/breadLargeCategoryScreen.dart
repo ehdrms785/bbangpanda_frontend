@@ -17,7 +17,11 @@ class BreadLargeCategoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: MainAppBar(),
+        appBar: MainAppBar(
+          isShowAppBar: controller.isShowAppBar,
+          title: controller.breadLargeCategory.category,
+          actions: appBarActions,
+        ),
         body: Obx(() {
           if (controller.isLoading.value) {
             return Center(child: CupertinoActivityIndicator());
@@ -41,41 +45,27 @@ class BreadLargeCategoryScreen extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget MainAppBar() => PreferredSize(
-        preferredSize: Size.fromHeight(5.0.h),
-        child: Obx(
-          () => AnimatedContainer(
-            height: controller.isShowAppBar.value ? 5.0.h : 0.0,
-            duration: Duration(milliseconds: 200),
-            child: AppBar(
-              // automaticallyImplyLeading: false,
-              leading: backArrowButtton(),
-              title: Text(controller.breadLargeCategory.category),
-              centerTitle: true,
-              actions: [
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.access_alarm),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    print("TAB");
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                    child: Icon(Icons.zoom_out_outlined),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+  List<Widget> appBarActions = [
+    GestureDetector(
+      onTap: () {
+        print("TAB");
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+        child: Icon(Icons.access_alarm),
+      ),
+    ),
+    GestureDetector(
+      onTap: () {
+        print("TAB");
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+        child: Icon(Icons.zoom_out_outlined),
+      ),
+    ),
+  ];
+
   Widget TabListContainer() => CustomScrollView(
         key: Key("BLCS"), // BakeryLargetCategoryScroll
         shrinkWrap: true,
