@@ -119,6 +119,7 @@ PreferredSizeWidget MainAppBar({
                   GestureDetector(
                     onTap: () {
                       print("TAB");
+                      Get.toNamed('/cart');
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 1.5.w),

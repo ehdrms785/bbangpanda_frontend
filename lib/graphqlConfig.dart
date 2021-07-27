@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 class GraphQLConfiguration {
   static String? token = 'Bearer ${Hive.box("auth").get('token')}';
 
-  static HttpLink httpLink = HttpLink('https://611549fb308d.ngrok.io/graphql');
+  static HttpLink httpLink = HttpLink('http://localhost:4000/graphql');
   // static Link? link
   static ValueNotifier<GraphQLClient> graphqlInit() {
     final AuthLink authLink = AuthLink(getToken: () => 'Bearer $token');

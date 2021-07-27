@@ -53,6 +53,7 @@ Future<bool> tokenCheck() async {
             document: gql(Queries.reissueTokenMutation),
             variables: {'refreshToken': Hive.box('auth').get('refreshToken')}),
       );
+      print("여기까지오나?");
       print(result);
       if (result.hasException) {
         return false;

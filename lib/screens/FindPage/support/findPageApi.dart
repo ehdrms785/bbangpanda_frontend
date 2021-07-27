@@ -89,6 +89,7 @@ class FindPageApi {
 // filterIdList
 // cursorId
   static Future<dynamic> fetchSimpleBreadsInfo({
+    int? bakeryId,
     String? largeCategoryId,
     String? smallCategoryId,
     String sortFilterId: '1', //최신순
@@ -100,6 +101,7 @@ class FindPageApi {
       QueryOptions(
           document: gql(FindBakeryQuery.getSimpleBreadsInfoQuery),
           variables: {
+            ...(bakeryId != null ? ({'bakeryId': bakeryId}) : {}),
             ...(largeCategoryId != null
                 ? ({'largeCategoryId': largeCategoryId})
                 : {}),
@@ -208,6 +210,26 @@ class FindPageApi {
           variables: {
             'bakeryId': bakeryId,
           }),
+    );
+  }
+
+  static Future<dynamic> toggleGetDibsBakery({
+    required int bakeryId,
+  }) async {
+    return client.mutate(
+      MutationOptions(
+          document: gql(FindBakeryQuery.toggleDibsBakeryMutation),
+          variables: {'bakeryId': bakeryId}),
+    );
+  }
+
+  static Future<dynamic> toggleGetDibsBread({
+    required int breadId,
+  }) async {
+    return client.mutate(
+      MutationOptions(
+          document: gql(FindBakeryQuery.toggleDibsBreadMutation),
+          variables: {'breadId': breadId}),
     );
   }
 }

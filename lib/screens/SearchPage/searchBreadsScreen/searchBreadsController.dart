@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SearchBreadsController extends GetxController implements BreadModel {
-  var isLoading = true.obs;
-  var firstInitLoading = true.obs;
-  var isFetchMoreLoading = false;
-  var hasMore = true.obs;
-  var filterLoading = true.obs;
+  RxBool isLoading = true.obs;
+  RxBool firstInitLoading = true.obs;
+  RxBool isFetchMoreLoading = false.obs;
+  RxBool hasMore = true.obs;
+  RxBool filterLoading = true.obs;
 
   RxString sortFilterId = '1'.obs; // 최신순
-  var filterIdList = [].obs;
+  late RxList<dynamic> filterIdList;
 
   late ScrollController scrollController;
   RxList<String> breadSortFilterIdList = ['1'].obs;
@@ -25,7 +25,7 @@ class SearchBreadsController extends GetxController implements BreadModel {
   RxList<dynamic> filterWidget = [].obs;
   RxInt cursorBreadId = 0.obs;
 
-  RxList<dynamic> tempFilterIdList = [].obs;
+  late RxList<dynamic> tempFilterIdList;
   var simpleBreadListResult = <BreadSimpleInfo>[].obs;
 
   @override
@@ -38,7 +38,7 @@ class SearchBreadsController extends GetxController implements BreadModel {
 
       if (scrollController.position.pixels + 400 >=
               scrollController.position.maxScrollExtent &&
-          !isFetchMoreLoading &&
+          !isFetchMoreLoading.value &&
           hasMore.value) {
         print("FetchMore 실행 합니다!");
 
@@ -158,7 +158,7 @@ class SearchBreadsController extends GetxController implements BreadModel {
     try {
       print("fetchMoreSimpleBreadsInfo ~들어왔다");
       // isFetchMoreLoading(true);
-      isFetchMoreLoading = true;
+      isFetchMoreLoading(true);
       print('cursorBreadId: ${cursorBreadId.value}');
       final result = await FindPageApi.fetchSearchedSimpleBreadsInfo(
         searchTerm: SearchScreenController.to.termTextController.value.text,
@@ -196,7 +196,7 @@ class SearchBreadsController extends GetxController implements BreadModel {
       print("에러발새생1");
       print(err);
     } finally {
-      isFetchMoreLoading = false;
+      isFetchMoreLoading(false);
     }
   }
 }

@@ -1,7 +1,13 @@
 import 'dart:ui';
 
+import 'package:bbangnarae_frontend/main.dart';
 import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryShareWidget.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadShareWidget.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/marketOrderShareWidget.dart';
+import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +47,7 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                             builder: (context, child) => SliverAppBar(
                               backgroundColor: controller.colorTween.value,
                               title: Text(
-                                "하이",
+                                controller.bakeryDetailInfo.value.name,
                                 style: TextStyle(
                                   color: controller.appBarTextColorTween.value,
                                 ),
@@ -63,15 +69,23 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                     return GestureDetector(
                                       onTap: () {
                                         print("Like");
+                                        controller.toggleGetDibsBakery();
                                         // Get.back();
                                       },
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 5),
-                                        child: Container(
-                                          child: Icon(
-                                            CupertinoIcons.star,
-                                            size: 18.0.sp,
+                                        child: Obx(
+                                          () => Container(
+                                            child: Icon(
+                                              controller.isGotDibs.value
+                                                  ? CupertinoIcons.star_fill
+                                                  : CupertinoIcons.star,
+                                              color: controller.isGotDibs.value
+                                                  ? Colors.red
+                                                  : Colors.grey,
+                                              size: 18.0.sp,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -84,7 +98,7 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                   child: GestureDetector(
                                     onTap: () {
                                       print("Search");
-                                      test(!test.value);
+                                      Get.toNamed('/search');
                                       // Get.back();
                                     },
                                     child: Padding(
@@ -93,6 +107,28 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                       child: Container(
                                         child: Icon(
                                           Icons.search,
+                                          size: 18.0.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  // color: Colors.red,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      print("Home");
+                                      Get.until((route) => route.isFirst);
+                                      AuthController.to.mainPageController
+                                          .jumpToPage(0);
+                                      // Get.back();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 5),
+                                      child: Container(
+                                        child: Icon(
+                                          Icons.home_outlined,
                                           size: 18.0.sp,
                                         ),
                                       ),
@@ -154,7 +190,7 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                     // color: Colors.transparent,
                                     child: Builder(builder: (context) {
                                       BakeryDetailInfo bakeryData =
-                                          controller.bakeryDetailInfo;
+                                          controller.bakeryDetailInfo.value;
                                       // Map<String, dynamic> bakeryData = {
                                       //   'thumbnail': 'assets/breadImage.jpg',
                                       //   'name': '다로베이커리',
@@ -253,7 +289,11 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                                 ),
                                                 GestureDetector(
                                                   onTap: () {
-                                                    print("여긴 취향존중");
+                                                    print(
+                                                        "여긴 취향존중 ${bakeryData.isGotDibs}");
+                                                    // toggleDibsBakery
+                                                    controller
+                                                        .toggleGetDibsBakery();
                                                   },
                                                   child: Padding(
                                                     padding: const EdgeInsets
@@ -262,25 +302,37 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                                     child: Align(
                                                         alignment: Alignment
                                                             .centerRight,
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Icon(
-                                                              CupertinoIcons
-                                                                  .star,
-                                                              color:
-                                                                  Colors.white,
-                                                              size: 20.0.sp,
-                                                            ),
-                                                            Text("${bakeryData.dibedUserCount}",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        8.0.sp,
-                                                                    color: Colors
-                                                                        .white)),
-                                                          ],
+                                                        child: Obx(
+                                                          () => Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Icon(
+                                                                controller.isGotDibs
+                                                                        .value
+                                                                    ? CupertinoIcons
+                                                                        .star_fill
+                                                                    : CupertinoIcons
+                                                                        .star,
+                                                                color: controller
+                                                                        .isGotDibs
+                                                                        .value
+                                                                    ? Colors.red
+                                                                    : Colors
+                                                                        .white,
+                                                                size: 20.0.sp,
+                                                              ),
+                                                              Text(
+                                                                  "${controller.gotDibsUserCount}",
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          8.0
+                                                                              .sp,
+                                                                      color: Colors
+                                                                          .white)),
+                                                            ],
+                                                          ),
                                                         )),
                                                   ),
                                                 )
@@ -397,7 +449,9 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                         ),
                         Obx(
                           () => SliverAppBar(
-                            toolbarHeight: test.value ? 7.0.h : 12.0.h,
+                            backgroundColor: Colors.blue,
+                            // toolbarHeight: test.value ? 7.0.h : 12.0.h,
+                            toolbarHeight: 5.0.h,
                             primary: false,
                             pinned: true,
                             elevation: 0,
@@ -408,68 +462,79 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                               title: Column(
                                 children: [
                                   Container(
-                                    height: 7.0.h,
+                                    height: 5.0.h,
                                     child: Row(
                                       children: [
                                         Expanded(
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              RawChip(
-                                                label: Text("전체",
-                                                    style: TextStyle(
-                                                        fontSize: 10.0.sp,
-                                                        color: Colors.white)),
-                                                materialTapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                onPressed: () {
-                                                  print("전체");
-                                                },
-                                                selected: true,
-                                                showCheckmark: false,
-                                                selectedColor: Colors.black
-                                                    .withOpacity(0.4),
-                                                visualDensity:
-                                                    VisualDensity.compact,
-                                              ),
-                                              RawChip(
-                                                label: Text("소프트브레드",
-                                                    style: TextStyle(
-                                                        fontSize: 10.0.sp)),
-                                                materialTapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                                labelPadding: EdgeInsets.zero,
-                                                visualDensity:
-                                                    VisualDensity.compact,
-                                              ),
-                                              RawChip(
-                                                label: Text("하드브레드",
-                                                    style: TextStyle(
-                                                        fontSize: 10.0.sp)),
-                                                materialTapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                                labelPadding: EdgeInsets.zero,
-                                                visualDensity:
-                                                    VisualDensity.compact,
-                                              ),
-                                              RawChip(
-                                                label: Text("디저트",
-                                                    style: TextStyle(
-                                                        fontSize: 10.0.sp)),
-                                                materialTapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                                labelPadding: EdgeInsets.zero,
-                                                visualDensity:
-                                                    VisualDensity.compact,
-                                              ),
-                                            ],
+                                          child: Builder(
+                                            builder: (context) {
+                                              List<BreadCategory>
+                                                  breadLargeCategories = [
+                                                new BreadCategory.fromJson({
+                                                  'id': '0',
+                                                  'category': '전체'
+                                                }),
+                                                ...controller.bakeryDetailInfo
+                                                    .value.breadLargeCategories
+                                                    .map((breadLargeCategory) =>
+                                                        BreadCategory.fromJson(
+                                                            breadLargeCategory))
+                                              ];
+                                              print(breadLargeCategories);
+                                              return Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 2.0.w),
+                                                child: Obx(
+                                                  () => Wrap(
+                                                    spacing: 2.0.w,
+                                                    children: [
+                                                      ...breadLargeCategories
+                                                          .map(
+                                                              (largeCategory) =>
+                                                                  RawChip(
+                                                                    label: Text(
+                                                                      largeCategory
+                                                                          .category,
+                                                                      style: TextStyle(
+                                                                          fontSize: 10.0
+                                                                              .sp,
+                                                                          color:
+                                                                              Colors.white),
+                                                                    ),
+                                                                    materialTapTargetSize:
+                                                                        MaterialTapTargetSize
+                                                                            .shrinkWrap,
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .grey,
+                                                                    onPressed:
+                                                                        () {
+                                                                      print(largeCategory
+                                                                          .category);
+                                                                      controller
+                                                                          .applyLargeCateogryChanged(
+                                                                              largeCategory.id);
+                                                                    },
+                                                                    selected: largeCategory
+                                                                            .id ==
+                                                                        controller
+                                                                            .breadLargeCategoryId
+                                                                            .value,
+                                                                    showCheckmark:
+                                                                        false,
+                                                                    selectedColor: Colors
+                                                                        .black
+                                                                        .withOpacity(
+                                                                            0.8),
+                                                                    visualDensity:
+                                                                        VisualDensity
+                                                                            .compact,
+                                                                  )),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
                                           ),
                                         ),
                                         GestureDetector(
@@ -489,17 +554,6 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                       ],
                                     ),
                                   ),
-                                  AnimatedContainer(
-                                      duration: Duration(
-                                          milliseconds: test.value ? 0 : 600),
-                                      curve: Curves.fastOutSlowIn,
-                                      // color: Colors.red,
-                                      height: test.value ? 0 : 5.0.h,
-                                      child: Container(
-                                        width: double.infinity,
-                                        color: Colors.red,
-                                        child: Text("하이"),
-                                      )),
                                 ],
                               ),
                               centerTitle: true,
@@ -507,23 +561,119 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                           ),
                         ),
 
-                        SliverList(
-                            key: ValueKey("NEWKEY"),
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                return Container(
-                                  height: 30.0.h,
-                                  color: Colors.blue.withRed(index * 50),
-                                  child: Center(
-                                    child: Text("$index 번 박사"),
+                        // SliverAppBar(
+                        //   titleSpacing: 0,
+                        //   toolbarHeight: test.value ? 0 : 5.0.h,
+                        //   automaticallyImplyLeading: false,
+                        //   title: AnimatedContainer(
+                        //     duration:
+                        //         Duration(milliseconds: test.value ? 0 : 600),
+                        //     curve: Curves.fastOutSlowIn,
+                        //     // color: Colors.red,
+                        //     height: test.value ? 0 : 5.0.h,
+                        //     child: Container(
+                        //       width: double.infinity,
+                        //       color: Colors.red,
+                        //       child: Text("하이"),
+                        //     ),
+                        //   ),
+                        // ),
+                        SliverAppBar(
+                          pinned: true,
+                          titleSpacing: 0,
+                          toolbarHeight: test.value ? 0 : 5.0.h,
+                          automaticallyImplyLeading: false,
+                          backgroundColor: Colors.red,
+                          title: AnimatedContainer(
+                            duration:
+                                Duration(milliseconds: test.value ? 0 : 600),
+                            curve: Curves.fastOutSlowIn,
+                            // color: Colors.red,
+                            height: test.value ? 0 : 5.0.h,
+                            child: Container(
+                              height: 5.0.h,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Builder(
+                                      builder: (context) {
+                                        List<BreadCategory>
+                                            breadSmallCategoreis = [
+                                          new BreadCategory.fromJson(
+                                              {'id': '0', 'category': '전체'}),
+                                          ...controller.bakeryDetailInfo.value
+                                              .breadSmallCategories
+                                              .map((breadSmallCategory) =>
+                                                  BreadCategory.fromJson(
+                                                      breadSmallCategory))
+                                        ];
+                                        // print(breadSmallCategoreis);
+                                        return Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 2.0.w),
+                                          child: Obx(
+                                            () => Wrap(
+                                              spacing: 2.0.w,
+                                              children: [
+                                                ...breadSmallCategoreis.map(
+                                                    (smallCategory) => RawChip(
+                                                          label: Text(
+                                                            smallCategory
+                                                                .category,
+                                                            style: TextStyle(
+                                                                fontSize:
+                                                                    10.0.sp,
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                          materialTapTargetSize:
+                                                              MaterialTapTargetSize
+                                                                  .shrinkWrap,
+                                                          backgroundColor:
+                                                              Colors.grey,
+                                                          onPressed: () {
+                                                            print(smallCategory
+                                                                .category);
+                                                            controller
+                                                                .applySmallCateogryChanged(
+                                                                    smallCategory
+                                                                        .id);
+                                                          },
+                                                          selected: smallCategory
+                                                                  .id ==
+                                                              controller
+                                                                  .breadSmallCategoryId
+                                                                  .value,
+                                                          showCheckmark: false,
+                                                          selectedColor: Colors
+                                                              .black
+                                                              .withOpacity(0.8),
+                                                          visualDensity:
+                                                              VisualDensity
+                                                                  .compact,
+                                                        )),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
-                                );
-                              },
-                              childCount: 10,
-                            )),
-                        // 라지 카테고리 && 세부카테고리(접이식)
-                        // 필터 & 세부옵션
-                        // 상품목록
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        BreadFilterBar(controller),
+                        SliverPadding(
+                          padding: EdgeInsets.symmetric(horizontal: 3.0.w),
+                          sliver: SimpleBreadList(
+                            isLoading: controller.isLoading,
+                            hasMore: controller.hasMore,
+                            simpleBreadListResult:
+                                controller.simpleBreadListResult,
+                          ),
+                        ),
                       ],
                     ),
                   ),

@@ -13,6 +13,7 @@ class MypageController extends GetxController {
   var userResult = Map<String, dynamic>().obs;
   @override
   void onInit() {
+    print("체크4");
     if (Get.find<AuthController>().isLoggedIn.value == true) {
       fetchUserDetail();
     }

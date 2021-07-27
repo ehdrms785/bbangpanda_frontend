@@ -102,7 +102,8 @@ class BreadLargeCategoryScreen extends StatelessWidget {
                     (smallCategory) => SizedBox(
                         height: 5.0.h,
                         child: Tab(
-                          child: Text(smallCategory['category']),
+                          child: Text(smallCategory['category'],
+                              style: TextStyle(fontSize: 13.0.sp)),
                         )),
                   ),
                 ]),

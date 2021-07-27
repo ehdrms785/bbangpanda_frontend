@@ -46,7 +46,8 @@ class BakeryDetailInfo {
   final List<dynamic>? signitureBreads;
   final List<dynamic> breadLargeCategories;
   final List<dynamic> breadSmallCategories;
-  final int dibedUserCount;
+  final int gotDibsUserCount;
+  bool isGotDibs;
 
   BakeryDetailInfo({
     required this.thumbnail,
@@ -56,10 +57,12 @@ class BakeryDetailInfo {
     this.signitureBreads,
     required this.breadLargeCategories,
     required this.breadSmallCategories,
-    required this.dibedUserCount,
+    required this.gotDibsUserCount,
+    required this.isGotDibs,
   });
 
-  BakeryDetailInfo.fromJson(Map<String, dynamic> bakeryJson, int dibedUsercount)
+  BakeryDetailInfo.fromJson(
+      Map<String, dynamic> bakeryJson, int gotDibsUserCount)
       : thumbnail = 'assets/bakeryImage.jpg',
         name = bakeryJson['name'],
         bakeryFeature = bakeryJson['bakeryFeatures'],
@@ -67,21 +70,24 @@ class BakeryDetailInfo {
         signitureBreads = bakeryJson['signitureBreads'],
         breadLargeCategories = bakeryJson['breadLargeCategories'],
         breadSmallCategories = bakeryJson['breadSmallCategories'],
-        dibedUserCount = dibedUsercount;
+        gotDibsUserCount = gotDibsUserCount,
+        isGotDibs = bakeryJson['isGotDibs'];
 
   @override
   String toString() {
-    return 'name: $name,  description: $description, bakeryFeature: $bakeryFeature,  signitureBreads: $signitureBreads \n breadLargeCategories $breadLargeCategories \n breadSmallCateogries: $breadSmallCategories \n dibedUserCount: $dibedUserCount';
+    return 'name: $name,  description: $description, bakeryFeature: $bakeryFeature,  signitureBreads: $signitureBreads \n breadLargeCategories $breadLargeCategories \n breadSmallCateogries: $breadSmallCategories \n gotDibsUserCount: $gotDibsUserCount';
   }
 }
 
 class BakerySimpleInfo {
+  final int id;
   final String thumbnail;
   final String name;
   final String? description;
   final List<dynamic> bakeryFeature;
   final List<dynamic>? signitureBreads;
   BakerySimpleInfo({
+    required this.id,
     required this.thumbnail,
     required this.name,
     required this.bakeryFeature,
@@ -89,7 +95,7 @@ class BakerySimpleInfo {
     this.description,
   });
   BakerySimpleInfo.fromJson(Map<String, dynamic> json)
-      :
+      : id = json['id'],
         // thumbnail: json['thumbnail'],
         thumbnail = 'assets/breadImage.jpg',
         name = json['name'],

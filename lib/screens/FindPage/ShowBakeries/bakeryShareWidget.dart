@@ -61,7 +61,8 @@ Widget SimpleBakeryList({
             return GestureDetector(
               onTap: () {
                 print("탭했습니다");
-                Get.to(BakeryDetailMainScreen(), arguments: {'bakeryId': 1},
+                Get.to(BakeryDetailMainScreen(),
+                    arguments: {'bakeryId': bakeryData.id},
                     binding: BindingsBuilder(() {
                   Get.lazyPut(() => BakeryDetailMainController());
                 }));

@@ -89,7 +89,8 @@ AppBar SearchScreenAppBar(
             alignment: Alignment.center,
             child: GestureDetector(
               onTap: () {
-                Get.until((route) => route.isFirst);
+                // Get.until((route) => route.isFirst);
+                Get.back();
               },
               child: Text(
                 "취소",

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+// import 'package:carousel_slider/carousel_slider.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -36,33 +36,33 @@ class _HomeState extends State<Home> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              CarouselSlider(
-                items: [1, 2, 3, 4, 5].map((i) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade300,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '$i번 이벤트 배너',
-                              style: TextStyle(fontSize: 16.0),
-                            ),
-                          ));
-                    },
-                  );
-                }).toList(),
-                options: CarouselOptions(
-                  autoPlay: true,
-                  autoPlayInterval: Duration(seconds: 4),
-                  enlargeCenterPage: true,
-                  viewportFraction: 1.0,
-                  aspectRatio: 2.0,
-                  initialPage: 0,
-                ),
-              ),
+              // CarouselSlider(
+              //   items: [1, 2, 3, 4, 5].map((i) {
+              //     return Builder(
+              //       builder: (BuildContext context) {
+              //         return Container(
+              //             width: double.infinity,
+              //             decoration: BoxDecoration(
+              //               color: Colors.green.shade300,
+              //             ),
+              //             child: Center(
+              //               child: Text(
+              //                 '$i번 이벤트 배너',
+              //                 style: TextStyle(fontSize: 16.0),
+              //               ),
+              //             ));
+              //       },
+              //     );
+              //   }).toList(),
+              //   options: CarouselOptions(
+              //     autoPlay: true,
+              //     autoPlayInterval: Duration(seconds: 4),
+              //     enlargeCenterPage: true,
+              //     viewportFraction: 1.0,
+              //     aspectRatio: 2.0,
+              //     initialPage: 0,
+              //   ),
+              // ),
               Expanded(
                 child: Container(
                   width: double.infinity,

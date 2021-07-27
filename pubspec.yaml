@@ -34,8 +34,8 @@ dependencies:
   another_flushbar: ^1.10.17
   path_provider: ^2.0.1
   graphql_flutter: ^5.0.0-nullsafety.2
-  firebase_core: ^1.1.0
-  firebase_auth: ^1.1.2
+  firebase_core: 
+  firebase_auth: 
   uuid:
   flutter_web_auth: ^0.3.0
   get: ^4.1.4
@@ -46,7 +46,7 @@ dependencies:
   flutter_markdown: ^0.6.2
   connectivity: ^3.0.3
   time: ^2.0.0
-  carousel_slider: ^4.0.0
+  # carousel_slider: ^4.0.0
   auto_size_text: ^3.0.0-nullsafety.0
 
 dev_dependencies:

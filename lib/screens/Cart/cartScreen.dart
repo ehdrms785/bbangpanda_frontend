@@ -2,12 +2,12 @@ import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/material.dart';
 
-class Cart extends StatefulWidget {
+class CartScreen extends StatefulWidget {
   @override
-  _CartState createState() => _CartState();
+  _CartScreenState createState() => _CartScreenState();
 }
 
-class _CartState extends State<Cart> {
+class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

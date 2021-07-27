@@ -1,4 +1,7 @@
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadSharedFunctions.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPageApi.dart';
+import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
@@ -8,7 +11,7 @@ import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.da
 
 class BakeryDetailMainController extends GetxController
     with SingleGetTickerProviderMixin
-    implements BakeryModel {
+    implements BreadModel {
   // 애니메이션
   late AnimationController ColorAnimationController;
   late AnimationController TextAnimationController;
@@ -18,36 +21,88 @@ class BakeryDetailMainController extends GetxController
   var test = true.obs;
   late final ScrollController scrollController;
   var bakeryLikeBtnShow = false.obs;
+  late int bakeryId;
+  late RxInt gotDibsUserCount = 0.obs;
+  late RxBool isGotDibs = false.obs;
+  // 추가
+  late final RxString breadLargeCategoryId = '0'.obs;
+  late final RxString breadSmallCategoryId = '0'.obs;
 
   // BakeryModel
-  var firstInitLoading = true.obs;
-  var isLoading = true.obs;
-  var filterLoading = true.obs;
-  var hasMore = true.obs;
-  var isFetchMoreLoading = false;
+  RxBool isLoading = true.obs;
+  RxBool firstInitLoading = true.obs;
+  RxBool isFetchMoreLoading = false.obs;
+  RxBool hasMore = true.obs;
+  RxBool filterLoading = true.obs;
 
-  late BakeryDetailInfo bakeryDetailInfo;
-  late RxList<dynamic> bakeryFilterResult = [].obs;
+  late Rx<BakeryDetailInfo> bakeryDetailInfo;
+  // late RxList<dynamic> bakeryFilterResult = [].obs;
   RxInt cursorBakeryId = 0.obs;
   RxString sortFilterId = '1'.obs; // 최신순
-  RxList<String> filterIdList = ['1'].obs; // 제일 기본은
-  RxList<String> tempFilterIdList = ['1'].obs;
-  var simpleBakeriesListResult = <BakerySimpleInfo>[].obs;
+  RxList<dynamic> filterIdList = [].obs; // 제일 기본은
+  RxList<dynamic> tempFilterIdList = [].obs;
+
+  @override
+  RxList breadFilterResult = [].obs;
+
+  @override
+  late RxList<String> breadOptionFilterIdList;
+
+  @override
+  late RxList<String> breadSortFilterIdList;
+
+  @override
+  RxInt cursorBreadId = 0.obs;
+
+  @override
+  RxList filterWidget = [].obs;
+
+  @override
+  var simpleBreadListResult = <BreadSimpleInfo>[].obs;
+
+  _applyFilterChanged() async {
+    filterIdList.clear();
+    filterIdList.addAll(tempFilterIdList);
+    hasMore(true);
+    await _fetchSimpleBreadsInfo();
+  }
+
+  applyLargeCateogryChanged(String largeCateogryId) async {
+    breadLargeCategoryId(largeCateogryId);
+    hasMore(true);
+    await _fetchSimpleBreadsInfo();
+  }
+
+  applySmallCateogryChanged(String smallCateogryId) async {
+    breadSmallCategoryId(smallCateogryId);
+    hasMore(true);
+    await _fetchSimpleBreadsInfo();
+  }
 
   @override
   // TODO: implement applyFilterChanged
-  get applyFilterChanged => throw UnimplementedError();
+  get applyFilterChanged => _applyFilterChanged();
+
+  _initFilterSelected() {
+    tempFilterIdList.clear();
+  }
 
   @override
   // TODO: implement initFilterSelected
-  get initFilterSelected => throw UnimplementedError();
+  get initFilterSelected => _initFilterSelected();
+
+  _refreshBakeryInfoData() async {
+    hasMore(true);
+    await _fetchSimpleBreadsInfo();
+  }
 
   @override
   // TODO: implement refreshBakeryInfoData
-  get refreshBakeryInfoData => throw UnimplementedError();
+  get refreshBakeryInfoData => _refreshBakeryInfoData();
 
   @override
   void onInit() async {
+    bakeryId = Get.arguments['bakeryId'];
     scrollController = new ScrollController();
 
     scrollController.addListener(() {
@@ -55,10 +110,10 @@ class BakeryDetailMainController extends GetxController
 
       if (scrollController.position.pixels + 500 >=
               scrollController.position.maxScrollExtent &&
-          !isFetchMoreLoading &&
+          !isFetchMoreLoading.value &&
           hasMore.value) {
-        print("FetchMore 실행 !");
-        // Future.microtask(() => fetchMoreSimpleBakeriesInfo());
+        print("FetchMore 실행 ! $isFetchMoreLoading");
+        Future.microtask(() => _fetchMoreSimpleBreadsInfo());
       }
     });
 
@@ -80,8 +135,9 @@ class BakeryDetailMainController extends GetxController
         .animate(TextAnimationController);
 
     await fetchBakeryDetail();
-
-    print("여기까지 왔을텐데");
+    breadFilterResult =
+        await fetchBreadFilter(filterLoading: filterLoading) ?? [].obs;
+    await _fetchSimpleBreadsInfo();
     firstInitLoading(false);
     super.onInit();
   }
@@ -110,6 +166,32 @@ class BakeryDetailMainController extends GetxController
 
 // Functions
 // =======================
+  Future<void> _fetchSimpleBreadsInfo() async {
+    await fetchSimpleBreadsInfo(
+        bakeryId: bakeryId,
+        cursorBreadId: cursorBreadId,
+        filterIdList: filterIdList,
+        hasMore: hasMore,
+        isLoading: isLoading,
+        simpleBreadListResult: simpleBreadListResult,
+        sortFilterId: sortFilterId,
+        breadLargeCategoryId: breadLargeCategoryId.value,
+        breadSmallCategoryId: breadSmallCategoryId.value);
+  }
+
+  void _fetchMoreSimpleBreadsInfo() async {
+    fetchMoreSimpleBreadsInfo(
+      breadLargeCategoryId: breadLargeCategoryId.value,
+      breadSmallCategoryId: breadSmallCategoryId.value,
+      cursorBreadId: cursorBreadId,
+      filterIdList: filterIdList,
+      hasMore: hasMore,
+      isFetchMoreLoading: isFetchMoreLoading,
+      simpleBreadListResult: simpleBreadListResult,
+      sortFilterId: sortFilterId,
+    );
+  }
+
   Future<void> fetchBakeryDetail() async {
     return Future(() async {
       try {
@@ -121,7 +203,11 @@ class BakeryDetailMainController extends GetxController
 
         final bakeryDetailResult = result.data?['getBakeryDetail'];
         bakeryDetailInfo = BakeryDetailInfo.fromJson(
-            bakeryDetailResult['bakery'], bakeryDetailResult['dibedUserCount']);
+                bakeryDetailResult['bakery'],
+                bakeryDetailResult['gotDibsUserCount'])
+            .obs;
+        gotDibsUserCount(bakeryDetailInfo.value.gotDibsUserCount).obs;
+        isGotDibs(bakeryDetailInfo.value.isGotDibs).obs;
         print("GetBakeryDetail Result 보기");
         print(bakeryDetailInfo);
       } catch (err) {
@@ -129,6 +215,37 @@ class BakeryDetailMainController extends GetxController
         print(err);
       } finally {
         isLoading(false);
+      }
+    });
+  }
+
+  Future<void> toggleGetDibsBakery() async {
+    return Future(() async {
+      try {
+        if (isGotDibs.value == true) {
+          isGotDibs(false);
+          gotDibsUserCount -= 1;
+        } else {
+          isGotDibs(true);
+          gotDibsUserCount += 1;
+        }
+        final result =
+            await FindPageApi.toggleGetDibsBakery(bakeryId: bakeryId);
+        final toggleDibsBakeryResult = result.data?['toggleDibsBakery'];
+
+        if (toggleDibsBakeryResult['ok'] == false) {
+          showSnackBar(message: "잠시 후에 다시 시도해 주세요.");
+          if (isGotDibs.value == true) {
+            isGotDibs(false);
+            gotDibsUserCount -= 1;
+          } else {
+            isGotDibs(true);
+            gotDibsUserCount += 1;
+          }
+        }
+        print(result);
+      } catch (e) {
+        print(e);
       }
     });
   }

@@ -75,9 +75,10 @@ class MyApp extends StatelessWidget {
           initialRoute: '/init',
           initialBinding: BindingsBuilder(() async {
             // AuthBinding();
-            Get.put(AuthController(), permanent: true);
+            // Get.put(AuthController(), permanent: true);
             Get.lazyPut(() => MypageController());
             Get.lazyPut(() => FindPageScreenController());
+
             // Get.lazyPut(() => ShowBakeriesController());
             // Get.lazyPut(() => ShowBreadsController());
           }),
@@ -85,21 +86,27 @@ class MyApp extends StatelessWidget {
           getPages: [
             GetPage(
               name: '/init',
-              page: () => AnimatedSplashScreen(
-                animationDuration: Duration(milliseconds: 1000),
-                splash: 'lib/images/splash.png',
-                splashIconSize: 30.0.h,
-                centered: true,
-                backgroundColor: SharedValues.mainColor,
-                nextScreen: App(),
-                splashTransition: SplashTransition.fadeTransition,
-                pageTransitionType: PageTransitionType.scale,
-              ),
+              page: () {
+                // return App();
+                return AnimatedSplashScreen(
+                  animationDuration: Duration(milliseconds: 1000),
+                  splash: 'lib/images/splash.png',
+                  splashIconSize: 30.0.h,
+                  centered: true,
+                  backgroundColor: SharedValues.mainColor,
+                  nextScreen: App(),
+                  splashTransition: SplashTransition.fadeTransition,
+                  pageTransitionType: PageTransitionType.scale,
+                );
+              },
             ),
             GetPage(
               name: '/',
-              page: () => App(),
+              page: () {
+                return App();
+              },
               binding: BindingsBuilder(() {
+                print("체크4");
                 // Get.put(MypageController());
               }),
             ),
@@ -176,6 +183,16 @@ class MyApp extends StatelessWidget {
                 // Get.lazyPut(() => SearchDetailScreenController());
               }),
             ),
+            GetPage(
+              name: '/cart',
+              page: () {
+                return CartScreen();
+              },
+              binding: BindingsBuilder(() {
+                print("카트 컨트롤러 바인딩 빌더");
+                // Get.put(MypageController());
+              }),
+            ),
           ],
         );
       }),
@@ -186,6 +203,7 @@ class MyApp extends StatelessWidget {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Get.put(AuthController(), permanent: true);
     return FutureBuilder(
       future: Firebase.initializeApp(),
       builder: (context, snapshot) {
@@ -208,28 +226,30 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
+// late final PageController _mainPageController;
+
 class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     Home(),
     Home(),
     FindPageScreen(),
-    Cart(),
+    CartScreen(),
     MyPageScreen(),
   ];
   final List<String> _pageNames = ["홈", "찜", "빵쇼핑", "장바구니", "마이페이지"];
 
-  late PageController pageController;
+  // late PageController pageController;
   int _selectedIndex = 0;
-
+  late PageController _mainPageController;
   @override
   void initState() {
     super.initState();
-    pageController = PageController();
+    _mainPageController = AuthController.to.mainPageController;
   }
 
   @override
   void dispose() {
-    pageController.dispose();
+    _mainPageController.dispose();
     super.dispose();
   }
 
@@ -240,7 +260,14 @@ class _MainPageState extends State<MainPage> {
     //   setState(() {
     //     _selectedIndex = index;
     //   });
-    pageController.jumpToPage(index);
+    if (index == 3) {
+      // print("장바구니");
+      // 장바구니는 BottomNavigationBar 가 없는게 좋을 것 같아서
+      // 이렇게 처리를 했다.
+      Get.toNamed("/cart");
+      return;
+    }
+    _mainPageController.jumpToPage(index);
     // Get.toNamed(_pageRoutes[index]);
   }
 
@@ -262,7 +289,7 @@ class _MainPageState extends State<MainPage> {
         body: PageView(
           //슬라이드 금지
           physics: NeverScrollableScrollPhysics(),
-          controller: pageController,
+          controller: _mainPageController,
           children: _pages,
           onPageChanged: onPageChanged,
         ),

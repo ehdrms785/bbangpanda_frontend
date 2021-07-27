@@ -110,8 +110,8 @@ class FindBakeryQuery {
 
   """;
   static String getSimpleBreadsInfoQuery = """
-      query getSimpleBreadsInfo(\$largeCategoryId: String, \$smallCategoryId: String, \$sortFilterId:String!, \$filterIdList: [String], \$cursorBreadId: Int) {
-    getSimpleBreadsInfo(largeCategoryId: \$largeCategoryId,smallCategoryId: \$smallCategoryId, sortFilterId: \$sortFilterId, filterIdList: \$filterIdList, cursorBreadId: \$cursorBreadId) {
+      query getSimpleBreadsInfo(\$bakeryId: Int,\$largeCategoryId: String, \$smallCategoryId: String, \$sortFilterId:String!, \$filterIdList: [String], \$cursorBreadId: Int) {
+    getSimpleBreadsInfo(bakeryId: \$bakeryId,largeCategoryId: \$largeCategoryId,smallCategoryId: \$smallCategoryId, sortFilterId: \$sortFilterId, filterIdList: \$filterIdList, cursorBreadId: \$cursorBreadId) {
       id
       thumbnail
       name
@@ -186,8 +186,27 @@ class FindBakeryQuery {
           id
           category
         }
+        isGotDibs
       }
-      dibedUserCount
+      gotDibsUserCount
+    }
+  }
+  """;
+
+  static String toggleDibsBakeryMutation = """
+  mutation toggleDibsBakery(\$bakeryId: Int!) {
+    toggleDibsBakery(bakeryId: \$bakeryId) {
+      ok
+      error
+    }
+  }
+  """;
+
+  static String toggleDibsBreadMutation = """
+  mutation toggleDibsBread(\$breadId: Int!) {
+    toggleDibsBread(breadId: \$breadId) {
+      ok
+      error
     }
   }
   """;

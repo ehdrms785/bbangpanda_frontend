@@ -176,8 +176,10 @@ Widget BreadFilterBar(BreadModel controller) => SliverAppBar(
                               ...BreadSortFilters.map((sortFilter) => ListTile(
                                     onTap: () {
                                       controller.sortFilterId(sortFilter.id);
-                                      controller.refreshBakeryInfoData();
+                                      controller.refreshBakeryInfoData;
+                                      print("여기요");
                                       Get.back();
+                                      print("여기요22");
                                     },
                                     title: Text(sortFilter.filter),
                                     selected: sortFilter.id ==
@@ -210,7 +212,7 @@ Widget BreadFilterBar(BreadModel controller) => SliverAppBar(
                         backgroundColor: Colors.transparent,
                       )),
                 ),
-                FilterIcon(controller),
+                BreadFilterIcon(controller),
                 Center(
                     child: Text(' | ', style: TextStyle(color: Colors.grey))),
                 Expanded(
@@ -269,7 +271,7 @@ Widget BreadFilterBar(BreadModel controller) => SliverAppBar(
         ],
       ),
     ));
-Widget FilterIcon(BreadModel controller) => GestureDetector(
+Widget BreadFilterIcon(BreadModel controller) => GestureDetector(
       child: RawChip(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         label: Text(

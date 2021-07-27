@@ -7,23 +7,22 @@ import 'package:get/get.dart';
 final SimpleBreadFetchMinimum = 2;
 
 abstract class BreadModel extends GetxController {
-  var isLoading;
-  var firstInitLoading;
-  var isFetchMoreLoading;
-  var hasMore;
-  var filterLoading;
-
-  var filterIdList = [].obs;
+  late RxBool isLoading;
+  late RxBool firstInitLoading;
+  late RxBool isFetchMoreLoading;
+  late RxBool hasMore;
+  late RxBool filterLoading;
 
   late RxString sortFilterId; // 최신순
   late ScrollController scrollController;
   late RxList<String> breadSortFilterIdList;
   late RxList<dynamic> breadFilterResult;
   late RxList<String> breadOptionFilterIdList;
-
   late RxList<dynamic> filterWidget;
+
   late RxInt cursorBreadId;
 
+  late RxList<dynamic> filterIdList;
   late RxList<dynamic> tempFilterIdList;
   var simpleBreadListResult;
 
@@ -43,6 +42,10 @@ class BreadCategory {
   final String id;
   final String category;
   BreadCategory({required this.id, required this.category});
+
+  BreadCategory.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        category = json['category'];
 }
 
 final BreadLargeCategories = [
