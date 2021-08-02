@@ -1,10 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/marketOrderModel.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/showMarketOrdersController.dart';
-import 'package:bbangnarae_frontend/screens/SearchPage/searchMarketsScreen/searchMarketsController.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

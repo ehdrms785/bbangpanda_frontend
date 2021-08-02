@@ -1,3 +1,5 @@
+import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainController.dart';
+import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadSmallCategoryScreen/breadSmallCategoryScreen.dart';
@@ -36,6 +38,19 @@ class BreadLargeCategoryScreen extends StatelessWidget {
                 children: [
                   TabListContainer(),
                   TabViewList(),
+                  TextButton(
+                      onPressed: () {
+                        Get.to(
+                          BreadDetailMainScreen(),
+                          arguments: {'breadId': 9},
+                          binding: BindingsBuilder(
+                            () {
+                              Get.lazyPut(() => BreadDetailMainController());
+                            },
+                          ),
+                        );
+                      },
+                      child: Text("빵상세보기 테스트용"))
                 ],
               ),
             ),

@@ -17,8 +17,10 @@ class FindPageScreen extends GetView<FindPageScreenController> {
       initialIndex: 0,
       child: SafeArea(
         child: Scaffold(
-          appBar:
-              MainAppBar(isShowAppBar: controller.isShowAppBar, title: "빵쇼핑"),
+          appBar: MainAppBar(
+              isShowAppBar: controller.isShowAppBar,
+              title: "빵쇼핑",
+              autoLeading: false),
           body: Column(
             children: [
               TabListContainer(),

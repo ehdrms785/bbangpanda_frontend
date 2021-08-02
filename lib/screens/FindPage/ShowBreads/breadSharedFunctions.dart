@@ -133,3 +133,41 @@ void fetchMoreSimpleBreadsInfo({
     isFetchMoreLoading(false);
   }
 }
+
+//  == FetchBreadDetailInfo
+Future<BreadDetailInfo?> fetchBreadDetail({
+  required int breadId,
+  required RxBool isLoading,
+}) async {
+  return Future(() async {
+    try {
+      // print('largeCategoryId: $largeCategoryId');
+      isLoading(true);
+      final result = await FindPageApi.fetchBreadDetail(
+        breadId: breadId,
+      );
+      print("잘 작동되는지 봅시다");
+      print("FetchBreadDetailInfo Result");
+      print(result);
+      if (result != null) {
+        print("크롸 BakeryDetail !");
+        final fetchBreadDetailInfoData = result.data['getBreadDetail'];
+
+        print(fetchBreadDetailInfoData['bread']);
+        print(fetchBreadDetailInfoData['bakery']);
+        print(fetchBreadDetailInfoData.runtimeType);
+        return BreadDetailInfo.fromJson(
+            fetchBreadDetailInfoData['bread'],
+            fetchBreadDetailInfoData['bakery'],
+            fetchBreadDetailInfoData['gotDibsUserCount']);
+      }
+    } catch (err) {
+      print("에러발새생");
+      print(err);
+    } finally {
+      print("그래도 작동하려나?");
+      isLoading(false);
+    }
+    return null;
+  });
+}

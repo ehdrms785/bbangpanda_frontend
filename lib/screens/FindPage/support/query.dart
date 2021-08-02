@@ -210,4 +210,35 @@ class FindBakeryQuery {
     }
   }
   """;
+
+  //////////////////////
+  /// Bread ////
+  /// ///////////////////
+  static String getBreadDetailQuery = """
+      query getBreadDetail(\$breadId: Int!) {
+    getBreadDetail(breadId: \$breadId) {
+      bread {
+        id
+        name
+        thumbnail
+        costPrice
+        price
+        discount
+        description
+        detailDescription
+        isGotDibs
+      }
+       bakery {
+          id
+          name
+          thumbnail
+          bakeryFeatures {
+            id
+            filter
+          }
+        }
+      gotDibsUserCount
+    }
+  }
+  """;
 }

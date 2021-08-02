@@ -47,6 +47,7 @@ Future<void> fetchSimpleBakeriesInfo(
             print(bakeryInfoJson);
             simpleBakeriesListResult
                 .add(new BakerySimpleInfo.fromJson(bakeryInfoJson));
+            print('여기까지 옵니까');
           });
           cursorBakeryId(getSimpleBakeriesInfoData[
               getSimpleBakeriesInfoData.length - 1]!['id']);

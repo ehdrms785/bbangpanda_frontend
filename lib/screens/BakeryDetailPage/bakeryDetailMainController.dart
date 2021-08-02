@@ -146,6 +146,7 @@ class BakeryDetailMainController extends GetxController
   void onClose() {
     ColorAnimationController.dispose();
     TextAnimationController.dispose();
+    scrollController.removeListener(() {});
     scrollController.dispose();
     // TODO: implement onClose
     super.onClose();
@@ -153,7 +154,7 @@ class BakeryDetailMainController extends GetxController
 
   bool scrollListener(ScrollNotification scrollInfo) {
     if (scrollInfo.metrics.axis == Axis.vertical) {
-      var calcScrollEventAppearValue = scrollInfo.metrics.pixels / 20.0.h;
+      var calcScrollEventAppearValue = scrollInfo.metrics.pixels / 25.0.h;
       ColorAnimationController.animateTo(calcScrollEventAppearValue);
       if (calcScrollEventAppearValue >= 1) {
         bakeryLikeBtnShow(true);

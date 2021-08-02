@@ -26,22 +26,26 @@ abstract class BakeryModel extends GetxController {
   // late Future<void> Function() refreshMarketOrderInfoData;
 }
 
-class BakerySortFilter {
+class BakeryFilterInfo {
   final String id;
   final String filter;
-  BakerySortFilter({required this.id, required this.filter});
+  BakeryFilterInfo({required this.id, required this.filter});
+
+  BakeryFilterInfo.fromJson(Map<String, dynamic> bakeryFilterJson)
+      : id = bakeryFilterJson['id'],
+        filter = bakeryFilterJson['filter'];
 }
 
-final List<BakerySortFilter> BakerySortFilters = [
-  BakerySortFilter(id: '1', filter: '최신순'),
-  BakerySortFilter(id: '2', filter: '인기순'),
-  BakerySortFilter(id: '3', filter: '리뷰많은순'),
+final List<BakeryFilterInfo> BakerySortFilters = [
+  BakeryFilterInfo(id: '1', filter: '최신순'),
+  BakeryFilterInfo(id: '2', filter: '인기순'),
+  BakeryFilterInfo(id: '3', filter: '리뷰많은순'),
 ];
 
 class BakeryDetailInfo {
   final String thumbnail;
   final String name;
-  final List<dynamic> bakeryFeature;
+  final List<BakeryFilterInfo> bakeryFeature;
   final String? description;
   final List<dynamic>? signitureBreads;
   final List<dynamic> breadLargeCategories;
@@ -65,7 +69,10 @@ class BakeryDetailInfo {
       Map<String, dynamic> bakeryJson, int gotDibsUserCount)
       : thumbnail = 'assets/bakeryImage.jpg',
         name = bakeryJson['name'],
-        bakeryFeature = bakeryJson['bakeryFeatures'],
+        bakeryFeature = bakeryJson['bakeryFeatures']
+            .map<BakeryFilterInfo>((bakeryFeatureJson) =>
+                BakeryFilterInfo.fromJson(bakeryFeatureJson))
+            .toList(),
         description = bakeryJson['description'],
         signitureBreads = bakeryJson['signitureBreads'],
         breadLargeCategories = bakeryJson['breadLargeCategories'],
@@ -84,13 +91,13 @@ class BakerySimpleInfo {
   final String thumbnail;
   final String name;
   final String? description;
-  final List<dynamic> bakeryFeature;
+  final List<BakeryFilterInfo> bakeryFeatures;
   final List<dynamic>? signitureBreads;
   BakerySimpleInfo({
     required this.id,
     required this.thumbnail,
     required this.name,
-    required this.bakeryFeature,
+    required this.bakeryFeatures,
     this.signitureBreads,
     this.description,
   });
@@ -100,14 +107,17 @@ class BakerySimpleInfo {
         thumbnail = 'assets/breadImage.jpg',
         name = json['name'],
         description = json['description'],
-        bakeryFeature = json['bakeryFeatures']
-            .map((bakeryFeature) => bakeryFeature)
-            .toList(),
+        bakeryFeatures =
+            json['bakeryFeatures'].map<BakeryFilterInfo>((bakeryFeatureJson) {
+          print("헬로우월드");
+          print(bakeryFeatureJson);
+          return BakeryFilterInfo.fromJson(bakeryFeatureJson);
+        }).toList(),
         signitureBreads =
             json['signitureBreads']?.map((bread) => bread['name']).toList();
 
   @override
   String toString() {
-    return 'name: $name,  description: $description, bakeryFeature: $bakeryFeature,  signitureBreads: $signitureBreads';
+    return 'name: $name,  description: $description, bakeryFeature: $bakeryFeatures,  signitureBreads: $signitureBreads';
   }
 }

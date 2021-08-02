@@ -1,3 +1,4 @@
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/theme/textFieldTheme.dart';
 import 'package:flutter/cupertino.dart';
@@ -88,7 +89,8 @@ PreferredSizeWidget PrefferedAppBar(BuildContext context) {
 PreferredSizeWidget MainAppBar({
   required RxBool isShowAppBar,
   String? title,
-  Widget? leading,
+  // Widget? leading,
+  bool autoLeading = true,
   List<Widget>? actions,
 }) =>
     PreferredSize(
@@ -100,7 +102,7 @@ PreferredSizeWidget MainAppBar({
           child: AppBar(
             title: title != null ? Text(title) : null,
             centerTitle: true,
-            leading: leading ?? backArrowButtton(),
+            leading: autoLeading ? backArrowButtton() : null,
             actions: actions ??
                 [
                   GestureDetector(
@@ -480,4 +482,20 @@ class CustomPageViewScrollPhysics extends ScrollPhysics {
         stiffness: 100,
         damping: 1,
       );
+}
+
+Text FeatureListTextWidget({required List<BakeryFilterInfo> features}) {
+  String filters = '';
+  for (BakeryFilterInfo item in features) {
+    filters += '#${item.filter} ';
+  }
+  return Text(
+    filters,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: TextStyle(
+        fontSize: 9.0.sp,
+        color: Colors.grey.shade400,
+        fontWeight: FontWeight.w300),
+  );
 }

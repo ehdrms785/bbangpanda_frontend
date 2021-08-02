@@ -1,5 +1,5 @@
-import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainController.dart';
-import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainScreen.dart';
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainController.dart';
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryShareWidget.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';

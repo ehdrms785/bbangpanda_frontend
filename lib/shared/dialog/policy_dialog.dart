@@ -8,7 +8,7 @@ class PolicyDialog extends StatelessWidget {
     Key? key,
     this.radius = 8,
     required this.mdFileName,
-  })   : assert(mdFileName.contains('.md'),
+  })  : assert(mdFileName.contains('.md'),
             'The file must contain the .md extension'),
         super(key: key);
 
@@ -46,6 +46,7 @@ class PolicyDialog extends StatelessWidget {
                     }),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
+                        print(snapshot.data as String);
                         return Markdown(
                           data: snapshot.data as String,
                         );

@@ -36,7 +36,7 @@ class BreadLargeCategoryController extends GetxController
   late RxList<String> breadOptionFilterIdList;
 
   var simpleBreadListResult = <BreadSimpleInfo>[].obs;
-  late List<dynamic> smallCategoriesResult;
+  late List<dynamic> smallCategoriesResult = [];
   static BreadLargeCategoryController get to => Get.find();
   late BreadCategory breadLargeCategory;
   @override
@@ -101,6 +101,7 @@ class BreadLargeCategoryController extends GetxController
           getSimpleBreadsInfoData.forEach((e) {
             simpleBreadListResult.add(
               new BreadSimpleInfo(
+                id: e['id'],
                 thumbnail: 'assets/breadImage.jpg',
                 name: e['name'],
                 bakeryName: e['bakeryName'],

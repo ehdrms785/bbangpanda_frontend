@@ -1,3 +1,6 @@
+import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainController.dart';
+import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainScreen.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
@@ -55,83 +58,85 @@ Widget SimpleBreadList({
           }
         }
         BreadSimpleInfo breadData = simpleBreadListResult[index];
-        return Container(
-          key: ValueKey(index),
-          child: Column(
-            // mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 45.0.w,
-                height: 25.0.h,
-                padding: EdgeInsets.only(bottom: 1.0.h),
-                child: Image.asset(
-                  breadData.thumbnail,
-                  fit: BoxFit.cover,
-                ),
+        return GestureDetector(
+          onTap: () {
+            Get.to(
+              BreadDetailMainScreen(),
+              arguments: {'breadId': breadData.id},
+              binding: BindingsBuilder(
+                () {
+                  Get.lazyPut(() => BreadDetailMainController());
+                },
               ),
-              RichText(
-                text: TextSpan(children: [
-                  TextSpan(
-                      text: breadData.bakeryName.length > 12
-                          ? '[${breadData.bakeryName.substring(0, 12)}...]\n'
-                          : '[${breadData.bakeryName}] ',
-                      style: TextStyle(
-                        fontSize: 10.0.sp,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey.shade700,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: breadData.name,
-                          style: TextStyle(
-                            fontSize: 12.0.sp,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ]),
-                ]),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Row(
-                children: [
-                  Text(
-                    '${breadData.discount}%',
-                    style: TextStyle(
-                      fontSize: 14.0.sp,
-                      color: Colors.redAccent,
-                    ),
+            );
+          },
+          child: Container(
+            color: Colors.transparent,
+            key: ValueKey(index),
+            child: Column(
+              // mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 45.0.w,
+                  height: 25.0.h,
+                  padding: EdgeInsets.only(bottom: 1.0.h),
+                  child: Image.asset(
+                    breadData.thumbnail,
+                    fit: BoxFit.cover,
                   ),
-                  SizedBox(width: 2.0.w),
-                  Text(priceToString(breadData.price),
-                      style: TextStyle(fontWeight: FontWeight.w600)),
-                ],
-              ),
-              Text(
-                breadData.description ?? '설명 없음',
-                style: TextStyle(
-                  fontSize: 9.0.sp,
-                  color: Colors.grey.shade600,
                 ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-              Row(
-                children: [
-                  ...breadData.breadFeatures.map(
-                    (breadFeature) => Text(
-                      '#$breadFeature ',
+                RichText(
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: breadData.bakeryName.length > 12
+                            ? '[${breadData.bakeryName.substring(0, 12)}...]\n'
+                            : '[${breadData.bakeryName}] ',
+                        style: TextStyle(
+                          fontSize: 10.0.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey.shade700,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: breadData.name,
+                            style: TextStyle(
+                              fontSize: 12.0.sp,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ]),
+                  ]),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '${breadData.discount}%',
                       style: TextStyle(
-                          fontSize: 9.0.sp,
-                          color: Colors.grey.shade400,
-                          fontWeight: FontWeight.w300),
+                        fontSize: 14.0.sp,
+                        color: Colors.redAccent,
+                      ),
                     ),
-                  )
-                ],
-              )
-            ],
+                    SizedBox(width: 2.0.w),
+                    Text(priceToString(breadData.price),
+                        style: TextStyle(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                Text(
+                  breadData.description ?? '설명 없음',
+                  style: TextStyle(
+                    fontSize: 9.0.sp,
+                    color: Colors.grey.shade600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                FeatureListTextWidget(features: breadData.breadFeatures),
+              ],
+            ),
           ),
         );
       },

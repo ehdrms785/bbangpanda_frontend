@@ -223,6 +223,10 @@ class FindPageApi {
     );
   }
 
+////////////////////////////////
+  /// Bread ///
+  /// //////////////////////////
+
   static Future<dynamic> toggleGetDibsBread({
     required int breadId,
   }) async {
@@ -230,6 +234,18 @@ class FindPageApi {
       MutationOptions(
           document: gql(FindBakeryQuery.toggleDibsBreadMutation),
           variables: {'breadId': breadId}),
+    );
+  }
+
+  static Future<dynamic> fetchBreadDetail({
+    required int breadId,
+  }) async {
+    return await client.query(
+      QueryOptions(
+          document: gql(FindBakeryQuery.getBreadDetailQuery),
+          variables: {
+            'breadId': breadId,
+          }),
     );
   }
 }

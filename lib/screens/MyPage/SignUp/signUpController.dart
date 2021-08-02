@@ -99,10 +99,8 @@ class SignUpController extends GetxController {
             verificationId: _verificationId,
             smsCode: signCodeTextController.text,
           );
-          print("1번 체크");
           print(credential);
           await _auth.signInWithCredential(credential);
-          print("2번 체크");
           if (_auth.currentUser != null) {
             print("유저 있음");
             bool ok = await signUpWithServer(uid: _auth.currentUser!.uid);

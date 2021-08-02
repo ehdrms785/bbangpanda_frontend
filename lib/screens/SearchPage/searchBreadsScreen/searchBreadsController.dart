@@ -46,14 +46,10 @@ class SearchBreadsController extends GetxController implements BreadModel {
       }
     });
 
-    print("1번");
     await fetchBakeryFilter();
-    print("2번");
     await fetchSearchedSimpleBreadInfo();
-    print("3번");
     // fetchFilterdBakeries();
     firstInitLoading(false);
-    print("4번");
 
     super.onInit();
   }

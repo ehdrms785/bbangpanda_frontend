@@ -1,17 +1,13 @@
 import 'dart:ui';
 
-import 'package:bbangnarae_frontend/main.dart';
-import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainController.dart';
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryShareWidget.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadShareWidget.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/marketOrderShareWidget.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -260,19 +256,20 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                                       ),
                                                       Builder(
                                                         builder: (context) {
-                                                          final List<dynamic>
+                                                          final List<
+                                                                  BakeryFilterInfo>
                                                               result =
                                                               bakeryData
                                                                   .bakeryFeature
                                                                   .where((e) =>
                                                                       int.parse(
-                                                                          e['id']) >
+                                                                          e.id) >
                                                                       2)
                                                                   .toList();
 
                                                           return Row(children: [
                                                             ...result.map((element) => Text(
-                                                                '#${element['filter']} ',
+                                                                '#${element.filter} ',
                                                                 style: TextStyle(
                                                                     fontSize:
                                                                         9.0.sp,

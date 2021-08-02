@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainController.dart';
-import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart/bakeryDetailMainScreen.dart';
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainController.dart';
+import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
@@ -155,24 +155,10 @@ Widget SimpleBakeryList({
                                               ),
                                       ],
                                     ),
-                                    Builder(
-                                      builder: (context) {
-                                        final List<dynamic> result = bakeryData
-                                            .bakeryFeature
-                                            .where(
-                                                (e) => int.parse(e['id']) > 2)
-                                            .toList();
-
-                                        return Row(children: [
-                                          ...result.map((element) => Text(
-                                              '#${element['filter']} ',
-                                              style: TextStyle(
-                                                  fontSize: 9.0.sp,
-                                                  color: Colors.grey.shade400,
-                                                  fontWeight:
-                                                      FontWeight.w300))),
-                                        ]);
-                                      },
+                                    FeatureListTextWidget(
+                                      features: bakeryData.bakeryFeatures
+                                          .where((e) => int.parse(e.id) > 2)
+                                          .toList(),
                                     ),
                                   ],
                                 ),

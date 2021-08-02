@@ -36,9 +36,7 @@ class SearchScreenController extends GetxController {
     if (recentSearchTerms.length > 6) {
       recentSearchTerms.removeAt(0);
     }
-    print("1번");
     recentSearchTerms.add(termTextController.value.text);
-    print("2번${termTextController.value.text}");
 
     recentSearchTerms.refresh();
     this.update();
