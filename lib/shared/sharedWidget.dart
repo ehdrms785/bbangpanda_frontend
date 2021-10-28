@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/theme/textFieldTheme.dart';
@@ -58,29 +60,18 @@ class ModalProgressScreen extends StatelessWidget {
   }
 }
 
-PreferredSizeWidget PrefferedAppBar(BuildContext context) {
+PreferredSizeWidget PrefferedAppBar({required String title}) {
   return PreferredSize(
     preferredSize: Size.fromHeight(5.0.h),
     child: AppBar(
       actions: [IconButton(icon: Icon(Icons.ac_unit), onPressed: () {})],
-      //AppBar Shadow를 사라져보이게 하기 !
-      // shadowColor: Colors.transparent,
       centerTitle: true,
-      // backgroundColor: Colors.red,
-      title: ValueListenableBuilder(
-        valueListenable: SharedValues.p_appBarTitleValueNotifier,
-        builder: (context, String title, _) {
-          return Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          );
-        },
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.0.sp,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     ),
   );
@@ -100,7 +91,15 @@ PreferredSizeWidget MainAppBar({
           height: isShowAppBar.value ? 5.0.h : 0.0,
           duration: Duration(milliseconds: 200),
           child: AppBar(
-            title: title != null ? Text(title) : null,
+            title: title != null
+                ? Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.0.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : null,
             centerTitle: true,
             leading: autoLeading ? backArrowButtton() : null,
             actions: actions ??
@@ -273,15 +272,22 @@ Widget MyAppBar({required String title}) => Column(
                     ),
                   ),
                   Container(
-                      color: Colors.white12,
+                      color: Colors.transparent,
+                      // color: Colors.white12,
+                      // color: Colors.grey,
                       width: 10.0.w,
-                      child: IconButton(
-                        icon: Icon(Icons.clear),
-                        color: Colors.grey.shade600,
-                        onPressed: () {
+                      height: 8.0.h,
+                      alignment: Alignment.center,
+                      child: GestureDetector(
+                        onTap: () {
                           Get.back();
                         },
-                        padding: EdgeInsets.only(left: 3.0.w),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 3.0.w),
+                          child: Icon(Icons.clear,
+                              color: Colors.grey.shade600, size: 20.0.sp),
+                        ),
                       ))
                 ],
               ),
@@ -497,5 +503,24 @@ Text FeatureListTextWidget({required List<BakeryFilterInfo> features}) {
         fontSize: 9.0.sp,
         color: Colors.grey.shade400,
         fontWeight: FontWeight.w300),
+  );
+}
+
+Widget LoadingModalScreen({
+  required RxBool isLoading,
+  required RxBool firstInitLoading,
+  required Widget child,
+}) {
+  return Obx(
+    () => firstInitLoading.value
+        ? Center(
+            child: CupertinoActivityIndicator(
+              radius: 16.0.sp,
+            ),
+          )
+        : ModalProgressScreen(
+            isAsyncCall: isLoading.value,
+            child: child,
+          ),
   );
 }

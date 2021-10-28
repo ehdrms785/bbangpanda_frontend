@@ -70,8 +70,7 @@ class SmsAuthController extends GetxController {
         changedPhoneNumber = phoneTextController.text;
         showSnackBar(message: "인증번호가 휴대폰으로 전송 되었습니다.");
       } else {
-        var errorBox = sendSmsData['error'].toString().split('\n');
-        showError(title: errorBox[0], message: errorBox[1]);
+        makeErrorBoxAndShow(error: sendSmsData['error']);
       }
     } catch (err) {
       print(err);

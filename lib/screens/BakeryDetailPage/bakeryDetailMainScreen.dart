@@ -43,7 +43,7 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                             builder: (context, child) => SliverAppBar(
                               backgroundColor: controller.colorTween.value,
                               title: Text(
-                                controller.bakeryDetailInfo.value.name,
+                                controller.bakeryDetailInfo!.name,
                                 style: TextStyle(
                                   color: controller.appBarTextColorTween.value,
                                 ),
@@ -186,21 +186,7 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                     // color: Colors.transparent,
                                     child: Builder(builder: (context) {
                                       BakeryDetailInfo bakeryData =
-                                          controller.bakeryDetailInfo.value;
-                                      // Map<String, dynamic> bakeryData = {
-                                      //   'thumbnail': 'assets/breadImage.jpg',
-                                      //   'name': '다로베이커리',
-                                      //   'signitureBreads': [
-                                      //     '다로1빵',
-                                      //     '다로2빵',
-                                      //     '다로3빵'
-                                      //   ],
-                                      //   'bakeryFeature': [
-                                      //     {'id': '3', 'filter': "유후"}
-                                      //   ],
-                                      //   'description':
-                                      //       '다로베이커리 입니다. 잘 부탁드립니다. 맛있고 건강한 빵을 만들기 위해서 최선을 다 하겠습니다.',
-                                      // };
+                                          controller.bakeryDetailInfo!;
                                       return Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -256,29 +242,14 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                                       ),
                                                       Builder(
                                                         builder: (context) {
-                                                          final List<
-                                                                  BakeryFilterInfo>
-                                                              result =
-                                                              bakeryData
+                                                          return FeatureListTextWidget(
+                                                              features: bakeryData
                                                                   .bakeryFeature
                                                                   .where((e) =>
                                                                       int.parse(
                                                                           e.id) >
                                                                       2)
-                                                                  .toList();
-
-                                                          return Row(children: [
-                                                            ...result.map((element) => Text(
-                                                                '#${element.filter} ',
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        9.0.sp,
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w300))),
-                                                          ]);
+                                                                  .toList());
                                                         },
                                                       ),
                                                     ],
@@ -471,8 +442,8 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                                   'id': '0',
                                                   'category': '전체'
                                                 }),
-                                                ...controller.bakeryDetailInfo
-                                                    .value.breadLargeCategories
+                                                ...controller.bakeryDetailInfo!
+                                                    .breadLargeCategories
                                                     .map((breadLargeCategory) =>
                                                         BreadCategory.fromJson(
                                                             breadLargeCategory))
@@ -598,7 +569,7 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
                                             breadSmallCategoreis = [
                                           new BreadCategory.fromJson(
                                               {'id': '0', 'category': '전체'}),
-                                          ...controller.bakeryDetailInfo.value
+                                          ...controller.bakeryDetailInfo!
                                               .breadSmallCategories
                                               .map((breadSmallCategory) =>
                                                   BreadCategory.fromJson(

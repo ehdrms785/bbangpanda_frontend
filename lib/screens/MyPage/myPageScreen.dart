@@ -19,54 +19,58 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 //   // pollInterval: Duration(seconds: 5),
 // );
 
-class MyPageScreen extends StatelessWidget {
-  late final MypageController myPageCtr = Get.find();
+class MyPageScreen extends GetView<MypageController> {
+  // late final MypageController controller = Get.find(tag: 'myPageController');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          MySliverAppBar(title: "마이페이지", isLeading: false),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 4.0.w, vertical: 2.0.h),
-                child: Obx(() {
-                  if (Get.find<AuthController>().isLoggedIn.value == false) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        NotLoginedHeader(),
-                        Divider(),
-                        InformationSection(),
-                      ],
-                    );
-                  } else {
-                    return Obx(() {
-                      if (myPageCtr.isLoading.value == true) {
-                        return Center(
-                          child: CupertinoActivityIndicator(),
-                        );
-                      }
+      body: LoadingModalScreen(
+        isLoading: controller.isLoading,
+        firstInitLoading: controller.firstInitLoading,
+        child: CustomScrollView(
+          slivers: [
+            MySliverAppBar(title: "마이페이지", isLeading: false),
+            SliverList(
+              delegate: SliverChildListDelegate([
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 4.0.w, vertical: 2.0.h),
+                  child: Obx(() {
+                    if (Get.find<AuthController>().isLoggedIn.value == false) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          LoginHeader(),
+                          NotLoginedHeader(),
+                          Divider(),
                           InformationSection(),
                         ],
                       );
-                    });
-                  }
-                }),
-              ),
-            ]),
-          )
-        ],
+                    } else {
+                      return Obx(() {
+                        // if (controller.isLoading.value == true) {
+                        //   return Center(
+                        //     child: CupertinoActivityIndicator(),
+                        //   );
+                        // }
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            LoginHeader(),
+                            InformationSection(),
+                          ],
+                        );
+                      });
+                    }
+                  }),
+                ),
+              ]),
+            )
+          ],
+        ),
       ),
     );
 
@@ -89,8 +93,13 @@ class MyPageScreen extends StatelessWidget {
         ListTile(
           leading: Icon(Icons.sticky_note_2_outlined),
           minLeadingWidth: double.minPositive,
-          onTap: () {
+          onTap: () async {
             print("tab");
+            print(controller.userResult['username']);
+            // await controller.fetchUserDetail();
+            // controller.userResult.refresh();
+            // controller
+            //     .userResult({'id': 10, 'username': '하이루', 'orderListCount': 0});
           },
           title: Text("공지사항"),
           contentPadding: EdgeInsets.zero,
@@ -197,7 +206,7 @@ class MyPageScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  myPageCtr.userResult['username'] ?? "빵판다인",
+                  controller.userResult['username'] ?? "빵판다인",
                   style: TextStyle(
                     fontSize: 18.0.sp,
                     fontWeight: FontWeight.bold,

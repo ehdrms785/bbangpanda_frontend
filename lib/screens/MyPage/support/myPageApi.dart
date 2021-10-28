@@ -7,11 +7,11 @@ class MyPageApi {
   static Future<dynamic> fetchUserDetail({bool fetchNetwork: false}) async {
     return client.query(
       QueryOptions(
-          document: gql(MyPageQuery.userDetailQuery),
-          fetchPolicy: FetchPolicy.cacheAndNetwork
-          // fetchPolicy:
-          //     fetchNetwork ? FetchPolicy.networkOnly : FetchPolicy.cacheFirst,
-          ),
+        document: gql(MyPageQuery.userDetailQuery),
+        // fetchPolicy: FetchPolicy.cacheAndNetwork
+        fetchPolicy:
+            fetchNetwork ? FetchPolicy.networkOnly : FetchPolicy.cacheFirst,
+      ),
     );
   }
 

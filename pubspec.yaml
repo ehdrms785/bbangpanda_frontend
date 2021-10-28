@@ -37,7 +37,7 @@ dependencies:
   firebase_core:
   firebase_auth:
   uuid:
-  flutter_web_auth: ^0.3.0
+  # flutter_web_auth: ^0.3.1
   get: ^4.1.4
   animated_splash_screen: ^1.1.0
   # The following adds the Cupertino Icons font to your application.

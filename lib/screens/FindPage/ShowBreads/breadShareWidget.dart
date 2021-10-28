@@ -1,13 +1,19 @@
+import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainController.dart';
 import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainScreen.dart';
+import 'package:bbangnarae_frontend/screens/DibsDrawerPage/DibsDrawerMainScreen/DibsDrawerMainController.dart';
+import 'package:bbangnarae_frontend/screens/DibsDrawerPage/DibsDrawerPageQuery.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
+import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
+import 'package:bbangnarae_frontend/theme/buttonTheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
 
@@ -58,86 +64,277 @@ Widget SimpleBreadList({
           }
         }
         BreadSimpleInfo breadData = simpleBreadListResult[index];
-        return GestureDetector(
-          onTap: () {
-            Get.to(
-              BreadDetailMainScreen(),
-              arguments: {'breadId': breadData.id},
-              binding: BindingsBuilder(
-                () {
-                  Get.lazyPut(() => BreadDetailMainController());
-                },
-              ),
-            );
-          },
-          child: Container(
-            color: Colors.transparent,
-            key: ValueKey(index),
-            child: Column(
-              // mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 45.0.w,
-                  height: 25.0.h,
-                  padding: EdgeInsets.only(bottom: 1.0.h),
-                  child: Image.asset(
-                    breadData.thumbnail,
-                    fit: BoxFit.cover,
+        RxBool _isGotDibs = breadData.isGotDibs!.obs;
+        print('Look At Here 2');
+        print('${breadData.name} 의 isGotDibs 는 ${breadData.isGotDibs}');
+        return Stack(
+          children: [
+            GestureDetector(
+              onTap: () {
+                Get.to(
+                  BreadDetailMainScreen(),
+                  arguments: {'breadId': breadData.id},
+                  binding: BindingsBuilder(
+                    () {
+                      Get.lazyPut(() => BreadDetailMainController());
+                    },
                   ),
-                ),
-                RichText(
-                  text: TextSpan(children: [
-                    TextSpan(
-                        text: breadData.bakeryName.length > 12
-                            ? '[${breadData.bakeryName.substring(0, 12)}...]\n'
-                            : '[${breadData.bakeryName}] ',
-                        style: TextStyle(
-                          fontSize: 10.0.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey.shade700,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: breadData.name,
-                            style: TextStyle(
-                              fontSize: 12.0.sp,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ]),
-                  ]),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Row(
+                );
+              },
+              child: Container(
+                color: Colors.transparent,
+                key: ValueKey(index),
+                child: Column(
+                  // mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${breadData.discount}%',
-                      style: TextStyle(
-                        fontSize: 14.0.sp,
-                        color: Colors.redAccent,
+                    Container(
+                      width: 45.0.w,
+                      height: 25.0.h,
+                      padding: EdgeInsets.only(bottom: 1.0.h),
+                      child: Image.asset(
+                        breadData.thumbnail,
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    SizedBox(width: 2.0.w),
-                    Text(priceToString(breadData.price),
-                        style: TextStyle(fontWeight: FontWeight.w600)),
+                    RichText(
+                      text: TextSpan(children: [
+                        TextSpan(
+                            text: breadData.bakeryName.length > 12
+                                ? '[${breadData.bakeryName.substring(0, 12)}...]\n'
+                                : '[${breadData.bakeryName}] ',
+                            style: TextStyle(
+                              fontSize: 10.0.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey.shade700,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: breadData.name,
+                                style: TextStyle(
+                                  fontSize: 12.0.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ]),
+                      ]),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          '${breadData.discount}%',
+                          style: TextStyle(
+                            fontSize: 14.0.sp,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                        SizedBox(width: 2.0.w),
+                        Text(priceToString(breadData.price),
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                    Text(
+                      breadData.description ?? '설명 없음',
+                      style: TextStyle(
+                        fontSize: 9.0.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    FeatureListTextWidget(features: breadData.breadFeatures!),
                   ],
                 ),
-                Text(
-                  breadData.description ?? '설명 없음',
-                  style: TextStyle(
-                    fontSize: 9.0.sp,
-                    color: Colors.grey.shade600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-                FeatureListTextWidget(features: breadData.breadFeatures),
-              ],
+              ),
             ),
-          ),
+            Container(
+              alignment: Alignment.topRight,
+              padding: EdgeInsets.symmetric(
+                vertical: 1.0.h,
+                horizontal: 2.0.w,
+              ),
+              child: GestureDetector(
+                onTap: () async {
+                  print("Look at Here");
+                  // DibsDrawerMainController.to;
+                  // print("Look at Here 22");
+                  // print(DibsDrawerMainController.to.initialized);
+                  // print(DibsDrawerMainController.to.dibsDrawerList);
+                  // final queryRequest = Request(
+                  //   operation: Operation(
+                  //       document: gql(
+                  //           DibsDrawerPageQuery.getDibsDrawerListQuery(
+                  //               count: 4))),
+                  // );
+                  // final readCache = client.cache.readQuery(queryRequest);
+                  // print(readCache);
+                  print(DibsDrawerMainController.to.dibsDrawerList);
+                  // print(DibsDrawerMainController.to.isLoading);
+                  // print(DibsDrawerMainController.to.firstInitLoading);
+                  // print(DibsDrawerMainController.to.scrollController);
+                  // Future.delayed(Duration(seconds: 3), () async {
+                  //   // if (readCache == null) {
+                  //   await DibsDrawerMainController.to.fetchDibsDrawerList();
+                  //   print("다시보기");
+
+                  //   // DibsDraw
+                  //   // }
+                  //   print("뭐지");
+                  // });
+                  if (_isGotDibs.value == true) {
+                    bool _isOk = await DibsDrawerMainController.to
+                        .toggleItemToDibsDrawer(
+                      isGotDibs: _isGotDibs.value,
+                      itemId: breadData.id,
+                      breadName: breadData.name,
+                    );
+                    if (_isOk) {
+                      print("_isGotDibs false로 바꾼다");
+                      _isGotDibs(false);
+                      DibsDrawerMainController.to.someDibsDrawerChanged = true;
+                    }
+                    return;
+                  }
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) => Container(
+                        width: 100.0.w,
+                        height: 85.0.h,
+                        child: CustomScrollView(
+                          slivers: [
+                            MySliverAppBar(title: '찜할 서랍 선택'),
+                            SliverAppBar(
+                              pinned: true,
+                              toolbarHeight: 0,
+                              automaticallyImplyLeading: false,
+                              elevation: 0,
+                              bottom: PreferredSize(
+                                preferredSize: Size.fromHeight(9.0.h),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 3.0.w, vertical: 1.0.h),
+                                  decoration: new BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                          color: Colors.grey, width: 0),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 15.0.w,
+                                        height: 7.0.h,
+                                        decoration: new BoxDecoration(
+                                          shape: BoxShape.rectangle,
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10.0)),
+                                          image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: new AssetImage(
+                                                'assets/breadImage.jpg'),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 5.0.w),
+                                      Text(
+                                        '새 서랍 만들기',
+                                        style: TextStyle(
+                                            fontSize: 13.0.sp,
+                                            fontWeight: FontWeight.w600),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              title: null,
+                            ),
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                ...DibsDrawerMainController.to.dibsDrawerList!
+                                    .map(
+                                  (dibsDrawer) => GestureDetector(
+                                    onTap: () async {
+                                      bool isOk = await DibsDrawerMainController
+                                          .to
+                                          .toggleItemToDibsDrawer(
+                                              isGotDibs: _isGotDibs.value,
+                                              drawerId: dibsDrawer!.id,
+                                              itemId: breadData.id,
+                                              breadName: breadData.name,
+                                              drawerName: dibsDrawer.name);
+                                      if (isOk) {
+                                        print("_isGotDibs true로 바꾼다");
+                                        _isGotDibs(true);
+                                        DibsDrawerMainController
+                                            .to.someDibsDrawerChanged = true;
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 3.0.w, vertical: 1.0.h),
+                                      decoration: BoxDecoration(
+                                          border: Border(
+                                              bottom: BorderSide(
+                                                  color: Colors.grey,
+                                                  width: 0))),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            width: 15.0.w,
+                                            height: 7.0.h,
+                                            decoration: new BoxDecoration(
+                                              shape: BoxShape.rectangle,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10.0)),
+                                              image: DecorationImage(
+                                                fit: BoxFit.cover,
+                                                image: new AssetImage(dibsDrawer!
+                                                            .itemCount <=
+                                                        0
+                                                    ? 'assets/bakeryImage.jpg'
+                                                    : dibsDrawer
+                                                        .items![0].thumbnail!),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 5.0.w),
+                                          Text(
+                                            dibsDrawer.name,
+                                            style: TextStyle(
+                                                fontSize: 13.0.sp,
+                                                fontWeight: FontWeight.w600),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ]),
+                            ),
+                          ],
+                        )),
+                  );
+                },
+                child: Obx(
+                  () => Icon(
+                    _isGotDibs.value == true
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color: _isGotDibs.value == true ? Colors.red : Colors.white,
+                    size: 20.0.sp,
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
           childCount: !hasMore.value
@@ -357,9 +554,7 @@ Widget FilterModal(BreadModel controller) {
                             onPressed: () {
                               controller.initFilterSelected();
                             },
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                            ),
+                            style: elevatedButtonWhiteBackground,
                           ),
                         ),
                         SizedBox(

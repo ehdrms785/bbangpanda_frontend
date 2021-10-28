@@ -36,6 +36,7 @@ class ShowBreadsController extends GetxController implements BreadModel {
   RxList<dynamic> tempFilterIdList = [].obs;
   var simpleBreadListResult = <BreadSimpleInfo>[].obs;
 
+  var isLogStateChange = false;
   @override
   void onInit() async {
     print("ShowBreadsController onInit!");

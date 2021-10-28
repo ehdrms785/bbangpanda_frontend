@@ -95,12 +95,12 @@ class SignUpController extends GetxController {
           }
           print(
               'verficationId: $_verificationId \n smsCode : ${signCodeTextController.text}');
-          final PhoneAuthCredential credential = PhoneAuthProvider.credential(
-            verificationId: _verificationId,
-            smsCode: signCodeTextController.text,
-          );
-          print(credential);
-          await _auth.signInWithCredential(credential);
+          // final PhoneAuthCredential credential = PhoneAuthProvider.credential(
+          //   verificationId: _verificationId,
+          //   smsCode: signCodeTextController.text,
+          // );
+          // print(credential);
+          // await _auth.signInWithCredential(credential);
           if (_auth.currentUser != null) {
             print("유저 있음");
             bool ok = await signUpWithServer(uid: _auth.currentUser!.uid);
@@ -166,14 +166,11 @@ class SignUpController extends GetxController {
       ));
       print('result');
       if (result.hasException) {
-        print(result.exception);
-        var internet = await internetCheck();
-        print('interNet 상태 $internet');
-        if (!await internetCheck()) {
-          showError(title: "XE00000", message: "인터넷 연결을 확인 해 주세요.");
+        // 인터넷 연결이 되어 있음에도 오류가 발생한 경우
+        if (await internetCheck()) {
+          showError(
+              title: "XE00001", message: '회원가입 알 수 없는 오류\n관리자에게 문의를 보내주세요.');
         }
-        showError(
-            title: "XE00001", message: '회원가입 알 수 없는 오류\n관리자에게 문의를 보내주세요.');
         return false;
       }
       final createUserResult = result.data?['createUser'];
@@ -194,8 +191,8 @@ class SignUpController extends GetxController {
         return true;
       } else {
         final _errorBox = createUserResult['error'].split('\n');
-        final ErrorCode error =
-            ErrorCode(errorCode: _errorBox[0], errorMessage: _errorBox[1]);
+        final ErrorBox error =
+            ErrorBox(errorCode: _errorBox[0], errorMessage: _errorBox[1]);
         print("계정 생성 실패");
         print(error.errorCode);
         switch (error.errorCode) {
@@ -256,6 +253,8 @@ class SignUpController extends GetxController {
         await _auth.signInWithCredential(credential);
       },
       verificationFailed: (FirebaseAuthException err) {
+        print("여긴가?");
+        print(err);
         print(err.code);
         if (err.code == 'invalid-phone-number') {
           print('잘못된 휴대폰 번호 입니다.');
@@ -264,6 +263,7 @@ class SignUpController extends GetxController {
       },
       codeSent: (String verificationId, int? resendToken) async {
         // SMS Code 받아서
+        print("Code Sent");
         _verificationId = verificationId;
         // print('verificationId: ${verificationId}');
         loadingStateChange(false);

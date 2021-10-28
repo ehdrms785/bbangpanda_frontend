@@ -19,6 +19,7 @@ class BreadDetailMainController extends GetxController
   late final ScrollController scrollController;
   late int breadId;
   RxInt gotDibsUserCount = 5.obs;
+  RxInt bakeryGotDibsUserCount = 5.obs;
   RxBool isGotDibs = false.obs;
 
   RxBool breadLikeBtnShow = false.obs;
@@ -26,25 +27,27 @@ class BreadDetailMainController extends GetxController
   RxBool firstInitLoading = true.obs;
 
   late BreadDetailInfo? breadDetailInfo;
-  BreadDetailInfo? __breadDetailInfo = BreadDetailInfo.fromJson({
-    'id': 9,
-    'name': '다로복숭아크림빵',
-    'thumbnail': null,
-    'costPrice': 4200,
-    'price': 3730,
-    'discount': 11,
-    'description': '생 복숭아가 씹히는 복숭아크림빵',
-    'detailDescription': null,
-    'isGotDibs': false,
-  }, {
-    'id': 1,
-    'name': '다로베이커리',
-    'thumbnail': null,
-    'bakeryFeatures': [
-      {'id': '1', 'filter': "우리밀"},
-      {'id': '2', 'filter': '천연발효'}
-    ]
-  }, 5);
+  // BreadDetailInfo? __breadDetailInfo = BreadDetailInfo.fromJson({
+  //   'id': 9,
+  //   'name': '다로복숭아크림빵',
+  //   'thumbnail': null,
+  //   'costPrice': 4200,
+  //   'price': 3730,
+  //   'discount': 11,
+  //   'description': '생 복숭아가 씹히는 복숭아크림빵',
+  //   'detailDescription': null,
+  //   'isGotDibs': false,
+  //   'gotDibsUserCount': 10,
+  // }, {
+  //   'id': 1,
+  //   'name': '다로베이커리',
+  //   'thumbnail': null,
+  //   'bakeryFeatures': [
+  //     {'id': '1', 'filter': "우리밀"},
+  //     {'id': '2', 'filter': '천연발효'}
+  //   ],
+  //   'gotDibsUserCount': 4
+  // });
   @override
   void onInit() async {
     breadId = Get.arguments['breadId'];
@@ -99,35 +102,42 @@ class BreadDetailMainController extends GetxController
 // -----------------------
 
   Future<void> _fetchBreadDetailInfo() async {
-    print('여기까지는옵니가');
+    print("여기까지는 오겠지");
     breadDetailInfo =
         await fetchBreadDetail(breadId: breadId, isLoading: isLoading);
+    print('여기까지는옵니가 + ${breadDetailInfo!.gotDibsUserCount}');
+
+    print("BakeryGotDibsCount: ${breadDetailInfo!.bakeryGotDibsUserCount}");
+    bakeryGotDibsUserCount(breadDetailInfo!.bakeryGotDibsUserCount);
+    isGotDibs(breadDetailInfo!.bakeryIsGotDibs);
   }
 
-  Future<void> toggleGetDibsBread() async {
+  Future<void> toggleGetDibsBakery() async {
     return Future(() async {
       try {
         if (isGotDibs.value == true) {
           isGotDibs(false);
-          gotDibsUserCount -= 1;
+          bakeryGotDibsUserCount -= 1;
         } else {
           isGotDibs(true);
-          gotDibsUserCount += 1;
+          bakeryGotDibsUserCount += 1;
         }
-        final result = await FindPageApi.toggleGetDibsBread(breadId: breadId);
+        print("가즈아");
+        final result = await FindPageApi.toggleGetDibsBakery(
+            bakeryId: breadDetailInfo!.bakeryId);
+        print(result);
         final toggleDibsBreadResult = result.data?['toggleDibsBakery'];
 
         if (toggleDibsBreadResult['ok'] == false) {
           showSnackBar(message: "잠시 후에 다시 시도해 주세요.");
           if (isGotDibs.value == true) {
             isGotDibs(false);
-            gotDibsUserCount -= 1;
+            bakeryGotDibsUserCount -= 1;
           } else {
             isGotDibs(true);
-            gotDibsUserCount += 1;
+            bakeryGotDibsUserCount += 1;
           }
         }
-        print(result);
       } catch (e) {
         print(e);
       }

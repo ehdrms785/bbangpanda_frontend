@@ -1,5 +1,6 @@
 import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/marketOrderShareWidget.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/showMarketOrdersController.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class _ShowMarketOrdersTabState extends State<ShowMarketOrdersTab>
           () => ModalProgressScreen(
               isAsyncCall: controller.isLoading.value,
               child: controller.firstInitLoading.value
-                  ? Center(child: CupertinoActivityIndicator())
+                  ? Loader()
                   : CustomScrollView(
                       key: ValueKey('marketOrderScroll'),
                       controller: _scrollController,

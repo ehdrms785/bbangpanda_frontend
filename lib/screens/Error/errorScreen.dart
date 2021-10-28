@@ -6,7 +6,7 @@ class ErrorScreen extends StatelessWidget {
     return Container(
       child: Center(
         child: Text(
-          "에러 발생 빵야~",
+          "에러 발생",
           style: TextStyle(fontSize: 30.0),
         ),
       ),

@@ -11,12 +11,8 @@ class SearchScreenController extends GetxController {
   static SearchScreenController get to => Get.find();
   @override
   void onInit() {
-    print("어딘지 알아보자 1");
-    // termTextController = TextEditingController().obs;
     termTextController = TextEditingController().obs;
-    print("어딘지 알아보자 2");
     hasTermText = false.obs;
-    print("타입체크");
 
     recentSearchTerms.addAll(Hive.box('cache').get('recentSearchTerms') ?? []);
     super.onInit();

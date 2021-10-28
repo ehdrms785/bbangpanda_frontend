@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadSharedFunctions.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPageApi.dart';
@@ -35,7 +37,7 @@ class BakeryDetailMainController extends GetxController
   RxBool hasMore = true.obs;
   RxBool filterLoading = true.obs;
 
-  late Rx<BakeryDetailInfo> bakeryDetailInfo;
+  late BakeryDetailInfo? bakeryDetailInfo;
   // late RxList<dynamic> bakeryFilterResult = [].obs;
   RxInt cursorBakeryId = 0.obs;
   RxString sortFilterId = '1'.obs; // 최신순
@@ -106,13 +108,10 @@ class BakeryDetailMainController extends GetxController
     scrollController = new ScrollController();
 
     scrollController.addListener(() {
-      print("Scroll 움직인다");
-
       if (scrollController.position.pixels + 500 >=
               scrollController.position.maxScrollExtent &&
           !isFetchMoreLoading.value &&
           hasMore.value) {
-        print("FetchMore 실행 ! $isFetchMoreLoading");
         Future.microtask(() => _fetchMoreSimpleBreadsInfo());
       }
     });
@@ -201,16 +200,13 @@ class BakeryDetailMainController extends GetxController
         final result = await FindPageApi.fetchBakeryDetail(
             bakeryId: Get.arguments['bakeryId']);
         // 가져온 데이터가 없으면 문제가 있는 것이니 에러페이지 보내기
-
+        print(result);
         final bakeryDetailResult = result.data?['getBakeryDetail'];
-        bakeryDetailInfo = BakeryDetailInfo.fromJson(
-                bakeryDetailResult['bakery'],
-                bakeryDetailResult['gotDibsUserCount'])
-            .obs;
-        gotDibsUserCount(bakeryDetailInfo.value.gotDibsUserCount).obs;
-        isGotDibs(bakeryDetailInfo.value.isGotDibs).obs;
         print("GetBakeryDetail Result 보기");
-        print(bakeryDetailInfo);
+        print(bakeryDetailResult);
+        bakeryDetailInfo = BakeryDetailInfo.fromJson(bakeryDetailResult);
+        gotDibsUserCount(bakeryDetailInfo!.gotDibsUserCount).obs;
+        isGotDibs(bakeryDetailInfo!.isGotDibs).obs;
       } catch (err) {
         print("에러발생");
         print(err);

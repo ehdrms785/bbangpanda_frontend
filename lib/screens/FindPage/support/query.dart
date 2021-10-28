@@ -13,6 +13,7 @@ class FindBakeryQuery {
         id
         name
       }
+      isGotDibs
     }
   }
 
@@ -124,6 +125,7 @@ class FindBakeryQuery {
         id
         filter
       }
+      isGotDibs
     }
   }
 
@@ -167,7 +169,6 @@ class FindBakeryQuery {
   static String getBakeryDetailQuery = """
       query getBakeryDetail(\$bakeryId: Int!) {
     getBakeryDetail(bakeryId: \$bakeryId) {
-      bakery {
         name
         description
         bakeryFeatures {
@@ -187,8 +188,8 @@ class FindBakeryQuery {
           category
         }
         isGotDibs
-      }
-      gotDibsUserCount
+        gotDibsUserCount
+      
     }
   }
   """;
@@ -227,6 +228,7 @@ class FindBakeryQuery {
         description
         detailDescription
         isGotDibs
+        gotDibsUserCount
       }
        bakery {
           id
@@ -236,8 +238,9 @@ class FindBakeryQuery {
             id
             filter
           }
+          gotDibsUserCount
+          isGotDibs
         }
-      gotDibsUserCount
     }
   }
   """;

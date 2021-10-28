@@ -1,9 +1,8 @@
 import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainController.dart';
 import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryShareWidget.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
-import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,30 +12,43 @@ import 'package:get/get.dart';
 
 class ShowBakeriesTab extends StatefulWidget {
   @override
-  _ShowBakeriesTabState createState() => _ShowBakeriesTabState();
+  ShowBakeriesTabState createState() => ShowBakeriesTabState();
 }
 
-class _ShowBakeriesTabState extends State<ShowBakeriesTab>
+class ShowBakeriesTabState extends State<ShowBakeriesTab>
     with AutomaticKeepAliveClientMixin {
-  late final ScrollController _scrollController;
+  // ShowBakeriesTabState(this.globalKey);
+  // ShowBakeriesTabState({Key? key}) : super(key: key);
+  late final ScrollController scrollController;
   late final ShowBakeriesController controller;
+  // final globalKey = GlobalObjectKey("testt");
+  static var globalKey;
 
+  // final globalKey = GlobalKey();
   @override
   void initState() {
     print("ShowBakeries Init!");
     Get.create(() => ShowBakeriesController(), tag: 'showBakeryTab');
     controller = Get.find(tag: 'showBakeryTab');
-    _scrollController = controller.scrollController;
+    scrollController = controller.scrollController;
+    globalKey = this;
     super.initState();
   }
 
+  void reset() {
+    setState(() {});
+  }
+
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => !controller.isLogStateChange;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     return Scaffold(
+      // key: globalKey,
+      // key: globalKey,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 3.0.w),
         child: Obx(
@@ -45,10 +57,10 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
             // 처음 로딩 돌아갈 때 굳이 밑에 이중로딩 돌아가지 않게
             // 하려는 작업!
             child: controller.firstInitLoading.value
-                ? Center(child: CupertinoActivityIndicator())
+                ? Loader()
                 : CustomScrollView(
                     key: ValueKey('bakeryScroll'),
-                    controller: _scrollController,
+                    controller: scrollController,
                     physics: const BouncingScrollPhysics(
                         parent: const AlwaysScrollableScrollPhysics()),
                     slivers: [
@@ -59,6 +71,32 @@ class _ShowBakeriesTabState extends State<ShowBakeriesTab>
                       SliverToBoxAdapter(
                           child: Divider(
                         height: 1,
+                      )),
+                      SliverToBoxAdapter(
+                          child: ElevatedButton(
+                        onPressed: () {
+                          // controller.isLogStateSame();
+                          // print(controller.loggCheckTest);
+                          // this.updateKeepAlive();
+                          // setState(() {});
+                          print(
+                              'DateNowTime : ${((DateTime.now().millisecondsSinceEpoch) / 1000).floor()}');
+                        },
+                        child: Text("하이루"),
+                      )),
+                      SliverToBoxAdapter(
+                          child: ElevatedButton(
+                        onPressed: () {
+                          // print(this);
+                          // ShowBakeriesTab.ShowBakeriesTabGlobalKey.currentState!
+                          //     .setState(() {});
+
+                          // controller.isLogStateSame();
+                          print(controller.loggCheckTest);
+                          // this.updateKeepAlive();
+                          // setState(() {});
+                        },
+                        child: Text("하이루22"),
                       )),
                       SliverToBoxAdapter(
                           child: SizedBox(

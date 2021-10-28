@@ -1,5 +1,6 @@
 import 'package:bbangnarae_frontend/screens/MyPage/SignUp/signUpController.dart';
 import 'package:bbangnarae_frontend/shared/dialog/policy_dialog.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedValidator.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
@@ -241,7 +242,7 @@ class SignUpScreen extends StatelessWidget {
                       backgroundColor: elevatedButtonBackground,
                     ),
                     child: signUpCtr.loading.value
-                        ? Center(child: CupertinoActivityIndicator())
+                        ? Loader()
                         : Center(
                             child: Text(
                                 signUpCtr.isSignCodeClicked.value

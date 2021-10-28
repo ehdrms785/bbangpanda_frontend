@@ -1,5 +1,5 @@
-import 'package:bbangnarae_frontend/screens/SearchPage/searchDetailScreen/searchDetailScreen.dart';
-import 'package:bbangnarae_frontend/screens/SearchPage/searchDetailScreen/searchDetailScreenController.dart';
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:bbangnarae_frontend/screens/SearchPage/searchScreenController.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';

@@ -1,12 +1,7 @@
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/marketOrderModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPageApi.dart';
 import 'package:bbangnarae_frontend/screens/SearchPage/searchScreenController.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-
 import 'package:get/get.dart';
 
 class SearchMarketOrderController extends GetxController {
@@ -39,7 +34,6 @@ class SearchMarketOrderController extends GetxController {
         Future.microtask(() => fetchMoreSimpleMarketOrdersInfo());
       }
     });
-    // TODO: implement onInit
     await fetchMarketOrderFilter();
     await fetchSearchedSimpleMarketOrdersInfo();
     firstInitLoading(false);

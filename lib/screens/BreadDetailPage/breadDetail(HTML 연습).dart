@@ -3,6 +3,7 @@ import 'dart:html';
 import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -237,7 +238,7 @@ class BreadDetailMainScreen extends GetView<BreadDetailMainController> {
           () => ModalProgressScreen(
             isAsyncCall: controller.isLoading.value,
             child: controller.firstInitLoading.value
-                ? Center(child: CupertinoActivityIndicator())
+                ? Loader()
                 : NotificationListener<ScrollNotification>(
                     onNotification: controller.scrollListener,
                     child: CustomScrollView(

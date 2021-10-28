@@ -56,8 +56,6 @@ class BreadLargeCategoryController extends GetxController
 
   @override
   void onClose() {
-    // TODO: implement onClose
-    print("BreadLargeCategoryController 디스포스");
     scrollController.dispose();
     tabController.dispose();
     super.onClose();
@@ -69,13 +67,12 @@ class BreadLargeCategoryController extends GetxController
         final result = await FindPageApi.fetchBreadSmallCategories(
             largeCategoryId: breadLargeCategory.id);
 
-        print("FetchBreadSmallCategories Result 확인");
         print(result);
         if (result != null) {
           smallCategoriesResult = result.data['getBreadSmallCategories'];
         }
       } catch (e) {
-        print('에러발새이잉이이잉');
+        print('에러발생');
         print(e);
       }
     });
@@ -101,20 +98,21 @@ class BreadLargeCategoryController extends GetxController
           getSimpleBreadsInfoData.forEach((e) {
             simpleBreadListResult.add(
               new BreadSimpleInfo(
-                id: e['id'],
-                thumbnail: 'assets/breadImage.jpg',
-                name: e['name'],
-                bakeryName: e['bakeryName'],
-                description: e['description'],
-                price: e['price'],
-                discount: e['discount'],
-                breadFeatures: (e['breadFeatures']
-                    ?.map((breadFeature) => breadFeature['filter'])).toList(),
-              ),
+                  id: e['id'],
+                  thumbnail: 'assets/breadImage.jpg',
+                  name: e['name'],
+                  bakeryName: e['bakeryName'],
+                  description: e['description'],
+                  price: e['price'],
+                  discount: e['discount'],
+                  breadFeatures: (e['breadFeatures']
+                      ?.map((breadFeature) => breadFeature['filter'])).toList(),
+                  isGotDibs: e['isGotDibs']),
             );
           });
         }
-      } catch (e) {} finally {
+      } catch (e) {
+      } finally {
         isLoading(false);
         // isLoading.value = false;
       }

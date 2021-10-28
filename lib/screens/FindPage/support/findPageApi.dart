@@ -209,7 +209,8 @@ class FindPageApi {
           document: gql(FindBakeryQuery.getBakeryDetailQuery),
           variables: {
             'bakeryId': bakeryId,
-          }),
+          },
+          fetchPolicy: FetchPolicy.cacheAndNetwork),
     );
   }
 
@@ -233,7 +234,8 @@ class FindPageApi {
     return client.mutate(
       MutationOptions(
           document: gql(FindBakeryQuery.toggleDibsBreadMutation),
-          variables: {'breadId': breadId}),
+          variables: {'breadId': breadId},
+          fetchPolicy: FetchPolicy.cacheAndNetwork),
     );
   }
 
@@ -245,7 +247,8 @@ class FindPageApi {
           document: gql(FindBakeryQuery.getBreadDetailQuery),
           variables: {
             'breadId': breadId,
-          }),
+          },
+          fetchPolicy: FetchPolicy.networkOnly),
     );
   }
 }

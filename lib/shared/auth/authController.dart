@@ -19,27 +19,21 @@ class AuthController extends GetxController {
   void onInit() async {
     if (Hive.box('auth').get('token') != '' &&
         Hive.box('auth').get('refreshToken') != '') {
-      print("토큰 들어있다");
       isLoggedIn((await tokenCheck()));
     } else {
-      print("토큰 없다");
       isLoggedIn.value = false;
     }
     print(isLoggedIn);
     var connectivityResult = await (Connectivity().checkConnectivity());
-    print("체크1");
     if (connectivityResult == ConnectivityResult.none) {
       isInternetOn = false;
     } else {
       isInternetOn = true;
     }
-    print("체크2");
 
     internetSubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
-      print("인터넷 체크 하는 곳 입니다요");
-      print(result);
       if (result == ConnectivityResult.none) {
         isInternetOn = false;
       } else {
@@ -47,8 +41,7 @@ class AuthController extends GetxController {
         print(isInternetOn);
       }
     });
-    print("체크3");
-
+    tokenExpireTest();
     super.onInit();
   }
 
@@ -58,8 +51,14 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    // TODO: implement onClose
     internetSubscription.cancel();
     super.onClose();
+  }
+
+  void tokenExpireTest() {
+    Future.delayed(Duration(minutes: 52), () async {
+      await tokenCheck();
+      tokenExpireTest();
+    });
   }
 }

@@ -65,8 +65,7 @@ class BakeryDetailInfo {
     required this.isGotDibs,
   });
 
-  BakeryDetailInfo.fromJson(
-      Map<String, dynamic> bakeryJson, int gotDibsUserCount)
+  BakeryDetailInfo.fromJson(Map<String, dynamic> bakeryJson)
       : thumbnail = 'assets/bakeryImage.jpg',
         name = bakeryJson['name'],
         bakeryFeature = bakeryJson['bakeryFeatures']
@@ -77,7 +76,7 @@ class BakeryDetailInfo {
         signitureBreads = bakeryJson['signitureBreads'],
         breadLargeCategories = bakeryJson['breadLargeCategories'],
         breadSmallCategories = bakeryJson['breadSmallCategories'],
-        gotDibsUserCount = gotDibsUserCount,
+        gotDibsUserCount = bakeryJson['gotDibsUserCount'],
         isGotDibs = bakeryJson['isGotDibs'];
 
   @override
@@ -93,6 +92,7 @@ class BakerySimpleInfo {
   final String? description;
   final List<BakeryFilterInfo> bakeryFeatures;
   final List<dynamic>? signitureBreads;
+  bool isGotDibs;
   BakerySimpleInfo({
     required this.id,
     required this.thumbnail,
@@ -100,6 +100,7 @@ class BakerySimpleInfo {
     required this.bakeryFeatures,
     this.signitureBreads,
     this.description,
+    required this.isGotDibs,
   });
   BakerySimpleInfo.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -114,7 +115,8 @@ class BakerySimpleInfo {
           return BakeryFilterInfo.fromJson(bakeryFeatureJson);
         }).toList(),
         signitureBreads =
-            json['signitureBreads']?.map((bread) => bread['name']).toList();
+            json['signitureBreads']?.map((bread) => bread['name']).toList(),
+        isGotDibs = json['isGotDibs'];
 
   @override
   String toString() {

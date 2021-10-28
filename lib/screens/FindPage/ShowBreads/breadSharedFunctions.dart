@@ -157,9 +157,9 @@ Future<BreadDetailInfo?> fetchBreadDetail({
         print(fetchBreadDetailInfoData['bakery']);
         print(fetchBreadDetailInfoData.runtimeType);
         return BreadDetailInfo.fromJson(
-            fetchBreadDetailInfoData['bread'],
-            fetchBreadDetailInfoData['bakery'],
-            fetchBreadDetailInfoData['gotDibsUserCount']);
+          fetchBreadDetailInfoData['bread'],
+          fetchBreadDetailInfoData['bakery'],
+        );
       }
     } catch (err) {
       print("에러발새생");

@@ -1,26 +1,34 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/support/myPageApi.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/support/query.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:hive/hive.dart';
 
 class MypageController extends GetxController {
-  var isLoading = true.obs;
+  RxBool isLoading = true.obs;
+  RxBool firstInitLoading = true.obs;
   // ignore: deprecated_member_use
+
+  static MypageController get to => Get.find();
   var userResult = Map<String, dynamic>().obs;
   @override
-  void onInit() {
+  void onInit() async {
     print("체크4");
     if (Get.find<AuthController>().isLoggedIn.value == true) {
-      fetchUserDetail();
+      await fetchUserDetail();
+    } else {
+      isLoading(false);
     }
+    firstInitLoading(false);
     super.onInit();
   }
 
-  void fetchUserDetail() async {
+  Future<void> fetchUserDetail() async {
     try {
       isLoading(true);
       var QueryRequest = Request(
@@ -54,8 +62,7 @@ class MypageController extends GetxController {
         print(result);
         print(result.runtimeType);
         print(result.data);
-        userResult.value = result.data['userDetail'];
-        print(userResult);
+        userResult(result.data['userDetail']);
       } else {
         print("Result 없습니다");
       }

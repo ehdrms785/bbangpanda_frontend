@@ -4,6 +4,7 @@ import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart'
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadShareWidget.dart';
 import 'package:bbangnarae_frontend/screens/SearchPage/searchBakeriesScreen/searchBakeriesController.dart';
 import 'package:bbangnarae_frontend/screens/SearchPage/searchBreadsScreen/searchBreadsController.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -51,7 +52,7 @@ class _SearchBakriesScreenState extends State<SearchBakriesScreen>
         child: Obx(() => ModalProgressScreen(
               isAsyncCall: controller.isLoading.value,
               child: controller.firstInitLoading.value
-                  ? Center(child: CupertinoActivityIndicator())
+                  ? Loader()
                   : CustomScrollView(
                       // key: ValueKey(),
                       controller: controller.scrollController,

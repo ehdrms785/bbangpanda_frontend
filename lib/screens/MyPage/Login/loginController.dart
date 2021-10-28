@@ -1,8 +1,10 @@
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
+import 'package:bbangnarae_frontend/screens/MyPage/myPageController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/support/query.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedClass.dart';
+import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedValidator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +77,7 @@ class LoginController extends GetxController {
   }
 
   //Buisness Logic
-  Future<ErrorCode?> signInWithServer() async {
+  Future<ErrorBox?> signInWithServer() async {
     return Future(() async {
       String type = 'email';
       try {
@@ -95,7 +97,7 @@ class LoginController extends GetxController {
                   }));
         if (result.hasException) {
           print(result.exception);
-          return ErrorCode(errorMessage: "로그인 접속 오류 잠시 후 다시 시도 해 주세요");
+          return ErrorBox(errorMessage: "로그인 접속 오류 잠시 후 다시 시도 해 주세요");
         }
         if (result.data != null) {
           final loginResult = result.data?['login'];
@@ -106,6 +108,11 @@ class LoginController extends GetxController {
                   .signInWithCustomToken(loginResult['customToken']);
               final token =
                   await FirebaseAuth.instance.currentUser?.getIdToken();
+
+              print(
+                  'CustomToken Expired Time Check : ${loginResult['customTokenExpired']}');
+              print(
+                  "nowTime Check : ${DateTime.now().millisecondsSinceEpoch / 1000}");
               Hive.box('auth').putAll({
                 'token': token,
                 'tokenExpired': loginResult['customTokenExpired'],
@@ -113,6 +120,8 @@ class LoginController extends GetxController {
                 'refreshTokenExpired': loginResult['refreshTokenExpired']
               });
               GraphQLConfiguration.setToken(token!);
+              initEntireSetting();
+              await MypageController.to.fetchUserDetail();
               return null;
             } catch (err) {
               print("에러발생");
@@ -121,7 +130,7 @@ class LoginController extends GetxController {
             }
           } else {
             final _errorBox = loginResult['error'].split('\n');
-            return ErrorCode(
+            return ErrorBox(
                 errorCode: _errorBox[0], errorMessage: _errorBox[1]);
           }
         }
@@ -137,11 +146,13 @@ class LoginController extends GetxController {
       // 포커스를 해제해주어야 비밀번호 틀렸을 때
       // 다시 비밀번호에 포커스하고 텍스트가 써짐
       focusScopeNode.unfocus();
-      isInAsyncCallStateChange(true);
+      // isInAsyncCallStateChange(true);
       try {
-        final ErrorCode? error = await signInWithServer();
+        isInAsyncCall(true);
+        final ErrorBox? error = await signInWithServer();
         if (error == null) {
           Get.find<AuthController>().isLoggedInStateChange(true);
+          Get.until((route) => route.isFirst);
         }
 
         if (error != null) {
@@ -151,13 +162,15 @@ class LoginController extends GetxController {
           showError(title: error.errorCode, message: error.errorMessage);
           return;
         }
-        Get.until((route) => route.isFirst);
+
+        // Get.reload(tag: )
         // Get.toNamed('/myPage');}
       } catch (e) {
         print(e);
         return;
       } finally {
-        isInAsyncCallStateChange(false);
+        isInAsyncCall(false);
+        // isInAsyncCallStateChange(false);
       }
     } else {
       String snackBarMesasge = idValidator(idTextController.text) ?? '';

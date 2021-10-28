@@ -3,9 +3,11 @@ import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakerySharedFu
 import 'package:bbangnarae_frontend/screens/FindPage/findpageScreenController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPageApi.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/support/findPagetypeDef.dart';
+import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 /*
 FilterIdList
@@ -28,6 +30,13 @@ class ShowBakeriesController extends GetxController implements BakeryModel {
   var filterLoading = true.obs;
   var hasMore = true.obs;
   var isFetchMoreLoading = false;
+
+// 해당 Controller를 로드할 때의  저장해서
+// 변동사항이 생기면 해당 페이지 리로드를 하게끔 하기!
+  // var loggedInCheck = getUserIdFromHiveBox();
+
+  var isLogStateChange = false;
+  var loggCheckTest = true;
 
   final RxBool isShowAppBar = FindPageScreenController.to.isShowAppBar;
   late RxList<dynamic> bakeryFilterResult = [].obs;

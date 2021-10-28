@@ -3,6 +3,7 @@ import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScr
 import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -230,13 +231,11 @@ class BreadDetailMainScreen extends GetView<BreadDetailMainController> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        // appBar: AppBar(),
-        // extendBodyBehindAppBar: true,
         body: Obx(
           () => ModalProgressScreen(
             isAsyncCall: controller.isLoading.value,
             child: controller.firstInitLoading.value
-                ? Center(child: CupertinoActivityIndicator())
+                ? Loader()
                 : NotificationListener<ScrollNotification>(
                     onNotification: controller.scrollListener,
                     child: CustomScrollView(
@@ -269,36 +268,36 @@ class BreadDetailMainScreen extends GetView<BreadDetailMainController> {
                                   color: controller.iconColorTween.value,
                                 ),
                                 actions: <Widget>[
-                                  Obx(() {
-                                    if (controller.breadLikeBtnShow.value) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          print("Like");
-                                          controller.toggleGetDibsBread();
-                                          // Get.back();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 5),
-                                          child: Obx(
-                                            () => Container(
-                                              child: Icon(
-                                                controller.isGotDibs.value
-                                                    ? CupertinoIcons.star_fill
-                                                    : CupertinoIcons.star,
-                                                color:
-                                                    controller.isGotDibs.value
-                                                        ? Colors.red
-                                                        : Colors.grey,
-                                                size: 18.0.sp,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return SizedBox.shrink();
-                                  }),
+                                  // Obx(() {
+                                  //   if (controller.breadLikeBtnShow.value) {
+                                  //     return GestureDetector(
+                                  //       onTap: () {
+                                  //         print("Like");
+                                  //         controller.toggleGetDibsBakery();
+                                  //         // Get.back();
+                                  //       },
+                                  //       child: Padding(
+                                  //         padding: const EdgeInsets.symmetric(
+                                  //             horizontal: 5),
+                                  //         child: Obx(
+                                  //           () => Container(
+                                  //             child: Icon(
+                                  //               controller.isGotDibs.value
+                                  //                   ? CupertinoIcons.star_fill
+                                  //                   : CupertinoIcons.star,
+                                  //               color:
+                                  //                   controller.isGotDibs.value
+                                  //                       ? Colors.red
+                                  //                       : Colors.grey,
+                                  //               size: 18.0.sp,
+                                  //             ),
+                                  //           ),
+                                  //         ),
+                                  //       ),
+                                  //     );
+                                  //   }
+                                  //   return SizedBox.shrink();
+                                  // }),
                                   Container(
                                     // color: Colors.red,
                                     child: GestureDetector(
@@ -457,7 +456,7 @@ class BreadDetailMainScreen extends GetView<BreadDetailMainController> {
                                         GestureDetector(
                                           onTap: () {
                                             print("Like");
-                                            controller.toggleGetDibsBread();
+                                            controller.toggleGetDibsBakery();
                                           },
                                           child: Container(
                                             width: 10.0.w,
@@ -479,7 +478,7 @@ class BreadDetailMainScreen extends GetView<BreadDetailMainController> {
                                                       size: 20.0.sp,
                                                     ),
                                                     Text(
-                                                        "${controller.gotDibsUserCount.value}",
+                                                        "${controller.bakeryGotDibsUserCount}",
                                                         style: TextStyle(
                                                             fontSize: 11.0.sp,
                                                             color: Colors.red)),

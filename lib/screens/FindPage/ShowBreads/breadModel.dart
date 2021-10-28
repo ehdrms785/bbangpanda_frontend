@@ -85,28 +85,30 @@ class BreadDetailInfo {
   final String bakeryName;
   final String? bakeryThumbnail;
   final List<BakeryFilterInfo> bakeryFeatures;
+  final int bakeryGotDibsUserCount;
+  bool bakeryIsGotDibs;
 
-  BreadDetailInfo({
-    required this.id,
-    required this.thumbnail,
-    required this.name,
-    required this.costPrice,
-    required this.price,
-    required this.discount,
-    this.description,
-    required this.detailDescription,
-    required this.gotDibsUserCount,
-    required this.isGotDibs,
-    required this.bakeryId,
-    required this.bakeryName,
-    required this.bakeryThumbnail,
-    required this.bakeryFeatures,
-  });
+  BreadDetailInfo(
+      {required this.id,
+      required this.thumbnail,
+      required this.name,
+      required this.costPrice,
+      required this.price,
+      required this.discount,
+      this.description,
+      required this.detailDescription,
+      required this.gotDibsUserCount,
+      required this.isGotDibs,
+      required this.bakeryId,
+      required this.bakeryName,
+      required this.bakeryThumbnail,
+      required this.bakeryFeatures,
+      required this.bakeryIsGotDibs,
+      required this.bakeryGotDibsUserCount});
 
   BreadDetailInfo.fromJson(
     Map<String, dynamic> breadJson,
     Map<String, dynamic> bakeryJson,
-    int gotDibsUserCount,
   )   : id = breadJson['id'],
         thumbnail = 'assets/breadImage.jpg',
         name = breadJson['name'],
@@ -116,7 +118,7 @@ class BreadDetailInfo {
         description = breadJson['description'],
         detailDescription =
             breadJson['detailDescription'] ?? 'Detail Description',
-        gotDibsUserCount = gotDibsUserCount,
+        gotDibsUserCount = breadJson['gotDibsUserCount'],
         isGotDibs = breadJson['isGotDibs'],
         bakeryId = bakeryJson['id'],
         bakeryName = bakeryJson['name'],
@@ -124,7 +126,9 @@ class BreadDetailInfo {
         bakeryFeatures = bakeryJson['bakeryFeatures']
             .map<BakeryFilterInfo>((bakeryFeatureJson) =>
                 BakeryFilterInfo.fromJson(bakeryFeatureJson))
-            .toList();
+            .toList(),
+        bakeryIsGotDibs = bakeryJson['isGotDibs'],
+        bakeryGotDibsUserCount = bakeryJson['gotDibsUserCount'];
 
   @override
   String toString() {
@@ -154,18 +158,19 @@ class BreadSimpleInfo {
   final String? description;
   final int discount;
   final bool isSigniture;
-  final List<BakeryFilterInfo> breadFeatures;
-  BreadSimpleInfo({
-    required this.id,
-    required this.thumbnail,
-    required this.name,
-    required this.bakeryName,
-    required this.breadFeatures,
-    this.description,
-    this.price: 0,
-    this.discount: 0,
-    this.isSigniture: false,
-  });
+  final List<BakeryFilterInfo>? breadFeatures;
+  bool? isGotDibs;
+  BreadSimpleInfo(
+      {required this.id,
+      required this.thumbnail,
+      required this.name,
+      required this.bakeryName,
+      this.breadFeatures,
+      this.description,
+      this.price: 0,
+      this.discount: 0,
+      this.isSigniture: false,
+      this.isGotDibs});
   BreadSimpleInfo.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         thumbnail = json['thumbnail'] ?? 'assets/breadImage.jpg',
@@ -175,13 +180,46 @@ class BreadSimpleInfo {
         price = json['price'],
         discount = json['discount'],
         breadFeatures = json['breadFeatures']
-            .map<BakeryFilterInfo>((breadFeatureJson) =>
+            ?.map<BakeryFilterInfo>((breadFeatureJson) =>
                 BakeryFilterInfo.fromJson(breadFeatureJson))
             .toList(),
-        isSigniture = json['isSigniture'];
+        isSigniture = json['isSigniture'],
+        isGotDibs = json['isGotDibs'];
 
   @override
   String toString() {
     return 'name: $name, bakeryName: $bakeryName, price: $price, description: $description, discount: $discount, isSigniture: $isSigniture breadFeature: $breadFeatures';
+  }
+}
+
+class DrawerItemInfo {
+  final int id;
+  final String thumbnail;
+  final String name;
+  final String bakeryName;
+  final int price;
+  final String? description;
+  final int discount;
+  DrawerItemInfo({
+    required this.id,
+    required this.thumbnail,
+    required this.name,
+    required this.bakeryName,
+    this.description,
+    this.price: 0,
+    this.discount: 0,
+  });
+  DrawerItemInfo.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        thumbnail = json['thumbnail'] ?? 'assets/breadImage.jpg',
+        name = json['name'],
+        bakeryName = json['bakeryName'],
+        description = json['description'],
+        price = json['price'],
+        discount = json['discount'];
+
+  @override
+  String toString() {
+    return 'name: $name, bakeryName: $bakeryName, price: $price, description: $description, discount: $discount';
   }
 }

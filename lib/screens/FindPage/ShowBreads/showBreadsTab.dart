@@ -15,13 +15,15 @@ import 'package:get/get.dart';
 
 class ShowBreadsTab extends StatefulWidget {
   @override
-  _ShowBreadsTabState createState() => _ShowBreadsTabState();
+  ShowBreadsTabState createState() => ShowBreadsTabState();
 }
 
-class _ShowBreadsTabState extends State<ShowBreadsTab>
+class ShowBreadsTabState extends State<ShowBreadsTab>
     with AutomaticKeepAliveClientMixin {
   late final ScrollController _scrollController;
   late final ShowBreadsController controller;
+  static var globalKey;
+
   @override
   void initState() {
     print("ShowBreads Init!");
@@ -31,7 +33,7 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
         tag: 'showBreadTab');
     controller = Get.find(tag: 'showBreadTab');
     _scrollController = controller.scrollController;
-
+    globalKey = this;
     super.initState();
   }
 
@@ -41,7 +43,7 @@ class _ShowBreadsTabState extends State<ShowBreadsTab>
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => !controller.isLogStateChange;
 
   @override
   Widget build(BuildContext context) {

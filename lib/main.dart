@@ -1,11 +1,11 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:bbangnarae_frontend/graphqlConfig.dart';
 import 'package:bbangnarae_frontend/screens/Cart/cartScreen.dart';
-import 'package:bbangnarae_frontend/screens/Error/errorScreen.dart';
+import 'package:bbangnarae_frontend/screens/DibsDrawerPage/DibsDrawerMainScreen/DibsDrawerMainScreen.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryScreen.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/findPageScreen.dart';
-import 'package:bbangnarae_frontend/screens/FindPage/findpageScreenController.dart';
 import 'package:bbangnarae_frontend/screens/Home/homeScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/Login/loginController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/Login/loginScreen.dart';
@@ -13,16 +13,14 @@ import 'package:bbangnarae_frontend/screens/MyPage/SignUp/signUpController.dart'
 import 'package:bbangnarae_frontend/screens/MyPage/SignUp/signUpScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/editProfileScreen/editProfileController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/editProfileScreen/editProfileScreen.dart';
-import 'package:bbangnarae_frontend/screens/MyPage/myPageController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/myPageScreen.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/smsAuthScreen/smsAuthController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/smsAuthScreen/smsAuthScreen.dart';
 import 'package:bbangnarae_frontend/screens/SearchPage/searchDetailScreen/searchDetailScreen.dart';
-import 'package:bbangnarae_frontend/screens/SearchPage/searchDetailScreen/searchDetailScreenController.dart';
 import 'package:bbangnarae_frontend/screens/SearchPage/searchScreen.dart';
 import 'package:bbangnarae_frontend/screens/SearchPage/searchScreenController.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
-import 'package:bbangnarae_frontend/shared/loader.dart';
+import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/theme/mainTheme.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -40,13 +38,13 @@ import 'package:page_transition/page_transition.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initHiveForFlutter();
+  await Firebase.initializeApp();
   await Hive.openBox('auth');
   await Hive.openBox('graphqlCache');
   Hive.box('graphqlCache').clear();
   await Hive.openBox('cache');
   //천지인에서 .. 한글 인식 못 한다는 얘기가 있어서 넣어봄
   FilteringTextInputFormatter.allow(RegExp('[ㄱ-ㅎ|가-힣|ㆍ|ᆢ]'));
-
   runApp(MyApp());
 }
 
@@ -74,13 +72,7 @@ class MyApp extends StatelessWidget {
           darkTheme: getMainDarkTheme(),
           initialRoute: '/init',
           initialBinding: BindingsBuilder(() async {
-            // AuthBinding();
-            // Get.put(AuthController(), permanent: true);
-            Get.lazyPut(() => MypageController());
-            Get.lazyPut(() => FindPageScreenController());
-
-            // Get.lazyPut(() => ShowBakeriesController());
-            // Get.lazyPut(() => ShowBreadsController());
+            initBinding();
           }),
 
           getPages: [
@@ -105,25 +97,16 @@ class MyApp extends StatelessWidget {
               page: () {
                 return App();
               },
-              binding: BindingsBuilder(() {
-                print("체크4");
-                // Get.put(MypageController());
-              }),
             ),
             GetPage(
               name: '/myPage',
               page: () => MyPageScreen(),
-              binding: BindingsBuilder(() {
-                // Get.put(MypageController());
-                // Get.lazyPut(() => MypageController());
-              }),
             ),
             GetPage(
               name: '/editProfile',
               page: () => EditProfileScreen(),
               binding: BindingsBuilder(() {
                 Get.lazyPut(() => EditProfileController());
-                // Get.put(MypageController());
               }),
             ),
             GetPage(
@@ -153,15 +136,11 @@ class MyApp extends StatelessWidget {
             GetPage(
               name: '/filteredContent',
               page: () => FindPageScreen(),
-              binding: BindingsBuilder(() {
-                // Get.lazyPut(() => ShowBreadsController());
-              }),
             ),
             GetPage(
               name: '/breadLargeCategory',
               page: () => BreadLargeCategoryScreen(),
               binding: BindingsBuilder(() {
-                // Get.create(() => BreadLargeCategoryController());
                 Get.lazyPut(() => BreadLargeCategoryController());
               }),
             ),
@@ -177,21 +156,12 @@ class MyApp extends StatelessWidget {
             GetPage(
               name: '/searchDetail',
               page: () => SearchDetailScreen(),
-              binding: BindingsBuilder(() {
-                // Get.create(() => SearchDetailScreenController(),
-                //     permanent: false);
-                // Get.lazyPut(() => SearchDetailScreenController());
-              }),
             ),
             GetPage(
               name: '/cart',
               page: () {
                 return CartScreen();
               },
-              binding: BindingsBuilder(() {
-                print("카트 컨트롤러 바인딩 빌더");
-                // Get.put(MypageController());
-              }),
             ),
           ],
         );
@@ -203,42 +173,27 @@ class MyApp extends StatelessWidget {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Get.put(AuthController(), permanent: true);
-    return FutureBuilder(
-      future: Firebase.initializeApp(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          print(snapshot.error);
-          return ErrorScreen();
-        }
-        if (snapshot.connectionState == ConnectionState.done) {
-          return MainPage();
-        }
-        return Loader();
-      },
-    );
+    return MainPage();
   }
 }
 
 class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);
+
   @override
   _MainPageState createState() => _MainPageState();
 }
 
-// late final PageController _mainPageController;
-
 class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     Home(),
-    Home(),
+    DibsDrawerMainScreen(),
     FindPageScreen(),
     CartScreen(),
     MyPageScreen(),
   ];
   final List<String> _pageNames = ["홈", "찜", "빵쇼핑", "장바구니", "마이페이지"];
 
-  // late PageController pageController;
   int _selectedIndex = 0;
   late PageController _mainPageController;
   @override
@@ -254,26 +209,16 @@ class _MainPageState extends State<MainPage> {
   }
 
   _switchTap(int index) {
-    // onPageChange와 _switchTap 중에 _switchTap이 먼저 실행 된다
-    // 그래서 onPageChange에서 setState를 한 번만 실행한다.
-    // if (_selectedIndex != index)
-    //   setState(() {
-    //     _selectedIndex = index;
-    //   });
+    // case of Cart Screen,
     if (index == 3) {
-      // print("장바구니");
-      // 장바구니는 BottomNavigationBar 가 없는게 좋을 것 같아서
-      // 이렇게 처리를 했다.
       Get.toNamed("/cart");
       return;
     }
     _mainPageController.jumpToPage(index);
-    // Get.toNamed(_pageRoutes[index]);
   }
 
   void onPageChanged(int index) {
     SharedValues.p_appBarTitleValueNotifier.value = _pageNames[index];
-    print("페이지 체인지");
     if (_selectedIndex != index)
       setState(() {
         _selectedIndex = index;
@@ -282,12 +227,10 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("실행완료!");
     final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
       child: Scaffold(
         body: PageView(
-          //슬라이드 금지
           physics: NeverScrollableScrollPhysics(),
           controller: _mainPageController,
           children: _pages,
@@ -301,7 +244,6 @@ class _MainPageState extends State<MainPage> {
           unselectedItemColor: colorScheme.onSurface.withOpacity(0.60),
           selectedFontSize: 12.0.sp,
           unselectedFontSize: 11.0.sp,
-          // elevation: 2.0,
           onTap: _switchTap,
           items: [
             BottomNavigationBarItem(

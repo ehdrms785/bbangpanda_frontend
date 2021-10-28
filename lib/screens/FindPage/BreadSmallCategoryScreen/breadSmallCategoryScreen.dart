@@ -3,6 +3,7 @@ import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart'
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadShareWidget.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsController.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -56,7 +57,7 @@ class _BreadSmallCategoryTabState extends State<BreadSmallCategoryTab>
       body: Obx(() => ModalProgressScreen(
             isAsyncCall: controller.isLoading.value,
             child: controller.firstInitLoading.value
-                ? Center(child: CupertinoActivityIndicator())
+                ? Loader()
                 : CustomScrollView(
                     key: ValueKey(widget.largeCategoryId),
                     controller: _scrollController,

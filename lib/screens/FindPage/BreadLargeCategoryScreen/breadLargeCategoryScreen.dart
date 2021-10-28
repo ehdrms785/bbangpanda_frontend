@@ -3,6 +3,7 @@ import 'package:bbangnarae_frontend/screens/BreadDetailPage/breadDetailMainScree
 import 'package:bbangnarae_frontend/screens/FindPage/BreadLargeCategoryScreen/breadLargeCategoryController.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/BreadSmallCategoryScreen/breadSmallCategoryScreen.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ class BreadLargeCategoryScreen extends StatelessWidget {
         ),
         body: Obx(() {
           if (controller.isLoading.value) {
-            return Center(child: CupertinoActivityIndicator());
+            return Loader();
           }
           return DefaultTabController(
             length: controller.smallCategoriesResult.length + 1,
@@ -38,19 +39,19 @@ class BreadLargeCategoryScreen extends StatelessWidget {
                 children: [
                   TabListContainer(),
                   TabViewList(),
-                  TextButton(
-                      onPressed: () {
-                        Get.to(
-                          BreadDetailMainScreen(),
-                          arguments: {'breadId': 9},
-                          binding: BindingsBuilder(
-                            () {
-                              Get.lazyPut(() => BreadDetailMainController());
-                            },
-                          ),
-                        );
-                      },
-                      child: Text("빵상세보기 테스트용"))
+                  // TextButton(
+                  //     onPressed: () {
+                  //       Get.to(
+                  //         BreadDetailMainScreen(),
+                  //         arguments: {'breadId': 9},
+                  //         binding: BindingsBuilder(
+                  //           () {
+                  //             Get.lazyPut(() => BreadDetailMainController());
+                  //           },
+                  //         ),
+                  //       );
+                  //     },
+                  //     child: Text("빵상세보기 테스트용"))
                 ],
               ),
             ),

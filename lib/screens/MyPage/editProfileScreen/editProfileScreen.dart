@@ -3,6 +3,7 @@ import 'package:bbangnarae_frontend/screens/MyPage/editProfileScreen/editProfile
 import 'package:bbangnarae_frontend/screens/MyPage/myPageController.dart';
 import 'package:bbangnarae_frontend/screens/MyPage/support/query.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedValidator.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:bbangnarae_frontend/theme/textFieldTheme.dart';
@@ -89,7 +90,7 @@ class EditProfileScreen extends StatelessWidget {
                   child: Container(
                     child: Obx(() {
                       if (editProfCtr.isLoading.value) {
-                        return Center(child: CupertinoActivityIndicator());
+                        return Loader();
                       }
                       return Column(
                         mainAxisSize: MainAxisSize.min,

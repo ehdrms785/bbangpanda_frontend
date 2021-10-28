@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowMarketOrders/marketOrderModel.dart';
 import 'package:bbangnarae_frontend/shared/sharedFunction.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
+import 'package:bbangnarae_frontend/theme/buttonTheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -595,9 +596,7 @@ Widget FilterModal(MarketOrderModel controller) {
                             onPressed: () {
                               controller.initFilterSelected();
                             },
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                            ),
+                            style: elevatedButtonWhiteBackground,
                           ),
                         ),
                         SizedBox(

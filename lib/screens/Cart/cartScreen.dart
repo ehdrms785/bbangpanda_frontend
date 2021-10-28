@@ -1,4 +1,3 @@
-import 'package:bbangnarae_frontend/shared/sharedValues.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +10,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: PrefferedAppBar(context),
+        appBar: PrefferedAppBar(title: '장바구니'),
         body: Container(
           child: Center(
               child: Text("여기는 장바구니",

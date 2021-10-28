@@ -38,4 +38,7 @@ class GraphQLConfiguration {
   }
 }
 
+// void hello() {
+
+// }
 final GraphQLClient client = GraphQLConfiguration.clientToQuery();

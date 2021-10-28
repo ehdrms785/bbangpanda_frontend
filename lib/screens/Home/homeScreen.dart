@@ -1,5 +1,10 @@
+import 'package:bbangnarae_frontend/main.dart';
+import 'package:bbangnarae_frontend/screens/DibsDrawerPage/DibsDrawerMainScreen/DibsDrawerMainController.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/showBakeriesTab.dart';
+import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/showBreadsTab.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/instance_manager.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -29,7 +34,7 @@ class _HomeState extends State<Home> {
     print("빌드 리빌드 테스트");
     return Scaffold(
       // resizeToAvoidBottomInset: false,
-      appBar: PrefferedAppBar(context),
+      appBar: PrefferedAppBar(title: "홈"),
       body: Container(
           width: 100.0.w,
           height: 100.0.h,
@@ -74,6 +79,13 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
+
+              TextButton(
+                  onPressed: () {
+                    // Get.reload(tag: 'showBakeryTab', force: true);
+                    DibsDrawerMainController.to.someDibsDrawerChanged = true;
+                  },
+                  child: Text("버튼을 눌러봅시다"))
             ],
           )),
     );

@@ -9,6 +9,10 @@ final elevatedButtonBackground =
   return Colors.blue; // Regular color
 });
 
+final elevatedButtonWhiteBackground = ElevatedButton.styleFrom(
+  primary: Colors.white,
+);
+
 final textButtonRoundedBorder = TextButton.styleFrom(
   padding: EdgeInsets.all(4.0.sp),
   side: BorderSide(color: Colors.black, width: 0.0),

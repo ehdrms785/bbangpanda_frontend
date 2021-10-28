@@ -58,6 +58,7 @@ Widget SimpleBakeryList({
               }
             }
             BakerySimpleInfo bakeryData = simpleBakeriesListResult[index];
+
             return GestureDetector(
               onTap: () {
                 print("탭했습니다");
