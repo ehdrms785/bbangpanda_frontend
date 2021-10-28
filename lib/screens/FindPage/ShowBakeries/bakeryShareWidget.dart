@@ -5,6 +5,7 @@ import 'package:bbangnarae_frontend/screens/BakeryDetailPage/bakeryDetailMainScr
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.dart';
 import 'package:bbangnarae_frontend/shared/dialog/snackBar.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
+import 'package:bbangnarae_frontend/theme/buttonTheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -456,9 +457,7 @@ Widget FilterModal(
                             onPressed: () {
                               controller.initFilterSelected();
                             },
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                            ),
+                            style: elevatedButtonWhiteBackground,
                           ),
                         ),
                         SizedBox(

@@ -5,6 +5,7 @@ import 'package:bbangnarae_frontend/screens/FindPage/ShowBakeries/bakeryModel.da
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadModel.dart';
 import 'package:bbangnarae_frontend/screens/FindPage/ShowBreads/breadShareWidget.dart';
 import 'package:bbangnarae_frontend/shared/auth/authController.dart';
+import 'package:bbangnarae_frontend/shared/loader.dart';
 import 'package:bbangnarae_frontend/shared/sharedWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class BakeryDetailMainScreen extends GetView<BakeryDetailMainController> {
           () => ModalProgressScreen(
             isAsyncCall: controller.isLoading.value,
             child: controller.firstInitLoading.value
-                ? Center(child: CupertinoActivityIndicator())
+                ? Loader()
                 : NotificationListener<ScrollNotification>(
                     onNotification: controller.scrollListener,
                     child: CustomScrollView(
